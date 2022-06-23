@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"net/http"
@@ -16,9 +16,9 @@ type OrdersHandler struct {
 	dataSvc db.DataService
 }
 
-func NewOrdersHandler(database db.MongoDBDatabase) *OrdersHandler {
+func NewOrdersHandler(svc db.DataService) *OrdersHandler {
 	ic := &OrdersHandler{
-		dataSvc: db.NewOrderDataService(database),
+		dataSvc: svc,
 	}
 	return ic
 }

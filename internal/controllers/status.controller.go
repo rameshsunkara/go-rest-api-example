@@ -1,14 +1,12 @@
-package handlers
+package controllers
 
 import (
-	"context"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"net/http"
 	"time"
 
 	"github.com/rs/zerolog/log"
-
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,28 +26,23 @@ type StatusResponse struct {
 	Version     string
 }
 
-// MongoDBClient - Enables mocking
-type MongoDBClient interface {
-	Ping(ctx context.Context, rp *readpref.ReadPref) error
-}
-
 type StatusHandler struct {
-	svcInfo  *models.ServiceInfo
-	dbClient MongoDBClient
+	svcInfo models.ServiceInfo
+	dbMgr   db.DataManager
 }
 
-func NewStatusHandler(s *models.ServiceInfo, client MongoDBClient) *StatusHandler {
+func NewStatusHandler(s models.ServiceInfo, m db.DataManager) *StatusHandler {
 	return &StatusHandler{
-		svcInfo:  s,
-		dbClient: client,
+		svcInfo: s,
+		dbMgr:   m,
 	}
 }
 
-func (sc *StatusHandler) CheckStatus(c *gin.Context) {
+func (s *StatusHandler) CheckStatus(c *gin.Context) {
 	log.Debug().Msg("in CheckStatus")
 	var stat ServiceStatus
 	var code int
-	err := sc.dbClient.Ping(context.TODO(), readpref.Primary())
+	err := s.dbMgr.Ping()
 	if err == nil {
 		stat = UP
 		code = http.StatusOK
@@ -60,10 +53,10 @@ func (sc *StatusHandler) CheckStatus(c *gin.Context) {
 	}
 	status := &StatusResponse{
 		Status:      stat,
-		ServiceName: sc.svcInfo.Name,
-		UpTime:      sc.svcInfo.UpTime,
-		Environment: sc.svcInfo.Environment,
-		Version:     sc.svcInfo.Version,
+		ServiceName: s.svcInfo.Name,
+		UpTime:      s.svcInfo.UpTime,
+		Environment: s.svcInfo.Environment,
+		Version:     s.svcInfo.Version,
 	}
 	c.JSON(code, status)
 }

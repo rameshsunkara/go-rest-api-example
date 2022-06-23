@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 	"sync"
 	"time"
 
@@ -12,62 +13,65 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
-	dbClient    *mongo.Client
-	database    *mongo.Database
-	connectOnce sync.Once
-)
+var connectOnce sync.Once
 
-func Init(dbName string) (*mongo.Client, *mongo.Database) {
-	c := config.GetConfig()
-	connectionUrl := c.GetString("db.dsn")
-	log.Debug().Str("Connection Url", connectionUrl)
-	connectOnce.Do(func() {
-		newConnection(connectionUrl, dbName)
-	})
+// ConnectionTimeOut - Max time to establish DB connection // TODO: Move to config
+const ConnectionTimeOut = 10 * time.Second
 
-	return dbClient, database
+type Manager struct {
+	client   *mongo.Client
+	database *mongo.Database
 }
 
-func newConnection(connectionUrl string, dbName string) {
+func Init(dbName string) *Manager {
+	c := config.GetConfig()
+	connUrl := c.GetString("db.dsn")
+	log.Debug().Str("DB Connection Url", connUrl)
+
+	dbMgr := &Manager{}
+	connectOnce.Do(func() {
+		c := newConnection(connUrl)
+		db := c.Database(dbName)
+		dbMgr.database = db
+		dbMgr.client = c
+	})
+
+	return dbMgr
+}
+
+func newConnection(connectionUrl string) *mongo.Client {
 	clientOptions := options.Client().ApplyURI(connectionUrl)
 	client, err := mongo.NewClient(clientOptions)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Connection Failed to Database")
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ConnectionTimeOut)
 	defer cancel()
 	connErr := client.Connect(ctx)
 	if connErr != nil {
 		log.Fatal().Err(connErr).Msg("Connection Failed to Database")
 	}
 
-	pingError := client.Ping(context.TODO(), nil)
-	if pingError != nil {
-		log.Fatal().Err(pingError).Msg("Connection Failed to Database")
-	}
-
-	// Set the globals
-	dbClient = client
-	database = client.Database(dbName)
+	return client
 }
 
-func GetDBClient() (*mongo.Client, error) {
-	if dbClient == nil {
+func (d *Manager) Client() (*mongo.Client, error) {
+	if d.client == nil {
 		return nil, errors.New("invalid state, database.Init is not called")
 	}
-	return dbClient, nil
+	return d.client, nil
 }
 
-func GetDB() (*mongo.Database, error) {
-	if database == nil {
+func (d *Manager) Database() (*mongo.Database, error) {
+	if d.database == nil {
 		return nil, errors.New("invalid state, database.Init is not called")
 	}
-	return database, nil
+	return d.database, nil
 }
 
-func OverrideDBSetup(c *mongo.Client, db *mongo.Database) {
-	dbClient = c
-	database = db
+func (d *Manager) Ping() error {
+	err := d.client.Ping(context.TODO(), readpref.Primary())
+	log.Error().Err(err).Msg("unable to connect to DB")
+	return err
 }

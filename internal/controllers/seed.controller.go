@@ -1,4 +1,4 @@
-package handlers
+package controllers
 
 import (
 	"math/rand"
@@ -19,14 +19,14 @@ type SeedHandler struct {
 	dataSvc db.DataService
 }
 
-func NewSeedHandler(database db.MongoDBDatabase) *SeedHandler {
+func NewSeedHandler(svc db.DataService) *SeedHandler {
 	ic := &SeedHandler{
-		dataSvc: db.NewOrderDataService(database),
+		dataSvc: svc,
 	}
 	return ic
 }
 
-func (sHandler *SeedHandler) SeedDB(c *gin.Context) {
+func (s *SeedHandler) SeedDB(c *gin.Context) {
 	for i := 0; i < SeedRecordCount; i++ {
 		product := []models.Product{
 			{
@@ -46,7 +46,7 @@ func (sHandler *SeedHandler) SeedDB(c *gin.Context) {
 		po := &models.Order{
 			Products: product,
 		}
-		_, err := sHandler.dataSvc.Create(po)
+		_, err := s.dataSvc.Create(po)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Unable inserted data",

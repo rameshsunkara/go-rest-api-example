@@ -21,6 +21,7 @@ const (
 	DBName      = "ecommerce"
 )
 
+// Passed while building from  make file
 var version string
 
 // @title           GO Rest Example API Service (Purchase Order Tracker)
@@ -42,7 +43,7 @@ func main() {
 	}
 
 	// Metadata of the service
-	serviceInfo := &models.ServiceInfo{
+	serviceInfo := models.ServiceInfo{
 		Name:        ServiceName,
 		UpTime:      upTime,
 		Environment: env,
@@ -52,18 +53,16 @@ func main() {
 	// Setup : Log
 	setupLog(env)
 
-	log.Log().
-		Object("Service", serviceInfo).
-		Msg("starting")
+	log.Info().Object("Service", serviceInfo).Msg("starting")
 
 	// Load Configuration
 	config.LoadConfig(env)
 
 	// Setup : DB
-	dbClient, database := db.Init(DBName)
+	dbManager := db.Init(DBName)
 
 	// Setup : Server
-	server.Init(serviceInfo, dbClient, database)
+	server.Init(serviceInfo, dbManager)
 
 	log.Fatal().Str("ServiceName", ServiceName).Msg("Server Exited")
 }
