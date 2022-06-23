@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Metadata of the service
-	serviceInfo := models.ServiceInfo{
+	serviceInfo := &models.ServiceInfo{
 		Name:        ServiceName,
 		UpTime:      upTime,
 		Environment: env,
@@ -56,10 +56,15 @@ func main() {
 	log.Info().Object("Service", serviceInfo).Msg("starting")
 
 	// Load Configuration
-	config.LoadConfig(env)
+	if err := config.LoadConfig(env); err != nil {
+		log.Fatal().Msg("unable to read configuration")
+	}
 
 	// Setup : DB
-	dbManager := db.Init(DBName)
+	dbManager, err := db.Init(DBName)
+	if err != nil {
+		log.Fatal().Msg("unable to initialize DB connection")
+	}
 
 	// Setup : Server
 	server.Init(serviceInfo, dbManager)

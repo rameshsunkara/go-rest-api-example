@@ -6,7 +6,6 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/controllers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/util"
-	"github.com/rs/zerolog/log"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"sync"
@@ -17,7 +16,7 @@ import (
 
 var runOnce sync.Once
 
-func Init(serviceInfo models.ServiceInfo, manager db.DataManager) {
+func Init(serviceInfo *models.ServiceInfo, manager db.DataManager) {
 	config := config.GetConfig()
 	port := config.GetString("server.port")
 	runOnce.Do(func() {
@@ -26,7 +25,7 @@ func Init(serviceInfo models.ServiceInfo, manager db.DataManager) {
 	})
 }
 
-func WebRouter(svcInfo models.ServiceInfo, dbMgr db.DataManager) (router *gin.Engine) {
+func WebRouter(svcInfo *models.ServiceInfo, dbMgr db.DataManager) (router *gin.Engine) {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcInfo.Environment) {
 		ginMode = gin.DebugMode
@@ -47,19 +46,16 @@ func WebRouter(svcInfo models.ServiceInfo, dbMgr db.DataManager) (router *gin.En
 	router.GET("/status", status.CheckStatus) // /status
 
 	// Dependencies for controllers
-	d, err := dbMgr.Database()
-	if err != nil {
-		log.Fatal().Err(err).Msg("database error")
-	}
+	d, _ := dbMgr.Database()
 	orders := db.NewOrderDataService(d)
 
-	// Seed DB
+	// Routes - Seed DB
 	if util.IsDevMode(svcInfo.Environment) {
 		seed := controllers.NewSeedHandler(orders)
 		router.POST("/seedDB", seed.SeedDB) // /seedDB
 	}
 
-	// Routes - API
+	// Routes - Orders
 	v1 := router.Group("/api/v1")
 	{
 		ordersGroup := v1.Group("orders")

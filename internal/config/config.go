@@ -8,7 +8,7 @@ import (
 var config *viper.Viper
 
 // LoadConfig TODO: Add more profiles and obey all 12-Factor app rules
-func LoadConfig(env string) {
+func LoadConfig(env string) error {
 	log.Debug().Str("env", env).Msg("loading config for")
 	var err error
 	config = viper.New()
@@ -18,8 +18,9 @@ func LoadConfig(env string) {
 	config.AddConfigPath("config/")
 	err = config.ReadInConfig()
 	if err != nil {
-		log.Fatal().Err(err).Msg("error occurred while reading config")
+		log.Error().Err(err).Msg("error occurred while reading config")
 	}
+	return err
 }
 
 func GetConfig() *viper.Viper {

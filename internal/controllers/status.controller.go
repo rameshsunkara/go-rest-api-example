@@ -27,11 +27,11 @@ type StatusResponse struct {
 }
 
 type StatusHandler struct {
-	svcInfo models.ServiceInfo
+	svcInfo *models.ServiceInfo
 	dbMgr   db.DataManager
 }
 
-func NewStatusHandler(s models.ServiceInfo, m db.DataManager) *StatusHandler {
+func NewStatusHandler(s *models.ServiceInfo, m db.DataManager) *StatusHandler {
 	return &StatusHandler{
 		svcInfo: s,
 		dbMgr:   m,
