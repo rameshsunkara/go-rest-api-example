@@ -6,13 +6,14 @@ import (
 )
 
 func TestLoadConfig_Success(t *testing.T) {
-	err := LoadConfig("dev")
+	c, err := LoadConfig("dev")
 	assert.NoError(t, err)
-	k := config.AllKeys()
+	k := c.AllKeys()
 	assert.Equal(t, 2, len(k))
 }
 
 func TestLoadConfig_Failure(t *testing.T) {
-	err := LoadConfig("dummy")
+	c, err := LoadConfig("dummy")
 	assert.Error(t, err)
+	assert.Equal(t, "", c.ConfigFileUsed())
 }
