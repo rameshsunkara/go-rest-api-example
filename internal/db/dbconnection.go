@@ -72,7 +72,7 @@ func (d *Manager) Client() (*mongo.Client, error) {
 	return d.client, nil
 }
 
-func (d *Manager) Database() (*mongo.Database, error) {
+func (d *Manager) Database() (MongoDatabase, error) {
 	if d.database == nil {
 		return nil, errors.New("invalid state, database.Init is not called")
 	}

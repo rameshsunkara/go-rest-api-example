@@ -1,6 +1,10 @@
 package mocks
 
-import "go.mongodb.org/mongo-driver/mongo"
+import (
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
 
 var (
 	PingFunc       func() error
@@ -21,8 +25,14 @@ func (m *MockDataMgr) Client() (*mongo.Client, error) {
 	return nil, nil
 }
 
-func (m *MockDataMgr) Database() (*mongo.Database, error) {
-	return nil, nil
+func (m *MockDataMgr) Database() (db.MongoDatabase, error) {
+	return &MockMongoDataBase{}, nil
+}
+
+type MockMongoDataBase struct{}
+
+func (m *MockMongoDataBase) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
+	return nil
 }
 
 type MockDataService struct{}
