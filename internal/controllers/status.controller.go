@@ -26,24 +26,25 @@ type StatusResponse struct {
 	Version     string
 }
 
-type StatusHandler struct {
+type StatusController struct {
 	svcInfo *models.ServiceInfo
 	dbMgr   db.DataManager
 }
 
-func NewStatusHandler(s *models.ServiceInfo, m db.DataManager) *StatusHandler {
-	return &StatusHandler{
+func NewStatusController(s *models.ServiceInfo, m db.DataManager) *StatusController {
+	return &StatusController{
 		svcInfo: s,
 		dbMgr:   m,
 	}
 }
 
-func (s *StatusHandler) CheckStatus(c *gin.Context) {
+// CheckStatus - Pings all the dependencies of the service to ensure total health
+func (s *StatusController) CheckStatus(c *gin.Context) {
 	log.Debug().Msg("in CheckStatus")
 	var stat ServiceStatus
 	var code int
-	err := s.dbMgr.Ping()
-	if err == nil {
+
+	if err := s.dbMgr.Ping(); err == nil {
 		stat = UP
 		code = http.StatusOK
 	} else {
@@ -51,12 +52,15 @@ func (s *StatusHandler) CheckStatus(c *gin.Context) {
 		stat = DOWN
 		code = http.StatusFailedDependency
 	}
-	status := &StatusResponse{
+
+	status := StatusResponse{
 		Status:      stat,
 		ServiceName: s.svcInfo.Name,
 		UpTime:      s.svcInfo.UpTime,
 		Environment: s.svcInfo.Environment,
 		Version:     s.svcInfo.Version,
 	}
+
+	// send response
 	c.JSON(code, status)
 }

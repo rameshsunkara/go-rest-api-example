@@ -42,7 +42,7 @@ func WebRouter(svcInfo *models.ServiceInfo, dbMgr db.DataManager) (router *gin.E
 	// Routes
 
 	// Routes - Status Check
-	status := controllers.NewStatusHandler(svcInfo, dbMgr)
+	status := controllers.NewStatusController(svcInfo, dbMgr)
 	router.GET("/status", status.CheckStatus) // /status
 
 	// Dependencies for controllers
