@@ -65,13 +65,6 @@ func newConnection(connectionUrl string) (*mongo.Client, error) {
 	return client, nil
 }
 
-func (d *Manager) Client() (*mongo.Client, error) {
-	if d.client == nil {
-		return nil, errors.New("invalid state, database.Init is not called")
-	}
-	return d.client, nil
-}
-
 func (d *Manager) Database() (MongoDatabase, error) {
 	if d.database == nil {
 		return nil, errors.New("invalid state, database.Init is not called")

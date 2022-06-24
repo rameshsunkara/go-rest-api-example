@@ -10,7 +10,6 @@ type MongoDatabase interface {
 }
 
 type DataManager interface {
-	Client() (*mongo.Client, error)
 	Database() (MongoDatabase, error)
 	Ping() error
 }

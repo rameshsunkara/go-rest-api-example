@@ -21,10 +21,6 @@ func (m *MockDataMgr) Ping() error {
 	return PingFunc()
 }
 
-func (m *MockDataMgr) Client() (*mongo.Client, error) {
-	return nil, nil
-}
-
 func (m *MockDataMgr) Database() (db.MongoDatabase, error) {
 	return &MockMongoDataBase{}, nil
 }
