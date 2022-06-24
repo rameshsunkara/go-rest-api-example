@@ -56,14 +56,15 @@ func main() {
 	log.Info().Object("Service", serviceInfo).Msg("starting")
 
 	// Load Configuration
-	if err := config.LoadConfig(env); err != nil {
-		log.Fatal().Msg("unable to read configuration")
+	c, cErr := config.LoadConfig(env)
+	if cErr != nil {
+		log.Fatal().Err(cErr).Msg("unable to read configuration")
 	}
 
 	// Setup : DB
-	dbManager, err := db.Init(DBName)
-	if err != nil {
-		log.Fatal().Msg("unable to initialize DB connection")
+	dbManager, dErr := db.Init(DBName, c.GetString("db.dsn"))
+	if dErr != nil {
+		log.Fatal().Err(dErr).Msg("unable to initialize DB connection")
 	}
 
 	// Setup : Server

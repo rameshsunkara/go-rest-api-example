@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,9 +24,7 @@ type Manager struct {
 }
 
 // Init - Initializes DB connection and returns a Manager object which can be used to perform DB operations
-func Init(dbName string) (*Manager, error) {
-	c := config.GetConfig()
-	connUrl := c.GetString("db.dsn")
+func Init(dbName string, connUrl string) (*Manager, error) {
 	log.Debug().Str("DB Connection Url", connUrl)
 
 	dbMgr := &Manager{}
