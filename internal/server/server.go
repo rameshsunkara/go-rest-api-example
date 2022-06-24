@@ -51,7 +51,7 @@ func WebRouter(svcInfo *models.ServiceInfo, dbMgr db.DataManager) (router *gin.E
 
 	// Routes - Seed DB
 	if util.IsDevMode(svcInfo.Environment) {
-		seed := controllers.NewSeedHandler(orders)
+		seed := controllers.NewSeedController(orders)
 		router.POST("/seedDB", seed.SeedDB) // /seedDB
 	}
 
@@ -60,7 +60,7 @@ func WebRouter(svcInfo *models.ServiceInfo, dbMgr db.DataManager) (router *gin.E
 	{
 		ordersGroup := v1.Group("orders")
 		{
-			orders := controllers.NewOrdersHandler(orders)
+			orders := controllers.NewOrdersController(orders)
 			ordersGroup.GET("", orders.GetAll)            // api/v1/orders
 			ordersGroup.GET("/:id", orders.GetById)       // api/v1/orders/:id
 			ordersGroup.POST("", orders.Post)             // api/v1/orders

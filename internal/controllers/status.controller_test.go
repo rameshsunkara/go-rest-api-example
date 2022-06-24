@@ -4,29 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/stretchr/testify/assert"
-	"go.mongodb.org/mongo-driver/mongo"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 )
-
-type MockDataMgr struct{}
-
-func (m *MockDataMgr) Ping() error {
-	return pingFunc()
-}
-
-func (m *MockDataMgr) Client() (*mongo.Client, error) {
-	return nil, nil
-}
-
-func (m *MockDataMgr) Database() (*mongo.Database, error) {
-	return nil, nil
-}
 
 func UnMarshalStatusResponse(resp *http.Response) (StatusResponse, error) {
 	body, _ := io.ReadAll(resp.Body)
@@ -36,14 +22,13 @@ func UnMarshalStatusResponse(resp *http.Response) (StatusResponse, error) {
 }
 
 var (
-	pingFunc func() error
-	svcInfo  = &models.ServiceInfo{
+	svcInfo = &models.ServiceInfo{
 		Name:        "test-api-service",
 		Version:     "rams-fav",
 		UpTime:      time.Now(),
 		Environment: "test",
 	}
-	s = NewStatusController(svcInfo, &MockDataMgr{})
+	s = NewStatusController(svcInfo, &mocks.MockDataMgr{})
 )
 
 func TestStatusSuccess(t *testing.T) {
@@ -51,7 +36,7 @@ func TestStatusSuccess(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	pingFunc = func() error {
+	mocks.PingFunc = func() error {
 		return nil
 	}
 
@@ -73,7 +58,7 @@ func TestStatusDown(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 
-	pingFunc = func() error {
+	mocks.PingFunc = func() error {
 		return errors.New("DB Connection Failed")
 	}
 

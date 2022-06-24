@@ -15,18 +15,18 @@ const (
 	SeedRecordCount = 500
 )
 
-type SeedHandler struct {
+type SeedController struct {
 	dataSvc db.DataService
 }
 
-func NewSeedHandler(svc db.DataService) *SeedHandler {
-	ic := &SeedHandler{
+func NewSeedController(svc db.DataService) *SeedController {
+	ic := &SeedController{
 		dataSvc: svc,
 	}
 	return ic
 }
 
-func (s *SeedHandler) SeedDB(c *gin.Context) {
+func (s *SeedController) SeedDB(c *gin.Context) {
 	for i := 0; i < SeedRecordCount; i++ {
 		product := []models.Product{
 			{

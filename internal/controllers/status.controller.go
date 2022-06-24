@@ -38,7 +38,7 @@ func NewStatusController(s *models.ServiceInfo, m db.DataManager) *StatusControl
 	}
 }
 
-// CheckStatus - Pings all the dependencies of the service to ensure total health
+// CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability
 func (s *StatusController) CheckStatus(c *gin.Context) {
 	log.Debug().Msg("in CheckStatus")
 	var stat ServiceStatus

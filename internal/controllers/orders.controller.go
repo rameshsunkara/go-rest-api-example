@@ -12,12 +12,12 @@ const (
 	OrderIdPath = "id" // Request path variable
 )
 
-type OrdersHandler struct {
+type OrdersController struct {
 	dataSvc db.DataService
 }
 
-func NewOrdersHandler(svc db.DataService) *OrdersHandler {
-	ic := &OrdersHandler{
+func NewOrdersController(svc db.DataService) *OrdersController {
+	ic := &OrdersController{
 		dataSvc: svc,
 	}
 	return ic
@@ -31,7 +31,7 @@ func NewOrdersHandler(svc db.DataService) *OrdersHandler {
 // @Produce      json
 // @Success      200
 // @Router       /orders/ [post]
-func (oHandler *OrdersHandler) Post(c *gin.Context) {
+func (oHandler *OrdersController) Post(c *gin.Context) {
 	purchaseRequest := models.Order{}
 
 	if err := c.BindJSON(&purchaseRequest); err != nil {
@@ -62,7 +62,7 @@ func (oHandler *OrdersHandler) Post(c *gin.Context) {
 // @Produce      json
 // @Success      200
 // @Router       /orders/ [get]
-func (oHandler *OrdersHandler) GetAll(c *gin.Context) {
+func (oHandler *OrdersController) GetAll(c *gin.Context) {
 	orders, err := oHandler.dataSvc.GetAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error occurred while retrieved purchase orders", "error": err})
@@ -82,7 +82,7 @@ func (oHandler *OrdersHandler) GetAll(c *gin.Context) {
 // @Success      200
 // @Failure      500            {string}  string  "bad request"
 // @Router       /orders/{id} [get]
-func (oHandler *OrdersHandler) GetById(c *gin.Context) {
+func (oHandler *OrdersController) GetById(c *gin.Context) {
 	id := c.Param(OrderIdPath)
 	if id != "" {
 		order, err := oHandler.dataSvc.GetById(id)
@@ -108,7 +108,7 @@ func (oHandler *OrdersHandler) GetById(c *gin.Context) {
 // @Success      200
 // @Failure      500            {string}  string  "bad request"
 // @Router       /orders/{id} [delete]
-func (oHandler *OrdersHandler) DeleteById(c *gin.Context) {
+func (oHandler *OrdersController) DeleteById(c *gin.Context) {
 	id := c.Param(OrderIdPath)
 	if id != "" {
 		count, err := oHandler.dataSvc.DeleteById(id)
