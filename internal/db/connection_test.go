@@ -30,6 +30,7 @@ func TestMain(m *testing.M) {
 	if dErr != nil {
 		log.Fatal().Err(dErr)
 	}
+	defer d.Disconnect()
 	testDBMgr = d
 	insertTestData()
 
