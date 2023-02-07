@@ -17,6 +17,7 @@ var (
 	InvalidConnUrlErr = errors.New("failed to connect to DB, as the connection string is invalid")
 	ClientCreationErr = errors.New("failed to create new client to connect with db")
 	ClientInitErr     = errors.New("failed to initialize db client")
+	ConnectionLeak    = errors.New("unable to disconnect from db, potential connection leak")
 	connectOnce       sync.Once
 )
 
@@ -105,7 +106,7 @@ func (c *connectionManager) Disconnect() error {
 	log.Info().Msg("Disconnecting from Database")
 	if err := c.client.Disconnect(context.Background()); err != nil {
 		log.Error().Err(err).Msg("unable to disconnect from DB")
-		return err
+		return ConnectionLeak
 	}
 	log.Info().Msg("Successfully disconnected from DB")
 	return nil
