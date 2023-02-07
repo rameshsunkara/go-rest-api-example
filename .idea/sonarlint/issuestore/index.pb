@@ -22,10 +22,6 @@ W
 .internal/controllers/orders.controller_test.go,5/d/5d3e6bf9687c56d1b7d9a3e4e8577b6104e6030f
 Y
 )internal/controllers/orders.controller.go,d/b/db0d3214626a9811db80f831b4bc85f8d741f5bc
-I
-internal/db/connection.go,f/b/fbaf5e36181edc75722cd554978598207e294205
-9
-	README.md,8/e/8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
 N
 .github/workflows/coverage.yml,e/5/e5a6f1ed046081016d3663d7c080e9a742d096d0
 ;
