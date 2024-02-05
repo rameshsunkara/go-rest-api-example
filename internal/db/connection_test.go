@@ -8,7 +8,7 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/rameshsunkara/strikememongo"
 	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
@@ -42,7 +42,7 @@ func insertTestData() {
 	dSvc := db.NewOrderDataService(database)
 
 	for i := 0; i < 500; i++ {
-		product := []models.Product{
+		product := []types.Product{
 			{
 				Name:      faker.Name(),
 				Price:     (uint)(rand.Intn(90) + 10),
@@ -57,7 +57,7 @@ func insertTestData() {
 			},
 		}
 
-		po := &models.Order{
+		po := &types.Order{
 			Products: product,
 		}
 		_, err := dSvc.Create(context.TODO(), po)

@@ -1,10 +1,11 @@
 package controllers
 
 import (
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"net/http"
 	"time"
+
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 
 	"github.com/rs/zerolog/log"
 
@@ -27,11 +28,11 @@ type StatusResponse struct {
 }
 
 type StatusController struct {
-	svcInfo *models.ServiceInfo
+	svcInfo *types.ServiceInfo
 	dbMgr   db.MongoManager
 }
 
-func NewStatusController(s *models.ServiceInfo, m db.MongoManager) *StatusController {
+func NewStatusController(s *types.ServiceInfo, m db.MongoManager) *StatusController {
 	return &StatusController{
 		svcInfo: s,
 		dbMgr:   m,

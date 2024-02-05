@@ -1,22 +1,23 @@
 package server
 
 import (
+	"sync"
+
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/controllers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"sync"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/config"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
 
 var runOnce sync.Once
 
-func Init(serviceInfo *models.ServiceInfo, manager db.MongoManager) {
+func Init(serviceInfo *types.ServiceInfo, manager db.MongoManager) {
 	config := config.GetConfig()
 	port := config.GetString("server.port")
 	runOnce.Do(func() {
@@ -25,7 +26,7 @@ func Init(serviceInfo *models.ServiceInfo, manager db.MongoManager) {
 	})
 }
 
-func WebRouter(svcInfo *models.ServiceInfo, dbMgr db.MongoManager) (router *gin.Engine) {
+func WebRouter(svcInfo *types.ServiceInfo, dbMgr db.MongoManager) (router *gin.Engine) {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcInfo.Environment) {
 		ginMode = gin.DebugMode

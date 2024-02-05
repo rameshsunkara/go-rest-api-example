@@ -6,14 +6,12 @@ import (
 
 	"github.com/rameshsunkara/deferrun"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 
-	_ "github.com/rameshsunkara/go-rest-api-example/docs"
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,16 +23,6 @@ const (
 // Passed while building from  make file
 var version string
 
-// @title           GO Rest Example API Service (Purchase Order Tracker)
-// @version         1.0
-// @description     A sample service to demonstrate how to develop REST API in golang
-
-// @contact.name    Ramesh Sunkara
-// @contact.url
-// @contact.email
-
-// @host      localhost:8080
-// @BasePath  /api/v1
 func main() {
 	upTime := time.Now()
 	t := deferrun.NewSignalHandler()
@@ -45,7 +33,7 @@ func main() {
 	}
 
 	// Metadata of the service
-	serviceInfo := &models.ServiceInfo{
+	serviceInfo := &types.ServiceInfo{
 		Name:        ServiceName,
 		UpTime:      upTime,
 		Environment: env,
@@ -57,19 +45,17 @@ func main() {
 
 	log.Info().Object("Service", serviceInfo).Msg("starting")
 
-	// Load Configuration
-	c, cErr := config.LoadConfig(env)
-	if cErr != nil {
-		log.Fatal().Err(cErr).Msg("unable to read configuration")
-	}
-
 	// Setup : DB
-	dbManager, dErr := db.NewMongoManager(DBName, c.GetString("db.dsn"))
+	dbManager, dErr := db.NewMongoManager(DBName, "")
 	if dErr != nil {
 		log.Fatal().Err(dErr).Msg("unable to initialize DB connection")
 	}
 	t.OnSignal(func() {
-		dbManager.Disconnect()
+		err := dbManager.Disconnect()
+		if err != nil {
+			log.Err(err).Msg("unable to disconnect from DB")
+			return
+		}
 	})
 
 	// Setup : Server

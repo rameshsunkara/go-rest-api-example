@@ -3,11 +3,11 @@ package db
 import (
 	"context"
 	"errors"
+
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rs/zerolog/log"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/util"
-
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -44,7 +44,7 @@ func (ordDataSvc *ordersRepo) Create(ctx context.Context, po interface{}) (*mong
 	if vErr := validate(ordDataSvc.collection); vErr != nil {
 		return nil, vErr
 	}
-	purchaseOrder := po.(*models.Order)
+	purchaseOrder := po.(*types.Order)
 	if !purchaseOrder.ID.IsZero() {
 		return nil, errors.New("invalid request")
 	}
@@ -63,7 +63,7 @@ func (ordDataSvc *ordersRepo) Update(ctx context.Context, po interface{}) (int64
 		return 0, vErr
 	}
 
-	purchaseOrder := po.(*models.Order)
+	purchaseOrder := po.(*types.Order)
 	if primitive.ObjectID.IsZero(purchaseOrder.ID) || !primitive.IsValidObjectID(purchaseOrder.ID.Hex()) {
 		return 0, errors.New("invalid request")
 	}
@@ -105,7 +105,7 @@ func (ordDataSvc *ordersRepo) GetAll(ctx context.Context) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	var results []models.Order
+	var results []types.Order
 	if err = cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (ordDataSvc *ordersRepo) GetById(ctx context.Context, id string) (interface
 	}
 	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
 
-	var result models.Order
+	var result types.Order
 	error := ordDataSvc.collection.FindOne(ctx, filter).Decode(&result)
 	if error != nil {
 		if error == mongo.ErrNoDocuments {

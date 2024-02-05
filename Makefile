@@ -71,14 +71,6 @@ docker-clean-build-images:
 version:
 	@echo $(VERSION)
 
-## api-docs: Generate OpenAPI3 Spec
-api-docs:
-	swag init -g main.go
-	curl -X POST "https://converter.swagger.io/api/convert" \
-		-H "accept: application/json" \
-		-H "Content-Type: application/json" \
-		-d @docs/swagger.json > docs/openapi.json
-
 ## test: Run tests
 test:
 	go test -v ./...
@@ -90,6 +82,10 @@ coverage:
 
 coverage-html:
 	go tool cover -html=coverage.out
+
+## lint: Run linter
+lint:
+	golangci-lint run
 
 .PHONY: help
 help: Makefile

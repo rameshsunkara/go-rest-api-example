@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
 
 const (
@@ -32,7 +32,7 @@ func NewOrdersController(svc db.OrdersDataService) *OrdersController {
 // @Success      200
 // @Router       /orders/ [post]
 func (oHandler *OrdersController) Post(c *gin.Context) {
-	purchaseRequest := models.Order{}
+	purchaseRequest := types.Order{}
 
 	if err := c.BindJSON(&purchaseRequest); err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)

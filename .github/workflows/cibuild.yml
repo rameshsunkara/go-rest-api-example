@@ -2,7 +2,7 @@ name: Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, v2 ]
   pull_request:
     branches: [ main ]
 
@@ -10,27 +10,36 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Set up Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: false
 
-    - uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go- 
+      - name: Check go mod
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod
+          git diff --exit-code -- go.sum
 
-    - name: Build
-      run: make build
-      
-    - name: Tests
-      run: make test
-      
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3.7.0
+        with:
+          version: latest
+          skip-build-cache: true
+          skip-pkg-cache: true
+
+      - name: Format
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
+      - name: Build
+        run: make build
+
+      - name: Test
+        run: make test

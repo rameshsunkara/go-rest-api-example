@@ -14,15 +14,15 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func UnMarshalOrdersResponse(d []byte) (*[]models.Order, error) {
-	var orders *[]models.Order
+func UnMarshalOrdersResponse(d []byte) (*[]types.Order, error) {
+	var orders *[]types.Order
 	err := json.Unmarshal(d, &orders)
 	if err != nil {
 		return nil, err
@@ -31,8 +31,8 @@ func UnMarshalOrdersResponse(d []byte) (*[]models.Order, error) {
 	return orders, nil
 }
 
-func UnMarshalOrderResponse(d []byte) (*models.Order, error) {
-	var r *models.Order
+func UnMarshalOrderResponse(d []byte) (*types.Order, error) {
+	var r *types.Order
 	err := json.Unmarshal(d, &r)
 	if err != nil {
 		return nil, err
@@ -63,8 +63,8 @@ func TestCreateOrderSuccess(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	order, _ := json.Marshal(models.Order{
-		Products: []models.Product{{
+	order, _ := json.Marshal(types.Order{
+		Products: []types.Product{{
 			Name:  "test-prod",
 			Price: 100,
 		}},
@@ -97,8 +97,8 @@ func TestCreateOrderFailure_DBError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	order, _ := json.Marshal(models.Order{
-		Products: []models.Product{{
+	order, _ := json.Marshal(types.Order{
+		Products: []types.Product{{
 			Name:  "test-prod",
 			Price: 100,
 		}},
@@ -145,9 +145,9 @@ func TestUpdateOrderSuccess(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	id, _ := primitive.ObjectIDFromHex("629fd50cb1e95cbe7ac12aae")
-	order, _ := json.Marshal(models.Order{
+	order, _ := json.Marshal(types.Order{
 		ID: id,
-		Products: []models.Product{{
+		Products: []types.Product{{
 			Name:  "test-prod",
 			Price: 100,
 		}},

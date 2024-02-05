@@ -6,14 +6,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	svcInfo = &models.ServiceInfo{
+	svcInfo = &types.ServiceInfo{
 		Name:        "test-api-service",
 		Version:     "rams-fav",
 		UpTime:      time.Now(),

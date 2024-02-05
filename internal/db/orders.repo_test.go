@@ -7,7 +7,7 @@ import (
 
 	"github.com/bxcodec/faker/v3"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -23,7 +23,7 @@ func TestNewOrderDataService(t *testing.T) {
 func TestCreateSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
-	product := []models.Product{
+	product := []types.Product{
 		{
 			Name:      faker.Name(),
 			Price:     (uint)(rand.Intn(90) + 10),
@@ -38,7 +38,7 @@ func TestCreateSuccess(t *testing.T) {
 		},
 	}
 
-	po := &models.Order{
+	po := &types.Order{
 		Products: product,
 	}
 	result, err := dSvc.Create(context.TODO(), po)
@@ -52,7 +52,7 @@ func TestCreateSuccess(t *testing.T) {
 func TestCreate_InvalidReq(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
-	product := []models.Product{
+	product := []types.Product{
 		{
 			Name:      faker.Name(),
 			Price:     (uint)(rand.Intn(90) + 10),
@@ -67,7 +67,7 @@ func TestCreate_InvalidReq(t *testing.T) {
 		},
 	}
 
-	po := &models.Order{
+	po := &types.Order{
 		ID:       primitive.NewObjectID(),
 		Products: product,
 	}
@@ -78,7 +78,7 @@ func TestCreate_InvalidReq(t *testing.T) {
 func TestUpdateSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
-	product := []models.Product{
+	product := []types.Product{
 		{
 			Name:      faker.Name(),
 			Price:     (uint)(rand.Intn(90) + 10),
@@ -87,7 +87,7 @@ func TestUpdateSuccess(t *testing.T) {
 		},
 	}
 
-	po := &models.Order{
+	po := &types.Order{
 		ID:       orderId,
 		Products: product,
 	}
@@ -99,7 +99,7 @@ func TestUpdateSuccess(t *testing.T) {
 func TestUpdate_InvalidId(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
-	product := []models.Product{
+	product := []types.Product{
 		{
 			Name:      faker.Name(),
 			Price:     (uint)(rand.Intn(90) + 10),
@@ -108,7 +108,7 @@ func TestUpdate_InvalidId(t *testing.T) {
 		},
 	}
 
-	po := &models.Order{
+	po := &types.Order{
 		ID:       primitive.NilObjectID,
 		Products: product,
 	}
@@ -121,7 +121,7 @@ func TestGetAllSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
 	results, _ := dSvc.GetAll(context.TODO())
-	orders := results.(*[]models.Order)
+	orders := results.(*[]types.Order)
 	assert.EqualValues(t, 100, len(*orders))
 }
 
@@ -129,7 +129,7 @@ func TestGetByIdSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrderDataService(d)
 	result, _ := dSvc.GetById(context.TODO(), orderId.Hex())
-	order := result.(*models.Order)
+	order := result.(*types.Order)
 	assert.NotNil(t, result)
 	assert.EqualValues(t, orderId, order.ID)
 }

@@ -1,5 +1,0 @@
-server:
-    port: 8080
-
-db:
-    dsn:  mongodb://admin:badpassword@localhost:27017
