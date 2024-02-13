@@ -4,10 +4,10 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 
-	"github.com/bxcodec/faker/v3"
 	"github.com/gin-gonic/gin"
 )
 

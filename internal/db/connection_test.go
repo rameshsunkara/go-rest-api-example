@@ -4,9 +4,10 @@ import (
 	"context"
 	"math/rand"
 	"os"
+	"runtime"
 	"testing"
 
-	"github.com/bxcodec/faker/v3"
+	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/rameshsunkara/strikememongo"
@@ -19,10 +20,27 @@ var (
 	testDBMgr db.MongoManager
 )
 
+const AppleChip = "arm64"
+
+func mongoOptions() *strikememongo.Options {
+	mongoVersion := "6.0.5"
+
+	downloadUrl := ""
+	if runtime.GOARCH == AppleChip {
+		downloadUrl = "https://fastdl.mongodb.org/osx/mongodb-macos-arm64-6.0.5.tgz"
+	}
+
+	opts := &strikememongo.Options{
+		MongoVersion: mongoVersion,
+		DownloadURL:  downloadUrl,
+	}
+	return opts
+}
+
 func TestMain(m *testing.M) {
-	mongoServer, err := strikememongo.Start("6.0.3")
+	mongoServer, err := strikememongo.StartWithOptions(mongoOptions())
 	if err != nil {
-		log.Fatal().Err(err)
+		panic(err)
 	}
 	defer mongoServer.Stop()
 
@@ -30,7 +48,12 @@ func TestMain(m *testing.M) {
 	if dErr != nil {
 		log.Fatal().Err(dErr)
 	}
-	defer d.Disconnect()
+	defer func(d *db.ConnectionManager) {
+		err := d.Disconnect()
+		if err != nil {
+			log.Error().Err(err).Msg("unable to disconnect from db")
+		}
+	}(d)
 	testDBMgr = d
 	insertTestData()
 
@@ -39,7 +62,7 @@ func TestMain(m *testing.M) {
 
 func insertTestData() {
 	database := testDBMgr.Database()
-	dSvc := db.NewOrderDataService(database)
+	dSvc := db.NewOrdersRepo(database)
 
 	for i := 0; i < 500; i++ {
 		product := []types.Product{

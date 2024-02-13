@@ -11,15 +11,13 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
 
 var runOnce sync.Once
 
 func Init(serviceInfo *types.ServiceInfo, manager db.MongoManager) {
-	config := config.GetConfig()
-	port := config.GetString("server.port")
+	port := "8080" // TODO: Move to config
 	runOnce.Do(func() {
 		r := WebRouter(serviceInfo, manager)
 		r.Run(":" + port)
@@ -48,7 +46,7 @@ func WebRouter(svcInfo *types.ServiceInfo, dbMgr db.MongoManager) (router *gin.E
 
 	// Dependencies for controllers
 	d := dbMgr.Database()
-	orders := db.NewOrderDataService(d)
+	orders := db.NewOrdersRepo(d)
 
 	// Routes - Seed DB
 	if util.IsDevMode(svcInfo.Environment) {
