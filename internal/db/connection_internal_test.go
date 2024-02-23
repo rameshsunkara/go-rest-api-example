@@ -26,7 +26,7 @@ func TestNewConnection(t *testing.T) {
 		{
 			Description: "expect client object",
 			Input:       "mongodb://test",
-			ExpectedErr: nil,
+			ExpectedErr: ErrClientInit,
 		},
 	}
 

@@ -5,10 +5,14 @@ go 1.21
 require (
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/go-faker/faker/v4 v4.3.0
+	github.com/google/uuid v1.4.0
 	github.com/rameshsunkara/deferrun v1.0.2
 	github.com/rameshsunkara/strikememongo v0.2.5
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
+	github.com/swaggo/files v1.0.1
+	github.com/swaggo/gin-swagger v1.6.0
 	go.mongodb.org/mongo-driver v1.13.1
 )
 
@@ -21,7 +25,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-faker/faker/v4 v4.3.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
 	github.com/go-openapi/spec v0.20.7 // indirect

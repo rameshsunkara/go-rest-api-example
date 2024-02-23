@@ -3,12 +3,13 @@ package mocks
 import (
 	"context"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
-	CreateFunc     func(ctx context.Context, purchaseOrder interface{}) (*mongo.InsertOneResult, error)
-	UpdateFunc     func(ctx context.Context, purchaseOrder interface{}) (int64, error)
+	CreateFunc     func(ctx context.Context, purchaseOrder *types.Order) (*mongo.InsertOneResult, error)
+	UpdateFunc     func(ctx context.Context, purchaseOrder *types.Order) (int64, error)
 	GetAllFunc     func(ctx context.Context) (interface{}, error)
 	GetByIdFunc    func(ctx context.Context, id string) (interface{}, error)
 	DeleteByIdFunc func(ctx context.Context, id string) (int64, error)
@@ -16,11 +17,11 @@ var (
 
 type MockOrdersDataService struct{}
 
-func (m *MockOrdersDataService) Create(ctx context.Context, purchaseOrder interface{}) (*mongo.InsertOneResult, error) {
+func (m *MockOrdersDataService) Create(ctx context.Context, purchaseOrder *types.Order) (*mongo.InsertOneResult, error) {
 	return CreateFunc(ctx, purchaseOrder)
 }
 
-func (m *MockOrdersDataService) Update(ctx context.Context, purchaseOrder interface{}) (int64, error) {
+func (m *MockOrdersDataService) Update(ctx context.Context, purchaseOrder *types.Order) (int64, error) {
 	return UpdateFunc(ctx, purchaseOrder)
 }
 

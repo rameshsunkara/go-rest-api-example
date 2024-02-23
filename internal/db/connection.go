@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"errors"
-	"sync"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -18,11 +17,9 @@ var (
 	ErrClientCreation = errors.New("failed to create new client to connect with db")
 	ErrClientInit     = errors.New("failed to initialize db client")
 	ErrConnectionLeak = errors.New("unable to disconnect from db, potential connection leak")
-	connectOnce       sync.Once
 )
 
-// DefaultConnectionTimeOut - Max time to establish DB connection before timing out
-const DefaultConnectionTimeOut = 10 * time.Second
+const DefConnectionTimeOut = 0 * time.Second
 
 type MongoDatabase interface {
 	Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection
@@ -45,23 +42,15 @@ func NewMongoManager(dbName string, connUrl string) (*ConnectionManager, error) 
 	log.Info().Str("DB Connection Url", connUrl)
 
 	dbMgr := &ConnectionManager{}
-	var connErr error
-	connectOnce.Do(func() {
-		if c, err := newClient(connUrl); err != nil {
-			connErr = err
-		} else {
-			db := c.Database(dbName)
-			dbMgr.database = db
-			dbMgr.client = c
+	if c, err := newClient(connUrl); err != nil {
+		return nil, err
+	} else {
+		db := c.Database(dbName)
+		dbMgr.database = db
+		dbMgr.client = c
+	}
 
-			// Verify connection
-			if err := dbMgr.Ping(); err != nil {
-				connErr = err
-			}
-		}
-	})
-
-	return dbMgr, connErr
+	return dbMgr, nil
 }
 
 // newClient - creates a new Mongo Client to connect to the specified url and initializes the Client
@@ -70,6 +59,7 @@ func newClient(connectionUrl string) (*mongo.Client, error) {
 		return nil, ErrInvalidConnUrl
 	}
 	opts := options.Client().ApplyURI(connectionUrl)
+	opts.SetConnectTimeout(DefConnectionTimeOut)
 	client, err := mongo.Connect(context.Background(), opts)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to establish db connection")

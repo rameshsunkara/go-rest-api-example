@@ -4,15 +4,16 @@ import (
 	"os"
 	"sync"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
 )
 
 var once sync.Once
+var logger zerolog.Logger
 
-func ZeroLogger(env string) zerolog.Logger {
-	var logger zerolog.Logger
+func SetupZeroLogger(env string) zerolog.Logger {
 	once.Do(func() {
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		lvl := zerolog.InfoLevel
@@ -26,4 +27,15 @@ func ZeroLogger(env string) zerolog.Logger {
 		zerolog.SetGlobalLevel(lvl)
 	})
 	return logger
+}
+
+const RequestIdentifier = "x-trace-id"
+
+func ReqLogger(c *gin.Context) (zerolog.Logger, string) {
+	reqContext := c.Request.Context()
+	if rId := reqContext.Value(RequestIdentifier); rId != nil {
+		reqId := rId.(string)
+		return logger.With().Str(RequestIdentifier, reqId).Logger(), reqId
+	}
+	return logger, ""
 }
