@@ -20,17 +20,28 @@ const (
 )
 
 var (
-	ErrInvalidPurchaseOrderId = errors.New("invalid purchase order id")
-	ErrFailedToCreateOrder    = errors.New("failed to create order")
+	ErrInvalidInitialization = errors.New("invalid initialization")
+	ErrInvalidPOIDCreate = errors.New("order id should be empty")
+	ErrInvalidPOIDUpdate = errors.New("invalid order id")
+	ErrUnexpectedUpdateOrder = errors.New("unexpected error occurred while updating order")
+	ErrPOIDNotFound = errors.New("purchase order doesn't exist with given id")
+	ErrFailedToCreateOrder  = errors.New("failed to create order")
+	ErrInvalidPOIDDelete = errors.New("invalid order id")
+	ErrorUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
 )
 
-// OrdersDataService  - Added for mocking purpose
+// OrdersDataService  - Added for tests/mock
 type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *types.Order) (string, error)
-	Update(ctx context.Context, purchaseOrder *types.Order) (int64, error)
-	GetAll(ctx context.Context) (interface{}, error)
-	GetById(ctx context.Context, id string) (interface{}, error)
+	Update(ctx context.Context, purchaseOrder *types.Order) error
+	GetAll(ctx context.Context) (*[]types.Order, error)
+	GetById(ctx context.Context, id string) (types.Order, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
+}
+
+// OrdersRepo - Implements OrdersDataService
+type OrdersRepo struct {
+	collection *mongo.Collection
 }
 
 func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
@@ -40,17 +51,12 @@ func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
 	return iDBSvc
 }
 
-// OrdersRepo - Implements OrdersDataService
-type OrdersRepo struct {
-	collection *mongo.Collection
-}
-
 func (ordDataSvc *OrdersRepo) Create(ctx context.Context, po *types.Order) (string, error) {
-	if vErr := validate(ordDataSvc.collection); vErr != nil {
-		return "", vErr
+	if err := validate(ordDataSvc.collection); err != nil {
+		return "", err
 	}
 	if !po.ID.IsZero() {
-		return "", ErrInvalidPurchaseOrderId
+		return "", ErrInvalidPOIDCreate
 	}
 	po.UpdatedAt = util.CurrentISOTime()
 
@@ -59,45 +65,40 @@ func (ordDataSvc *OrdersRepo) Create(ctx context.Context, po *types.Order) (stri
 		log.Err(err).Msg("error occurred while creating order")
 		return "", ErrFailedToCreateOrder
 	}
-	log.Info().Msgf("Inserted a single document: %s", result.InsertedID.(primitive.ObjectID).Hex())
+	log.Info().Msgf("created new order: %s", result.InsertedID.(primitive.ObjectID).Hex())
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-// Update - Create and Update can be merged using upsert, but this is to demonstrate CRUD rest API so ...
-func (ordDataSvc *OrdersRepo) Update(ctx context.Context, po *types.Order) (int64, error) {
-	if vErr := validate(ordDataSvc.collection); vErr != nil {
-		return 0, vErr
+func (ordDataSvc *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
+	if err := validate(ordDataSvc.collection); err != nil {
+		return err
 	}
 
-	if primitive.ObjectID.IsZero(po.ID) || !primitive.IsValidObjectID(po.ID.Hex()) {
-		return 0, errors.New("invalid request")
+	oID, err := primitive.ObjectIDFromHex(po.ID.Hex())
+	if oID.IsZero() || err != nil {
+		return ErrInvalidPOIDUpdate
 	}
 
 	po.UpdatedAt = util.CurrentISOTime()
 
-	opts := options.Update().SetUpsert(true)
 	filter := bson.D{primitive.E{Key: "_id", Value: po.ID}}
 	update := bson.D{primitive.E{Key: "$set", Value: po}}
-	result, err := ordDataSvc.collection.UpdateOne(ctx, filter, update, opts)
+	result, err := ordDataSvc.collection.UpdateOne(ctx, filter, update, nil)
 
 	if err != nil {
-		log.Err(err).Msg("Error occurred while updating order")
+		log.Err(err).Msg("error occurred while updating order")
+		return ErrUnexpectedUpdateOrder
 	}
 
-	if result.MatchedCount != 0 {
-		log.Info().Msg("matched and replaced an existing document")
-		return result.MatchedCount, nil
+	if result.MatchedCount == 0 {
+		log.Info().Msg("order id given for updating the order is not found")
+		return ErrPOIDNotFound
 	}
 
-	if result.UpsertedCount != 0 {
-		log.Info().Msg("inserted a new order with ID")
-		return result.MatchedCount, nil
-	}
-
-	return 0, nil
+	return nil
 }
 
-func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (interface{}, error) {
+func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
 	if vErr := validate(ordDataSvc.collection); vErr != nil {
 		return nil, vErr
 	}
@@ -118,51 +119,55 @@ func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (interface{}, error) {
 	return &results, nil
 }
 
-func (ordDataSvc *OrdersRepo) GetById(ctx context.Context, id string) (interface{}, error) {
-	if vErr := validate(ordDataSvc.collection); vErr != nil {
-		return nil, vErr
+func (ordDataSvc *OrdersRepo) GetById(ctx context.Context, id string) (*types.Order, error) {
+	if err := validate(ordDataSvc.collection); err != nil {
+		return nil, err
 	}
 
-	docID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return nil, errors.New("bad request")
+	oID, err := primitive.ObjectIDFromHex(id)
+	if oID.IsZero() || err != nil {
+		return nil, ErrInvalidPOIDUpdate
 	}
-	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
+
+	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
 
 	var result types.Order
-	err2 := ordDataSvc.collection.FindOne(ctx, filter).Decode(&result)
-	if err2 != nil {
-		if errors.Is(err2, mongo.ErrNoDocuments) {
-			return nil, nil
+	err = ordDataSvc.collection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, ErrPOIDNotFound
 		}
-		return nil, err2
+		return nil, err
 	}
 
 	return &result, nil
 }
 
 func (ordDataSvc *OrdersRepo) DeleteById(ctx context.Context, id string) (int64, error) {
-	if vErr := validate(ordDataSvc.collection); vErr != nil {
-		return 0, vErr
+	if err := validate(ordDataSvc.collection); err != nil {
+		return 0, err
 	}
 
-	docID, err := primitive.ObjectIDFromHex(id)
+	oID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return 0, errors.New("bad request")
+		return 0, ErrInvalidPOIDDelete
 	}
-	filter := bson.D{primitive.E{Key: "_id", Value: docID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
 
-	res, err2 := ordDataSvc.collection.DeleteOne(ctx, filter)
-	if err2 != nil {
-		return 0, err2
+	res, err := ordDataSvc.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return 0, ErrorUnexpectedDeleteOrder
 	}
 
+	if res.DeletedCount == 0 {
+		return 0, ErrPOIDNotFound
+	}
 	return res.DeletedCount, nil
 }
 
 func validate(collection *mongo.Collection) error {
 	if collection == nil {
-		return errors.New("collection is not defined")
+		return ErrInvalidInitialization
 	}
 	return nil
 }

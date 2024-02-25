@@ -6,6 +6,7 @@ import (
 
 type Order struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"order_id"`
+	CreatedAt string             `bson:"createdAt,omitempty" json:"createdAt"`
 	UpdatedAt string             `bson:"updatedAt,omitempty" json:"updatedAt"`
 	Products  []Product          `bson:"products,omitempty" json:"products"`
 }
@@ -17,3 +18,4 @@ type Product struct {
 	Status    string `bson:"status,omitempty" json:"status"`
 	Remarks   string `bson:"remarks,omitempty" json:"remarks"`
 }
+
