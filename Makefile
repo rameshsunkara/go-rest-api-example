@@ -1,6 +1,6 @@
 -include .env
 
-export environment=$(profile)
+export environment=local
 
 PROJECT_NAME := $(shell basename "$(PWD)" | tr '[:upper:]' '[:lower:]')
 

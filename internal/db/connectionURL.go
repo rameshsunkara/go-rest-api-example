@@ -1,0 +1,94 @@
+package db
+
+import (
+	"encoding/json"
+	"errors"
+	"io"
+	"net/url"
+	"os"
+	"strings"
+)
+
+type MongoDBCredentials struct {
+	User       string `json:"user"`
+	Port       string `json:"port"`
+	Hostname   string `json:"hostname"`
+	ReplicaSet string `json:"replicaset"`
+	Password   string `json:"password"`
+}
+
+var (
+	ErrSideCarFileFormat = errors.New("mongo side car file is in invalid format")
+	ErrSideCarFileRead   = errors.New("unable to read the mongo side car file")
+)
+
+const defaultMongoDBSidecar string = "/vault/secrets/mongodb.json"
+const mongoAtlasIdentifier string = "mongodb.net"
+
+func MongoConnectionUrl(mc MongoDBCredentials) string {
+	if len(mc.Hostname) == 0 {
+		return ""
+	}
+	var protocol, authMechanism, host string
+	connParams := url.Values{}
+	protocol = "mongodb"
+
+	// Atlas uses different options
+	if strings.Contains(mc.Hostname, mongoAtlasIdentifier) {
+		protocol = "mongodb+srv"
+		connParams.Add("retryWrites", "true")
+		connParams.Add("w", "majority")
+		connParams.Add("readPreference", "nearest")
+	}
+
+	if len(mc.ReplicaSet) > 0 {
+		connParams.Add("replicaSet", mc.ReplicaSet)
+	}
+
+	if len(mc.User) > 0 && len(mc.Password) > 0 {
+		authMechanism = mc.User + ":" + mc.Password + "@"
+	}
+
+	host = mc.Hostname
+	isMultiHost := len(strings.Split(mc.Hostname, ",")) > 1
+	if len(mc.Port) > 0 && !isMultiHost {
+		host += ":" + mc.Port
+	}
+	finalUrl := protocol + "://" + authMechanism + host
+
+	connParamsStr := connParams.Encode()
+	if len(connParamsStr) > 0 {
+		finalUrl += "/?" + connParamsStr
+	}
+
+	return finalUrl
+}
+
+func MaskedMongoConnectionUrl(mc MongoDBCredentials) string {
+	if len(mc.User) > 0 {
+		mc.User = "#####"
+	}
+
+	if len(mc.Password) > 0 {
+		mc.Password = "#####"
+	}
+
+	return MongoConnectionUrl(mc)
+}
+
+func MongoDBCredentialFromSideCar(sideCarFile string) (MongoDBCredentials, error) {
+	if sideCarFile == "" {
+		sideCarFile = defaultMongoDBSidecar
+	}
+	jsonFile, err := os.Open(sideCarFile)
+	if err != nil {
+		return MongoDBCredentials{}, ErrSideCarFileRead
+	}
+	byteValue, _ := io.ReadAll(jsonFile)
+	var mongoDBCredential MongoDBCredentials
+	err = json.Unmarshal(byteValue, &mongoDBCredential)
+	if err != nil {
+		return mongoDBCredential, ErrSideCarFileFormat
+	}
+	return mongoDBCredential, nil
+}

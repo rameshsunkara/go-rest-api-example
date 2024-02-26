@@ -35,7 +35,7 @@ type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *types.Order) (string, error)
 	Update(ctx context.Context, purchaseOrder *types.Order) error
 	GetAll(ctx context.Context) (*[]types.Order, error)
-	GetById(ctx context.Context, id string) (types.Order, error)
+	GetById(ctx context.Context, id string) (*types.Order, error)
 	DeleteById(ctx context.Context, id string) (int64, error)
 }
 

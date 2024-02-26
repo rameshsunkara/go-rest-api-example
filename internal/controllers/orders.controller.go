@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
@@ -24,23 +25,22 @@ func NewOrdersController(svc db.OrdersDataService) *OrdersController {
 }
 
 func (oHandler *OrdersController) Post(c *gin.Context) {
-	purchaseRequest := types.Order{}
+	poReq := types.OrderReqBody{}
 
-	if err := c.ShouldBind(&purchaseRequest); err != nil {
+	if err := c.ShouldBind(&poReq); err != nil {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 
-	if purchaseRequest.ID.IsZero() {
-		if uid, _ := oHandler.dataSvc.Create(c, &purchaseRequest); uid != nil {
-			c.JSON(http.StatusOK, uid)
-			return
-		}
-	} else {
-		if updatedCount, _ := oHandler.dataSvc.Update(c, &purchaseRequest); updatedCount != 0 {
-			c.JSON(http.StatusOK, updatedCount)
-			return
-		}
+	order := types.Order{
+		Products: poReq.Products,
+		User: "from-jwt-token",
+		CreatedAt: time.Now().UTC().Format(time.RFC3339),
+	}
+
+	if uid, err := oHandler.dataSvc.Create(c, &order); err == nil {
+		c.JSON(http.StatusOK, uid)
+		return
 	}
 
 	c.JSON(http.StatusInternalServerError, "Unexpected Error occurred")

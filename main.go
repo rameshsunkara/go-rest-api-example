@@ -2,77 +2,112 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/rameshsunkara/deferrun"
-	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/pkgerrors"
-
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
-	"github.com/rs/zerolog/log"
 )
 
 const (
-	ServiceName = "ecommerce-orders"
-	DBName      = "ecommerce"
+	serviceName = "ecommerce-orders"
+	defaultPort = "8080"
 )
 
 // Passed while building from  make file
 var version string
 
 func main() {
-	upTime := time.Now()
-	t := deferrun.NewSignalHandler()
+	upTime := time.Now().UTC().Format(time.RFC3339)
+	sigHandler := deferrun.NewSignalHandler()
 
-	env := os.Getenv("environment")
-	if env == "" {
-		env = "dev"
-	}
+	// read all environmental configurations, panics if something critical is missing
+	svcEnv := MustEnvConfig()
 
-	// Metadata of the service
-	serviceInfo := &types.ServiceInfo{
-		Name:        ServiceName,
+	// service details that can be shared internally for debugging
+	svcInfo := types.ServiceInfo{
+		Name:        serviceName,
 		UpTime:      upTime,
-		Environment: env,
+		Environment: svcEnv.Name,
 		Version:     version,
 	}
 
-	// Setup : Log
-	setupLog(env)
+	// setup : logger
+	zLogger := logger.SetupZeroLogger(svcEnv.Name)
 
-	log.Info().Object("Service", serviceInfo).Msg("starting")
+	zLogger.Info().Object("serviceDetails", svcInfo).Msg("starting")
 
-	// Setup : DB
-	dbManager, dErr := db.NewMongoManager(DBName, "")
-	if dErr != nil {
-		log.Fatal().Err(dErr).Msg("unable to initialize DB connection")
+	// setup : database connection
+	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
+	if err != nil {
+		zLogger.Fatal().Err(err).Msg("failed to fetch DB credentials")
 	}
-	t.OnSignal(func() {
-		err := dbManager.Disconnect()
+	opts := &db.ConnectionOpts{
+		Database:     svcEnv.DBName,
+		PrintQueries: svcEnv.PrintQueries,
+	}
+	connMgr, err := db.NewMongoManager(dbCredentials, opts)
+	if err != nil {
+		zLogger.Fatal().Err(err).Msg("unable to initialize DB connection")
+	}
+	sigHandler.OnSignal(func() {
+		err := connMgr.Disconnect()
 		if err != nil {
-			log.Err(err).Msg("unable to disconnect from DB")
+			zLogger.Err(err).Msg("unable to disconnect from DB, potential connection leak")
 			return
 		}
 	})
 
-	// Setup : Server
-	server.Init(serviceInfo, dbManager)
+	// setup : start service - blocking call
+	server.StartService(svcInfo, svcEnv, connMgr)
 
-	log.Fatal().Str("ServiceName", ServiceName).Msg("Server Exited")
+	zLogger.Fatal().Object("serviceDetails", svcInfo).Msg("server exited")
 }
 
-func setupLog(env string) {
-	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-	lvl := zerolog.InfoLevel
-	logDest := os.Stdout
-	logger := zerolog.New(logDest).With().Caller().Timestamp().Logger()
-	if util.IsDevMode(env) {
-		lvl = zerolog.TraceLevel
-		logger = zerolog.New(zerolog.ConsoleWriter{Out: logDest}).With().Caller().Timestamp().Logger()
+
+func MustEnvConfig() types.ServiceEnv {
+	envName := os.Getenv("environment")
+	if envName == "" {
+		envName = "local"
 	}
-	zerolog.SetGlobalLevel(lvl)
-	log.Logger = logger
+
+	port := os.Getenv("port")
+	if port == "" {
+		port = defaultPort
+	}
+
+	dbName := os.Getenv("dbName")
+	if dbName == "" {
+		panic("dbName should be defined in env configuration")
+	}
+
+	printDBQueries, err := strconv.ParseBool(os.Getenv("printDBQueries"))
+	if err != nil {
+		printDBQueries = false
+	}
+
+	mongoSideCar := os.Getenv("MongoVaultSideCar")
+	if mongoSideCar == "" {
+		panic("mongo sidecar file path should be defined in env configuration")
+	}
+
+	disableAuth, authEnvErr := strconv.ParseBool(os.Getenv("disableAuth"))
+	if authEnvErr != nil {
+		// do not disable authentication by default, added this flexibility just for local development purpose
+		disableAuth = false
+	}
+
+	envConfigurations := types.ServiceEnv{
+		Name:              envName,
+		Port:              port,
+		PrintQueries:       printDBQueries,
+		MongoVaultSideCar: mongoSideCar,
+		DisableAuth:       disableAuth,
+		DBName: dbName,
+	}
+
+	return envConfigurations
 }

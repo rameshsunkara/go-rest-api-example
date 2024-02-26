@@ -13,7 +13,7 @@ import (
 var once sync.Once
 var logger zerolog.Logger
 
-func SetupZeroLogger(env string) zerolog.Logger {
+func SetupZeroLogger(env string) *zerolog.Logger {
 	once.Do(func() {
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		lvl := zerolog.InfoLevel
@@ -26,10 +26,14 @@ func SetupZeroLogger(env string) zerolog.Logger {
 		}
 		zerolog.SetGlobalLevel(lvl)
 	})
-	return logger
+	return &logger
 }
 
-const RequestIdentifier = "x-trace-id"
+func ZeroLogger() *zerolog.Logger {
+	return &logger
+}
+
+const RequestIdentifier = "X-Request-ID"
 
 func ReqLogger(c *gin.Context) (zerolog.Logger, string) {
 	reqContext := c.Request.Context()

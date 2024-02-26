@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
@@ -22,17 +21,17 @@ const (
 type StatusResponse struct {
 	Status      ServiceStatus
 	ServiceName string
-	UpTime      time.Time
+	UpTime      string
 	Environment string
 	Version     string
 }
 
 type StatusController struct {
-	svcInfo *types.ServiceInfo
+	svcInfo types.ServiceInfo
 	dbMgr   db.MongoManager
 }
 
-func NewStatusController(s *types.ServiceInfo, m db.MongoManager) *StatusController {
+func NewStatusController(s types.ServiceInfo, m db.MongoManager) *StatusController {
 	return &StatusController{
 		svcInfo: s,
 		dbMgr:   m,
