@@ -5,21 +5,23 @@ import (
 	"sync"
 
 	"github.com/gin-contrib/gzip"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+
 	// TODO: "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/controllers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
-var runOnce sync.Once
+var RunOnce sync.Once
 
-func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.MongoManager) {
-	runOnce.Do(func() {
-		r := WebRouter(svcInfo, dbMgr)
+func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *logger.Logger) {
+	RunOnce.Do(func() {
+		r := WebRouter(svcInfo, dbMgr, lgr)
 		err := r.Run(":" + svcEnv.Port)
 		if err != nil {
 			panic(err)
@@ -27,7 +29,7 @@ func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.M
 	})
 }
 
-func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) *gin.Engine {
+func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager, lgr *logger.Logger) *gin.Engine {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcInfo.Environment) {
 		ginMode = gin.DebugMode
@@ -42,7 +44,7 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) *gin.Engine {
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(middleware.ReqIDMiddleware())
 	router.Use(middleware.ResponseHeadersMiddleware())
-	router.Use(middleware.RequestLogMiddleware())
+	router.Use(middleware.RequestLogMiddleware(lgr))
 
 	// Routes
 
@@ -52,16 +54,16 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) *gin.Engine {
 	adminGroup.Use()
 	pprof.RouteRegister(adminGroup, "pprof")
 	// TODO: router.GET("/metrics", gin.WrapH(promhttp.Handler())) // /metrics
-	status := controllers.NewStatusController(svcInfo, dbMgr)
+	status := handlers.NewStatusController(svcInfo, dbMgr)
 	router.GET("/status", status.CheckStatus) // /status
 
-	// Dependencies for controllers
+	// Dependencies for handlers
 	d := dbMgr.Database()
 	orders := db.NewOrdersRepo(d)
 
 	// Routes - Seed DB
 	if util.IsDevMode(svcInfo.Environment) {
-		seed := controllers.NewSeedController(orders)
+		seed := handlers.NewSeedController(orders)
 		router.POST("/seedDB", seed.SeedDB) // /seedDB
 	}
 
@@ -70,7 +72,7 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) *gin.Engine {
 	{
 		ordersGroup := v1.Group("orders")
 		{
-			orders := controllers.NewOrdersController(orders)
+			orders := handlers.NewOrdersController(orders)
 			ordersGroup.GET("", orders.GetAll)            // api/v1/orders
 			ordersGroup.GET("/:id", orders.GetById)       // api/v1/orders/:id
 			ordersGroup.POST("", orders.Post)             // api/v1/orders

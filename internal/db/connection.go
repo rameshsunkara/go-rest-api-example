@@ -5,7 +5,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -49,18 +48,18 @@ type ConnectionManager struct {
 	client   *mongo.Client
 	database *mongo.Database
 	credentials MongoDBCredentials
-	logger *zerolog.Logger
+	logger zerolog.Logger
 }
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
-func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts) (*ConnectionManager, error) {
+func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts, log zerolog.Logger) (*ConnectionManager, error) {
 	connURL := MongoConnectionURL(mc)
 	if len(connURL) == 0 {
 		return nil, ErrInvalidConnURL
 	}
 	connMgr := &ConnectionManager{
 		credentials: mc,
-		logger: logger.ZeroLogger(),
+		logger: log,
 		connectionURL: connURL,
 	}
 	connOpts := fillConnectionOpts(opts)

@@ -2,7 +2,6 @@ package logger
 
 import (
 	"os"
-	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
@@ -10,36 +9,28 @@ import (
 	"github.com/rs/zerolog/pkgerrors"
 )
 
-var once sync.Once
-var logger zerolog.Logger
-
-func SetupZeroLogger(env string) *zerolog.Logger {
-	once.Do(func() {
-		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
-		lvl := zerolog.InfoLevel
-		logDest := os.Stdout
-		logger = zerolog.New(logDest).With().Caller().Timestamp().Logger()
-
-		if util.IsDevMode(env) {
-			lvl = zerolog.TraceLevel
-			logger = zerolog.New(zerolog.ConsoleWriter{Out: logDest}).With().Caller().Timestamp().Logger()
-		}
-		zerolog.SetGlobalLevel(lvl)
-	})
-	return &logger
+type Logger struct {
+	ZLog zerolog.Logger
 }
 
-func ZeroLogger() *zerolog.Logger {
-	return &logger
-}
+func New(env string) *Logger {
+	al := Logger{}
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+	logDest := os.Stdout
+	al.ZLog = zerolog.New(logDest).With().Caller().Timestamp().Logger().Level(zerolog.InfoLevel)
 
-const RequestIdentifier = "X-Request-ID"
-
-func ReqLogger(c *gin.Context) (zerolog.Logger, string) {
-	reqContext := c.Request.Context()
-	if rID := reqContext.Value(RequestIdentifier); rID != nil {
-		reqID := rID.(string)
-		return logger.With().Str(RequestIdentifier, reqID).Logger(), reqID
+	if util.IsDevMode(env) {
+		al.ZLog = zerolog.New(zerolog.ConsoleWriter{Out: logDest}).With().
+			Caller().Timestamp().Logger().Level(zerolog.TraceLevel)
 	}
-	return logger, ""
+	return &al
+}
+
+func (l *Logger) WithReqID(ctx *gin.Context) (zerolog.Logger, string) {
+	reqContext := ctx.Request.Context()
+	if rID := reqContext.Value(util.RequestIdentifier); rID != nil {
+		reqID := rID.(string)
+		return l.ZLog.With().Str(util.RequestIdentifier, reqID).Logger(), reqID
+	}
+	return l.ZLog, ""
 }

@@ -7,13 +7,13 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 )
 
-func RequestLogMiddleware() gin.HandlerFunc {
+func RequestLogMiddleware(lgr *logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		rLogger, _ := logger.ReqLogger(c)
+		l, _ := lgr.WithReqID(c)
 		start := time.Now()
 		c.Next()
 		end := time.Now()
-		rLogger.Info().
+		l.Info().
 			Str("method", c.Request.Method).
 			Str("url", c.Request.URL.String()).
 			Str("path", c.Request.URL.Path).

@@ -36,35 +36,35 @@ func main() {
 	}
 
 	// setup : logger
-	zLogger := logger.SetupZeroLogger(svcEnv.Name)
+	lgr := logger.New(svcEnv.Name)
 
-	zLogger.Info().Object("serviceDetails", svcInfo).Msg("starting")
+	lgr.ZLog.Info().Object("serviceDetails", svcInfo).Msg("starting")
 
 	// setup : database connection
 	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
 	if err != nil {
-		zLogger.Fatal().Err(err).Msg("failed to fetch DB credentials")
+		lgr.ZLog.Fatal().Err(err).Msg("failed to fetch DB credentials")
 	}
 	opts := &db.ConnectionOpts{
 		Database:     svcEnv.DBName,
 		PrintQueries: svcEnv.PrintQueries,
 	}
-	connMgr, err := db.NewMongoManager(dbCredentials, opts)
+	connMgr, err := db.NewMongoManager(dbCredentials, opts, lgr.ZLog)
 	if err != nil {
-		zLogger.Fatal().Err(err).Msg("unable to initialize DB connection")
+		lgr.ZLog.Fatal().Err(err).Msg("unable to initialize DB connection")
 	}
 	sigHandler.OnSignal(func() {
 		dErr := connMgr.Disconnect()
 		if dErr != nil {
-			zLogger.Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
+			lgr.ZLog.Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
 			return
 		}
 	})
 
 	// setup : start service - blocking call
-	server.StartService(svcInfo, svcEnv, connMgr)
+	server.StartService(svcInfo, svcEnv, connMgr, lgr)
 
-	zLogger.Fatal().Object("serviceDetails", svcInfo).Msg("server exited")
+	lgr.ZLog.Fatal().Object("serviceDetails", svcInfo).Msg("server exited")
 }
 
 

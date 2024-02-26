@@ -1,10 +1,9 @@
-package controllers
+package handlers
 
 import (
 	"net/http"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 
 	"github.com/rs/zerolog/log"
@@ -41,9 +40,9 @@ func NewStatusController(s types.ServiceInfo, m db.MongoManager) *StatusControll
 
 // CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability
 func (s *StatusController) CheckStatus(c *gin.Context) {
-	reqLogger, _ := logger.ReqLogger(c)
+	//reqLogger, _ := logger.ReqLogger(c)
 
-	reqLogger.Debug().Msg("in CheckStatus")
+	log.Debug().Msg("in CheckStatus")
 	var stat ServiceStatus
 	var code int
 
