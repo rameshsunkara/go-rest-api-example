@@ -9,7 +9,7 @@ type Order struct {
 	CreatedAt string             `bson:"createdAt,omitempty" json:"createdAt"`
 	UpdatedAt string             `bson:"updatedAt,omitempty" json:"updatedAt"`
 	Products  []Product          `bson:"products,omitempty" json:"products"`
-	User	  string             `bson:"user,omitempty" json:"user"`
+	User      string             `bson:"user,omitempty" json:"user"`
 }
 
 type Product struct {
@@ -19,4 +19,3 @@ type Product struct {
 	Status    string `bson:"status,omitempty" json:"status"`
 	Remarks   string `bson:"remarks,omitempty" json:"remarks"`
 }
-

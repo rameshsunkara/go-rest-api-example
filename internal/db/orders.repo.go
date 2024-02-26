@@ -21,11 +21,11 @@ const (
 
 var (
 	ErrInvalidInitialization = errors.New("invalid initialization")
-	ErrInvalidPOIDCreate = errors.New("order id should be empty")
-	ErrInvalidPOIDUpdate = errors.New("invalid order id")
+	ErrInvalidPOIDCreate     = errors.New("order id should be empty")
+	ErrInvalidPOIDUpdate     = errors.New("invalid order id")
 	ErrUnexpectedUpdateOrder = errors.New("unexpected error occurred while updating order")
-	ErrPOIDNotFound = errors.New("purchase order doesn't exist with given id")
-	ErrFailedToCreateOrder  = errors.New("failed to create order")
+	ErrPOIDNotFound          = errors.New("purchase order doesn't exist with given id")
+	ErrFailedToCreateOrder   = errors.New("failed to create order")
 	ErrInvalidPOIDDelete     = errors.New("invalid order id")
 	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
 )

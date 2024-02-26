@@ -16,4 +16,3 @@ func ResponseHeadersMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

@@ -67,7 +67,6 @@ func main() {
 	lgr.ZLog.Fatal().Object("serviceDetails", svcInfo).Msg("server exited")
 }
 
-
 func MustEnvConfig() types.ServiceEnv {
 	envName := os.Getenv("environment")
 	if envName == "" {
@@ -103,10 +102,10 @@ func MustEnvConfig() types.ServiceEnv {
 	envConfigurations := types.ServiceEnv{
 		Name:              envName,
 		Port:              port,
-		PrintQueries:       printDBQueries,
+		PrintQueries:      printDBQueries,
 		MongoVaultSideCar: mongoSideCar,
 		DisableAuth:       disableAuth,
-		DBName: dbName,
+		DBName:            dbName,
 	}
 
 	return envConfigurations

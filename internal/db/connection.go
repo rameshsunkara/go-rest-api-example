@@ -17,8 +17,8 @@ var (
 	ErrInvalidConnURL      = errors.New("failed to connect to DB, as the connection string is invalid")
 	ErrConnectionEstablish = errors.New("failed to establish connection to DB")
 	ErrClientInit          = errors.New("failed to initialize db client")
-	ErrConnectionLeak = errors.New("unable to disconnect from db, potential connection leak")
-	ErrPingDB = errors.New("failed to ping DB")
+	ErrConnectionLeak      = errors.New("unable to disconnect from db, potential connection leak")
+	ErrPingDB              = errors.New("failed to ping DB")
 )
 
 const (
@@ -39,16 +39,16 @@ type MongoManager interface {
 type ConnectionOpts struct {
 	ConnectionTimeout time.Duration
 	PrintQueries      bool
-	Database string
+	Database          string
 }
 
 // ConnectionManager - Manages the connection to the underlying database.
 type ConnectionManager struct {
 	connectionURL string
-	client   *mongo.Client
-	database *mongo.Database
-	credentials MongoDBCredentials
-	logger zerolog.Logger
+	client        *mongo.Client
+	database      *mongo.Database
+	credentials   MongoDBCredentials
+	logger        zerolog.Logger
 }
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
@@ -58,8 +58,8 @@ func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts, log zerolog.Lo
 		return nil, ErrInvalidConnURL
 	}
 	connMgr := &ConnectionManager{
-		credentials: mc,
-		logger: log,
+		credentials:   mc,
+		logger:        log,
 		connectionURL: connURL,
 	}
 	connOpts := fillConnectionOpts(opts)
