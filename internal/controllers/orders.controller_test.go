@@ -234,7 +234,7 @@ func TestGetOrderSuccess(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.GetById(c)
+	o.GetByID(c)
 
 	// Check results
 	resp := w.Result()
@@ -262,7 +262,7 @@ func TestGetOrderFailure_InvalidId(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.GetById(c)
+	o.GetByID(c)
 
 	// Check results
 	resp := w.Result()
@@ -283,7 +283,7 @@ func TestGetOrderFailure_DBRead(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.GetById(c)
+	o.GetByID(c)
 
 	// Check results
 	resp := w.Result()
@@ -303,7 +303,7 @@ func TestDeleteOrderSuccess(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.DeleteById(c)
+	o.DeleteByID(c)
 
 	// Check results
 	resp := w.Result()
@@ -326,7 +326,7 @@ func TestDeleteOrderFailure_DBError(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.DeleteById(c)
+	o.DeleteByID(c)
 
 	// Check results
 	resp := w.Result()
@@ -346,7 +346,7 @@ func TestDeleteOrderFailure_BadRequest(t *testing.T) {
 
 	// Call actual function
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
-	o.DeleteById(c)
+	o.DeleteByID(c)
 
 	// Check results
 	resp := w.Result()

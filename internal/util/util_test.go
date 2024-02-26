@@ -1,15 +1,16 @@
-package util
+package util_test
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFormatTimeToISO(t *testing.T) {
-	got := FormatTimeToISO(time.Date(2022, 5, 18, 9, 36, 0, 0, time.UTC))
+	got := util.FormatTimeToISO(time.Date(2022, 5, 18, 9, 36, 0, 0, time.UTC))
 	want := "2022-05-18T09:36:00Z"
 
 	if want != got {
@@ -18,7 +19,7 @@ func TestFormatTimeToISO(t *testing.T) {
 }
 
 func TestCurrentISOTime(t *testing.T) {
-	got := CurrentISOTime()
+	got := util.CurrentISOTime()
 	parsedTime, err := time.Parse(time.RFC3339, got)
 	z, offset := parsedTime.Zone()
 
@@ -27,7 +28,6 @@ func TestCurrentISOTime(t *testing.T) {
 	}
 	assert.Equal(t, "UTC", z)
 	assert.Equal(t, 0, offset)
-
 }
 
 type DevModeTestCase struct {
@@ -46,7 +46,7 @@ func TestIsDevMode(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(fmt.Sprintf("%s=%t", tc.input, tc.result), func(t *testing.T) {
-			got := IsDevMode(tc.input)
+			got := util.IsDevMode(tc.input)
 			if tc.result != got {
 				t.Errorf("Expected '%t', but got '%t'", tc.result, got)
 			}

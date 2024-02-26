@@ -7,17 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
-const RequestIdentifier = "x-trace-id"
+const RequestIdentifier = "X-Request-ID"
 
-func ReqIdMiddleware() gin.HandlerFunc {
+func ReqIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		reqId := c.Request.Header.Get(RequestIdentifier)
-		if reqId == "" {
-			reqId = uuid.New().String()
+		reqID := c.Request.Header.Get(RequestIdentifier)
+		if reqID == "" {
+			reqID = uuid.New().String()
 		}
-		ctx := context.WithValue(c.Request.Context(), RequestIdentifier, reqId)
+		ctx := context.WithValue(c.Request.Context(), RequestIdentifier, reqID)
 		c.Request = c.Request.WithContext(ctx)
-		c.Writer.Header().Set(RequestIdentifier, reqId)
+		c.Writer.Header().Set(RequestIdentifier, reqID)
 		c.Next()
 	}
 }

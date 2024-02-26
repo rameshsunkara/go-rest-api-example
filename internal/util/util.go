@@ -13,7 +13,7 @@ func CurrentISOTime() string {
 	return FormatTimeToISO(time.Now().UTC())
 }
 
-// IsDevMode - Checks if the given string denotes any of the development environment
+// IsDevMode - Checks if the given string denotes any of the development environment.
 func IsDevMode(s string) bool {
 	return strings.Contains(s, "local") || strings.Contains(s, "dev")
 }

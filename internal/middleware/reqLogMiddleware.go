@@ -13,13 +13,12 @@ func RequestLogMiddleware() gin.HandlerFunc {
 		start := time.Now()
 		c.Next()
 		end := time.Now()
-		latency := end.Sub(start)
 		rLogger.Info().
 			Str("method", c.Request.Method).
 			Str("url", c.Request.URL.String()).
 			Str("path", c.Request.URL.Path).
 			Int("responseStatus", c.Writer.Status()).
-			Dur("responseInMS", latency).
+			Dur("responseInMS", end.Sub(start)).
 			Interface("reqHeaders", c.Request.Header).
 			Send()
 	}

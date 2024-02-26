@@ -25,7 +25,7 @@ var (
 const defaultMongoDBSidecar string = "/vault/secrets/mongodb.json"
 const mongoAtlasIdentifier string = "mongodb.net"
 
-func MongoConnectionUrl(mc MongoDBCredentials) string {
+func MongoConnectionURL(mc MongoDBCredentials) string {
 	if len(mc.Hostname) == 0 {
 		return ""
 	}
@@ -54,17 +54,17 @@ func MongoConnectionUrl(mc MongoDBCredentials) string {
 	if len(mc.Port) > 0 && !isMultiHost {
 		host += ":" + mc.Port
 	}
-	finalUrl := protocol + "://" + authMechanism + host
+	finalURL := protocol + "://" + authMechanism + host
 
 	connParamsStr := connParams.Encode()
 	if len(connParamsStr) > 0 {
-		finalUrl += "/?" + connParamsStr
+		finalURL += "/?" + connParamsStr
 	}
 
-	return finalUrl
+	return finalURL
 }
 
-func MaskedMongoConnectionUrl(mc MongoDBCredentials) string {
+func MaskedMongoConnectionURL(mc MongoDBCredentials) string {
 	if len(mc.User) > 0 {
 		mc.User = "#####"
 	}
@@ -73,7 +73,7 @@ func MaskedMongoConnectionUrl(mc MongoDBCredentials) string {
 		mc.Password = "#####"
 	}
 
-	return MongoConnectionUrl(mc)
+	return MongoConnectionURL(mc)
 }
 
 func MongoDBCredentialFromSideCar(sideCarFile string) (MongoDBCredentials, error) {

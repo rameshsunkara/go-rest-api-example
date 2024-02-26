@@ -128,7 +128,7 @@ func TestGetAllSuccess(t *testing.T) {
 func TestGetByIdSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
-	result, _ := dSvc.GetById(context.TODO(), orderId.Hex())
+	result, _ := dSvc.GetByID(context.TODO(), orderId.Hex())
 	order := result.(*types.Order)
 	assert.NotNil(t, result)
 	assert.EqualValues(t, orderId, order.ID)
@@ -138,7 +138,7 @@ func TestGetByIdSuccess_NoData(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
 	const id = "000000000000000000000000"
-	result, err := dSvc.GetById(context.TODO(), id)
+	result, err := dSvc.GetByID(context.TODO(), id)
 	assert.Nil(t, result)
 	assert.Nil(t, err)
 }
@@ -146,7 +146,7 @@ func TestGetByIdSuccess_NoData(t *testing.T) {
 func TestGetById_InvalidId(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.GetById(context.TODO(), "i-am-an-invalid-id")
+	result, err := dSvc.GetByID(context.TODO(), "i-am-an-invalid-id")
 	assert.Nil(t, result)
 	assert.Error(t, err)
 }
@@ -154,7 +154,7 @@ func TestGetById_InvalidId(t *testing.T) {
 func TestDeleteByIdSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.DeleteById(context.TODO(), orderId.Hex())
+	result, err := dSvc.DeleteByID(context.TODO(), orderId.Hex())
 	assert.Nil(t, err)
 	assert.EqualValues(t, 1, result)
 }
@@ -163,7 +163,7 @@ func TestDeleteByIdSuccess_NoData(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
 	const id = "000000000000000000000000"
-	result, err := dSvc.DeleteById(context.TODO(), id)
+	result, err := dSvc.DeleteByID(context.TODO(), id)
 	assert.Nil(t, err)
 	assert.EqualValues(t, 0, result)
 }
@@ -171,7 +171,7 @@ func TestDeleteByIdSuccess_NoData(t *testing.T) {
 func TestDeleteById_InvalidId(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.DeleteById(context.TODO(), "i-am-an-invalid-id")
+	result, err := dSvc.DeleteByID(context.TODO(), "i-am-an-invalid-id")
 	assert.EqualValues(t, 0, result)
 	assert.Error(t, err)
 }

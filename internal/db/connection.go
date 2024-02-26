@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	ErrInvalidConnUrl      = errors.New("failed to connect to DB, as the connection string is invalid")
+	ErrInvalidConnURL      = errors.New("failed to connect to DB, as the connection string is invalid")
 	ErrConnectionEstablish = errors.New("failed to establish connection to DB")
 	ErrClientInit          = errors.New("failed to initialize db client")
 	ErrConnectionLeak = errors.New("unable to disconnect from db, potential connection leak")
@@ -43,7 +43,7 @@ type ConnectionOpts struct {
 	Database string
 }
 
-// ConnectionManager - Manages the connection to the underlying database
+// ConnectionManager - Manages the connection to the underlying database.
 type ConnectionManager struct {
 	connectionURL string
 	client   *mongo.Client
@@ -52,11 +52,11 @@ type ConnectionManager struct {
 	logger *zerolog.Logger
 }
 
-// NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations
+// NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
 func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts) (*ConnectionManager, error) {
-	connURL := MongoConnectionUrl(mc)
+	connURL := MongoConnectionURL(mc)
 	if len(connURL) == 0 {
-		return nil, ErrInvalidConnUrl
+		return nil, ErrInvalidConnURL
 	}
 	connMgr := &ConnectionManager{
 		credentials: mc,
@@ -64,18 +64,19 @@ func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts) (*ConnectionMa
 		connectionURL: connURL,
 	}
 	connOpts := fillConnectionOpts(opts)
-	if c, err := connMgr.newClient(connOpts); err != nil {
-		return nil, err
-	} else {
+	var err error
+	var c *mongo.Client
+	if c, err = connMgr.newClient(connOpts); err == nil {
 		db := c.Database(opts.Database)
 		connMgr.database = db
 		connMgr.client = c
 		// Verify connection
-		if err := connMgr.Ping(); err != nil {
+		if pErr := connMgr.Ping(); pErr != nil {
 			return nil, ErrConnectionEstablish
 		}
+		return connMgr, nil
 	}
-	return connMgr, nil
+	return nil, err
 }
 
 func fillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
@@ -85,18 +86,17 @@ func fillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
 			ConnectionTimeout: DefaultConnTimeout,
 			Database:          DefaultDatabase,
 		}
-	} else {
-		if opts.ConnectionTimeout == 0 {
-			opts.ConnectionTimeout = DefaultConnTimeout
-		}
-		if opts.Database == "" {
-			opts.Database = DefaultDatabase
-		}
-		return opts
 	}
+	if opts.ConnectionTimeout == 0 {
+		opts.ConnectionTimeout = DefaultConnTimeout
+	}
+	if opts.Database == "" {
+		opts.Database = DefaultDatabase
+	}
+	return opts
 }
 
-// newClient - creates a new Mongo Client to connect DB
+// newClient - creates a new Mongo Client to connect DB.
 func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, error) {
 	var cmdMonitor *event.CommandMonitor
 	if connOpts.PrintQueries {
@@ -118,12 +118,12 @@ func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, 
 	return client, nil
 }
 
-// Database - Returns configured database instance
+// Database - Returns configured database instance.
 func (c *ConnectionManager) Database() MongoDatabase {
 	return c.database
 }
 
-// Ping - Validates application's connectivity to the underlying database by pinging
+// Ping - Validates application's connectivity to the underlying database by pinging.
 func (c *ConnectionManager) Ping() error {
 	if err := c.client.Ping(context.TODO(), readpref.Primary()); err != nil {
 		c.logger.Err(err).Msg("failed to ping DB")
@@ -132,7 +132,7 @@ func (c *ConnectionManager) Ping() error {
 	return nil
 }
 
-// Disconnect - Close connection to Database
+// Disconnect - Close connection to Database.
 func (c *ConnectionManager) Disconnect() error {
 	if err := c.client.Disconnect(context.Background()); err != nil {
 		c.logger.Err(err).Msg("failed to disconnect from DB")

@@ -17,7 +17,7 @@ const (
 	defaultPort = "8080"
 )
 
-// Passed while building from  make file
+// Passed while building from  make file.
 var version string
 
 func main() {
@@ -54,9 +54,9 @@ func main() {
 		zLogger.Fatal().Err(err).Msg("unable to initialize DB connection")
 	}
 	sigHandler.OnSignal(func() {
-		err := connMgr.Disconnect()
-		if err != nil {
-			zLogger.Err(err).Msg("unable to disconnect from DB, potential connection leak")
+		dErr := connMgr.Disconnect()
+		if dErr != nil {
+			zLogger.Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
 			return
 		}
 	})

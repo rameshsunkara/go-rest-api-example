@@ -37,9 +37,9 @@ const RequestIdentifier = "X-Request-ID"
 
 func ReqLogger(c *gin.Context) (zerolog.Logger, string) {
 	reqContext := c.Request.Context()
-	if rId := reqContext.Value(RequestIdentifier); rId != nil {
-		reqId := rId.(string)
-		return logger.With().Str(RequestIdentifier, reqId).Logger(), reqId
+	if rID := reqContext.Value(RequestIdentifier); rID != nil {
+		reqID := rID.(string)
+		return logger.With().Str(RequestIdentifier, reqID).Logger(), reqID
 	}
 	return logger, ""
 }

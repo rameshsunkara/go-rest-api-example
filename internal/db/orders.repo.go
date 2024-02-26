@@ -26,20 +26,20 @@ var (
 	ErrUnexpectedUpdateOrder = errors.New("unexpected error occurred while updating order")
 	ErrPOIDNotFound = errors.New("purchase order doesn't exist with given id")
 	ErrFailedToCreateOrder  = errors.New("failed to create order")
-	ErrInvalidPOIDDelete = errors.New("invalid order id")
-	ErrorUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
+	ErrInvalidPOIDDelete     = errors.New("invalid order id")
+	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
 )
 
-// OrdersDataService  - Added for tests/mock
+// OrdersDataService  - Added for tests/mock.
 type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *types.Order) (string, error)
 	Update(ctx context.Context, purchaseOrder *types.Order) error
 	GetAll(ctx context.Context) (*[]types.Order, error)
-	GetById(ctx context.Context, id string) (*types.Order, error)
-	DeleteById(ctx context.Context, id string) (int64, error)
+	GetByID(ctx context.Context, id string) (*types.Order, error)
+	DeleteByID(ctx context.Context, id string) (int64, error)
 }
 
-// OrdersRepo - Implements OrdersDataService
+// OrdersRepo - Implements OrdersDataService.
 type OrdersRepo struct {
 	collection *mongo.Collection
 }
@@ -119,7 +119,7 @@ func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error
 	return &results, nil
 }
 
-func (ordDataSvc *OrdersRepo) GetById(ctx context.Context, id string) (*types.Order, error) {
+func (ordDataSvc *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Order, error) {
 	if err := validate(ordDataSvc.collection); err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func (ordDataSvc *OrdersRepo) GetById(ctx context.Context, id string) (*types.Or
 	return &result, nil
 }
 
-func (ordDataSvc *OrdersRepo) DeleteById(ctx context.Context, id string) (int64, error) {
+func (ordDataSvc *OrdersRepo) DeleteByID(ctx context.Context, id string) (int64, error) {
 	if err := validate(ordDataSvc.collection); err != nil {
 		return 0, err
 	}
@@ -156,7 +156,7 @@ func (ordDataSvc *OrdersRepo) DeleteById(ctx context.Context, id string) (int64,
 
 	res, err := ordDataSvc.collection.DeleteOne(ctx, filter)
 	if err != nil {
-		return 0, ErrorUnexpectedDeleteOrder
+		return 0, ErrUnexpectedDeleteOrder
 	}
 
 	if res.DeletedCount == 0 {

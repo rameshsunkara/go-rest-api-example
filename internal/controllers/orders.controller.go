@@ -59,7 +59,7 @@ func (oHandler *OrdersController) GetAll(c *gin.Context) {
 func (oHandler *OrdersController) GetById(c *gin.Context) {
 	id := c.Param(OrderIdPath)
 	if id != "" {
-		order, err := oHandler.dataSvc.GetById(c, id)
+		order, err := oHandler.dataSvc.GetByID(c, id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error to retrieve order details", "error": err.Error()})
 			c.Abort()
@@ -75,7 +75,7 @@ func (oHandler *OrdersController) GetById(c *gin.Context) {
 func (oHandler *OrdersController) DeleteById(c *gin.Context) {
 	id := c.Param(OrderIdPath)
 	if id != "" {
-		count, err := oHandler.dataSvc.DeleteById(c, id)
+		count, err := oHandler.dataSvc.DeleteByID(c, id)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error to retrieve order details", "error": err.Error()})
 			c.Abort()

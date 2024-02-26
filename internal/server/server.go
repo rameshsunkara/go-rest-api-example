@@ -27,7 +27,7 @@ func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.M
 	})
 }
 
-func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) (router *gin.Engine) {
+func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) *gin.Engine {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcInfo.Environment) {
 		ginMode = gin.DebugMode
@@ -38,9 +38,9 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) (router *gin.En
 
 	// Middleware
 	gin.DefaultWriter = io.Discard
-	router = gin.Default()
+	router := gin.Default()
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
-	router.Use(middleware.ReqIdMiddleware())
+	router.Use(middleware.ReqIDMiddleware())
 	router.Use(middleware.ResponseHeadersMiddleware())
 	router.Use(middleware.RequestLogMiddleware())
 
@@ -78,6 +78,5 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager) (router *gin.En
 			ordersGroup.DELETE("/:id", orders.DeleteById) // api/v1/orders/:id
 		}
 	}
-
-	return
+	return router
 }
