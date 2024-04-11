@@ -21,8 +21,5 @@ type ServiceEnv struct {
 }
 
 func (s ServiceInfo) MarshalZerologObject(e *zerolog.Event) {
-	e.Str("name", s.Name).
-		Str("environment", s.Environment).
-		Str("started", s.UpTime).
-		Str("version", s.Version)
+
 }

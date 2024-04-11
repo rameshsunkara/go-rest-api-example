@@ -25,7 +25,7 @@ var (
 const defaultMongoDBSidecar string = "/vault/secrets/mongodb.json"
 const mongoAtlasIdentifier string = "mongodb.net"
 
-func MongoConnectionURL(mc MongoDBCredentials) string {
+func MongoConnectionURL(mc *MongoDBCredentials) string {
 	if len(mc.Hostname) == 0 {
 		return ""
 	}
@@ -64,7 +64,7 @@ func MongoConnectionURL(mc MongoDBCredentials) string {
 	return finalURL
 }
 
-func MaskedMongoConnectionURL(mc MongoDBCredentials) string {
+func MaskedMongoConnectionURL(mc *MongoDBCredentials) string {
 	if len(mc.User) > 0 {
 		mc.User = "#####"
 	}
@@ -76,19 +76,19 @@ func MaskedMongoConnectionURL(mc MongoDBCredentials) string {
 	return MongoConnectionURL(mc)
 }
 
-func MongoDBCredentialFromSideCar(sideCarFile string) (MongoDBCredentials, error) {
+func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoDBCredentials, error) {
 	if sideCarFile == "" {
 		sideCarFile = defaultMongoDBSidecar
 	}
 	jsonFile, err := os.Open(sideCarFile)
 	if err != nil {
-		return MongoDBCredentials{}, ErrSideCarFileRead
+		return nil, ErrSideCarFileRead
 	}
 	byteValue, _ := io.ReadAll(jsonFile)
 	var mongoDBCredential MongoDBCredentials
 	err = json.Unmarshal(byteValue, &mongoDBCredential)
 	if err != nil {
-		return mongoDBCredential, ErrSideCarFileFormat
+		return nil, ErrSideCarFileFormat
 	}
-	return mongoDBCredential, nil
+	return &mongoDBCredential, nil
 }

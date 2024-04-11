@@ -31,18 +31,16 @@ type StatusController struct {
 	dbMgr   db.MongoManager
 }
 
-func NewStatusController(s types.ServiceInfo, m db.MongoManager) *StatusController {
+func NewStatusController(m db.MongoManager) *StatusController {
 	return &StatusController{
-		svcInfo: s,
 		dbMgr:   m,
 	}
 }
 
 // CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability
 func (s *StatusController) CheckStatus(c *gin.Context) {
-	//reqLogger, _ := logger.ReqLogger(c)
+	//reqLogger, _ := log.ReqLogger(c)
 
-	log.Debug().Msg("in CheckStatus")
 	var stat ServiceStatus
 	var code int
 
@@ -55,14 +53,6 @@ func (s *StatusController) CheckStatus(c *gin.Context) {
 		code = http.StatusFailedDependency
 	}
 
-	status := StatusResponse{
-		Status:      stat,
-		ServiceName: s.svcInfo.Name,
-		UpTime:      s.svcInfo.UpTime,
-		Environment: s.svcInfo.Environment,
-		Version:     s.svcInfo.Version,
-	}
-
 	// send response
-	c.JSON(code, status)
+	c.JSON(code, stat)
 }

@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/gin-contrib/gzip"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 
 	// TODO: "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/gin-contrib/pprof"
@@ -19,9 +19,9 @@ import (
 
 var RunOnce sync.Once
 
-func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *logger.Logger) {
+func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) {
 	RunOnce.Do(func() {
-		r := WebRouter(svcInfo, dbMgr, lgr)
+		r := WebRouter(svcEnv, dbMgr, lgr)
 		err := r.Run(":" + svcEnv.Port)
 		if err != nil {
 			panic(err)
@@ -29,9 +29,9 @@ func StartService(svcInfo types.ServiceInfo, svcEnv types.ServiceEnv, dbMgr db.M
 	})
 }
 
-func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager, lgr *logger.Logger) *gin.Engine {
+func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) *gin.Engine {
 	ginMode := gin.ReleaseMode
-	if util.IsDevMode(svcInfo.Environment) {
+	if util.IsDevMode(svcEnv.Name) {
 		ginMode = gin.DebugMode
 		gin.ForceConsoleColor()
 	}
@@ -54,7 +54,7 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager, lgr *logger.Log
 	adminGroup.Use()
 	pprof.RouteRegister(adminGroup, "pprof")
 	// TODO: router.GET("/metrics", gin.WrapH(promhttp.Handler())) // /metrics
-	status := handlers.NewStatusController(svcInfo, dbMgr)
+	status := handlers.NewStatusController(dbMgr)
 	router.GET("/status", status.CheckStatus) // /status
 
 	// Dependencies for handlers
@@ -62,7 +62,7 @@ func WebRouter(svcInfo types.ServiceInfo, dbMgr db.MongoManager, lgr *logger.Log
 	orders := db.NewOrdersRepo(d)
 
 	// Routes - Seed DB
-	if util.IsDevMode(svcInfo.Environment) {
+	if util.IsDevMode(svcEnv.Name) {
 		seed := handlers.NewSeedController(orders)
 		router.POST("/seedDB", seed.SeedDB) // /seedDB
 	}

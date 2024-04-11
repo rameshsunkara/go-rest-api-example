@@ -7,7 +7,7 @@ import (
 
 	"github.com/rameshsunkara/deferrun"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
@@ -24,49 +24,47 @@ func main() {
 	upTime := time.Now().UTC().Format(time.RFC3339)
 	sigHandler := deferrun.NewSignalHandler()
 
-	// read all environmental configurations, panics if something critical is missing
+	// setup : read environmental configurations
 	svcEnv := MustEnvConfig()
 
-	// service details that can be shared internally for debugging
-	svcInfo := types.ServiceInfo{
-		Name:        serviceName,
-		UpTime:      upTime,
-		Environment: svcEnv.Name,
-		Version:     version,
-	}
-
-	// setup : logger
-	lgr := logger.New(svcEnv.Name)
-
-	lgr.ZLog.Info().Object("serviceDetails", svcInfo).Msg("starting")
+	// setup : service logger
+	logger := log.New(svcEnv.Name)
 
 	// setup : database connection
 	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
 	if err != nil {
-		lgr.ZLog.Fatal().Err(err).Msg("failed to fetch DB credentials")
+		logger.ZLogger.Fatal().Err(err).Msg("failed to fetch DB credentials")
 	}
-	opts := &db.ConnectionOpts{
+	connOpts := &db.ConnectionOpts{
 		Database:     svcEnv.DBName,
 		PrintQueries: svcEnv.PrintQueries,
 	}
-	connMgr, err := db.NewMongoManager(dbCredentials, opts, lgr.ZLog)
+	dbConnMgr, err := db.NewMongoManager(dbCredentials, connOpts, logger.ZLogger)
 	if err != nil {
-		lgr.ZLog.Fatal().Err(err).Msg("unable to initialize DB connection")
+		logger.ZLogger.Fatal().Err(err).Msg("unable to initialize DB connection")
 	}
 	sigHandler.OnSignal(func() {
-		dErr := connMgr.Disconnect()
+		dErr := dbConnMgr.Disconnect()
 		if dErr != nil {
-			lgr.ZLog.Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
+			logger.ZLogger.Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
 			return
 		}
 	})
 
-	// setup : start service - blocking call
-	server.StartService(svcInfo, svcEnv, connMgr, lgr)
+	logger.ZLogger.Info().
+		Str("name", serviceName).
+		Str("environment", svcEnv.Name).
+		Str("started", upTime).
+		Str("version", version).
+		Msg("service details, starting the service")
 
-	lgr.ZLog.Fatal().Object("serviceDetails", svcInfo).Msg("server exited")
+	// setup : start service
+	server.StartService(svcEnv, dbConnMgr, logger)
+
+	logger.ZLogger.Fatal().Msg("service stopped")
 }
 
+// MustEnvConfig reads all the environmental configurations and panics if something critical is missing.
 func MustEnvConfig() types.ServiceEnv {
 	envName := os.Getenv("environment")
 	if envName == "" {

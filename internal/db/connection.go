@@ -22,8 +22,8 @@ var (
 )
 
 const (
-	DefaultConnTimeout = 10 * time.Second
-	DefaultDatabase    = "ecommerce"
+	defaultConnTimeout = 10 * time.Second
+	defaultDatabase    = "ecommerce"
 )
 
 type MongoDatabase interface {
@@ -47,12 +47,12 @@ type ConnectionManager struct {
 	connectionURL string
 	client        *mongo.Client
 	database      *mongo.Database
-	credentials   MongoDBCredentials
+	credentials   *MongoDBCredentials
 	logger        zerolog.Logger
 }
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
-func NewMongoManager(mc MongoDBCredentials, opts *ConnectionOpts, log zerolog.Logger) (*ConnectionManager, error) {
+func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, log zerolog.Logger) (*ConnectionManager, error) {
 	connURL := MongoConnectionURL(mc)
 	if len(connURL) == 0 {
 		return nil, ErrInvalidConnURL
@@ -82,15 +82,15 @@ func fillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
 	if opts == nil {
 		return &ConnectionOpts{
 			PrintQueries:      false,
-			ConnectionTimeout: DefaultConnTimeout,
-			Database:          DefaultDatabase,
+			ConnectionTimeout: defaultConnTimeout,
+			Database:          defaultDatabase,
 		}
 	}
 	if opts.ConnectionTimeout == 0 {
-		opts.ConnectionTimeout = DefaultConnTimeout
+		opts.ConnectionTimeout = defaultConnTimeout
 	}
 	if opts.Database == "" {
-		opts.Database = DefaultDatabase
+		opts.Database = defaultDatabase
 	}
 	return opts
 }

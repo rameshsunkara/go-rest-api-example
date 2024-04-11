@@ -87,6 +87,9 @@ coverage-html:
 lint:
 	golangci-lint run
 
+lint-fix:
+	golangci-lint run --fix
+
 .PHONY: help
 help: Makefile
 	@echo
