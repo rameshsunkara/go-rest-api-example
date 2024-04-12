@@ -3,7 +3,6 @@ package server_test
 import (
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
@@ -13,16 +12,14 @@ import (
 )
 
 var (
-	svcInfo = &types.ServiceInfo{
-		Name:        "test-api-service",
-		Version:     "rams-fav",
-		UpTime:      time.Now(),
-		Environment: "test",
+	svcInfo = types.ServiceEnv{
+		Name:        "test",
+		Port:        "8080",
 	}
 )
 
 func TestListOfRoutes(t *testing.T) {
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{})
+	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, nil)
 	list := router.Routes()
 	mode := gin.Mode()
 
@@ -66,8 +63,8 @@ func TestListOfRoutes(t *testing.T) {
 }
 
 func TestModeSpecificRoutes(t *testing.T) {
-	svcInfo.Environment = "dev"
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{})
+	svcInfo.Name = "dev"
+	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, nil)
 	list := router.Routes()
 	mode := gin.Mode()
 

@@ -7,9 +7,9 @@ import (
 	"github.com/gin-contrib/gzip"
 	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 
-	// TODO: "github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
@@ -17,10 +17,10 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
-var RunOnce sync.Once
+var _runOnce sync.Once
 
 func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) {
-	RunOnce.Do(func() {
+	_runOnce.Do(func() {
 		r := WebRouter(svcEnv, dbMgr, lgr)
 		err := r.Run(":" + svcEnv.Port)
 		if err != nil {
@@ -51,9 +51,9 @@ func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) 
 	// Routes - Status Check
 
 	adminGroup := router.Group("/internal")
-	adminGroup.Use()
+	adminGroup.Use(middleware.AuthMiddleware())
 	pprof.RouteRegister(adminGroup, "pprof")
-	// TODO: router.GET("/metrics", gin.WrapH(promhttp.Handler())) // /metrics
+	router.GET("/metrics", gin.WrapH(promhttp.Handler())) // /metrics
 	status := handlers.NewStatusController(dbMgr)
 	router.GET("/status", status.CheckStatus) // /status
 
@@ -68,16 +68,17 @@ func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) 
 	}
 
 	// Routes - Orders
-	v1 := router.Group("/api/v1")
+	extApiGroup := router.Group("/api/extApiGroup")
+	extApiGroup.Use(middleware.AuthMiddleware())
 	{
-		ordersGroup := v1.Group("orders")
+		ordersGroup := extApiGroup.Group("orders")
 		{
 			orders := handlers.NewOrdersController(orders)
-			ordersGroup.GET("", orders.GetAll)            // api/v1/orders
-			ordersGroup.GET("/:id", orders.GetById)       // api/v1/orders/:id
-			ordersGroup.POST("", orders.Post)             // api/v1/orders
-			ordersGroup.PUT("", orders.Post)              // api/v1/orders
-			ordersGroup.DELETE("/:id", orders.DeleteById) // api/v1/orders/:id
+			ordersGroup.GET("", orders.GetAll)            // api/extApiGroup/orders
+			ordersGroup.GET("/:id", orders.GetById)       // api/extApiGroup/orders/:id
+			ordersGroup.POST("", orders.Post)             // api/extApiGroup/orders
+			ordersGroup.PUT("", orders.Post)              // api/extApiGroup/orders
+			ordersGroup.DELETE("/:id", orders.DeleteById) // api/extApiGroup/orders/:id
 		}
 	}
 	return router
