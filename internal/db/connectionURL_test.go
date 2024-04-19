@@ -46,18 +46,19 @@ func TestMongoDBCredentialFromSideCar(t *testing.T) {
 		t.Setenv("MongoVaultSideCar", tc.Input)
 		result, err := db.MongoDBCredentialFromSideCar(os.Getenv("MongoVaultSideCar"))
 		if !assert.EqualValues(t, tc.ExpectedOut, result) || !errors.Is(err, tc.ExpectedErr) {
-			t.Errorf("MongoDBCredentialFromSideCar: Test Case: %d:%s failed: expected %v, %v; got %v, %v", i+1, tc.Description, tc.ExpectedOut, tc.ExpectedErr, result, err)
+			t.Errorf("MongoDBCredentialFromSideCar: Test Case: %d:%s failed: expected %v, %v; got %v, %v",
+				i+1, tc.Description, tc.ExpectedOut, tc.ExpectedErr, result, err)
 		}
 	}
 }
 
 func TestMongoConnectionUrl(t *testing.T) {
-	type MongoConnectionUrlTestCase struct {
+	type connectionURLTestCase struct {
 		Description string
 		Input       *db.MongoDBCredentials
 		ExpectedOut string
 	}
-	var testCases = []MongoConnectionUrlTestCase{
+	var testCases = []connectionURLTestCase{
 		{
 			Description: "ensure Connection Url is empty",
 			Input:       &db.MongoDBCredentials{},
@@ -70,7 +71,8 @@ func TestMongoConnectionUrl(t *testing.T) {
 				User:     "fuzzy-yogi",
 				Password: "howsecureisthis",
 			},
-			ExpectedOut: "mongodb+srv://fuzzy-yogi:howsecureisthis@mongodb.net/?readPreference=nearest&retryWrites=true&w=majority",
+			ExpectedOut: "mongodb+srv://fuzzy-yogi:howsecureisthis@mongodb.net/?" +
+				"readPreference=nearest&retryWrites=true&w=majority",
 		},
 		{
 			Description: "connection url should have username and password in url",
@@ -132,18 +134,19 @@ func TestMongoConnectionUrl(t *testing.T) {
 	for i, tc := range testCases {
 		result := db.MongoConnectionURL(tc.Input)
 		if result != tc.ExpectedOut {
-			t.Errorf("TestMongoConnectionUrl test case %d:%s failed: expected %s; got %s", i, tc.Description, tc.ExpectedOut, result)
+			t.Errorf("TestMongoConnectionUrl test case %d:%s failed: expected %s; got %s",
+				i, tc.Description, tc.ExpectedOut, result)
 		}
 	}
 }
 
 func TestMaskedMongoConnectionUrl(t *testing.T) {
-	type MongoConnectionUrlTestCase struct {
+	type connectionURLTestCase struct {
 		Description string
 		Input       *db.MongoDBCredentials
 		ExpectedOut string
 	}
-	var testCases = []MongoConnectionUrlTestCase{
+	var testCases = []connectionURLTestCase{
 		{
 			Description: "ensure masking doesnt fail for empty credentials",
 			Input:       &db.MongoDBCredentials{},
@@ -163,7 +166,8 @@ func TestMaskedMongoConnectionUrl(t *testing.T) {
 	for i, tc := range testCases {
 		result := db.MaskedMongoConnectionURL(tc.Input)
 		if result != tc.ExpectedOut {
-			t.Errorf("TestMaskedMongoConnectionUrl test case %d:%s failed: expected %s; got %s", i, tc.Description, tc.ExpectedOut, result)
+			t.Errorf("TestMaskedMongoConnectionUrl test case %d:%s failed: expected %s; got %s",
+				i, tc.Description, tc.ExpectedOut, result)
 		}
 	}
 }

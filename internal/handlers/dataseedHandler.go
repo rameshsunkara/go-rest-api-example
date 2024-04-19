@@ -62,5 +62,4 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 		"message": "successfully inserted fake data",
 		"Count":   seedRecordCount,
 	})
-	return
 }

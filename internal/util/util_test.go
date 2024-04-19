@@ -56,7 +56,7 @@ func TestIsDevMode(t *testing.T) {
 
 func TestRandomPrice(t *testing.T) {
 	price := util.RandomPrice()
-	if price < 0 || price > util.MaxPrice {
+	if price > util.MaxPrice {
 		t.Errorf("Price is out of range: %v", price)
 	}
 }

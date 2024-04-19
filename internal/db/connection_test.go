@@ -2,7 +2,6 @@ package db_test
 
 import (
 	"context"
-	"os"
 	"runtime"
 	"strings"
 	"testing"
@@ -14,6 +13,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rameshsunkara/strikememongo"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -26,14 +26,14 @@ const AppleChip = "arm64"
 func mongoOptions() *strikememongo.Options {
 	mongoVersion := "6.0.5"
 
-	downloadUrl := ""
+	downloadURL := ""
 	if runtime.GOARCH == AppleChip {
-		downloadUrl = "https://fastdl.mongodb.org/osx/mongodb-macos-arm64-6.0.5.tgz"
+		downloadURL = "https://fastdl.mongodb.org/osx/mongodb-macos-arm64-6.0.5.tgz"
 	}
 
 	opts := &strikememongo.Options{
 		MongoVersion: mongoVersion,
-		DownloadURL:  downloadUrl,
+		DownloadURL:  downloadURL,
 	}
 	return opts
 }
@@ -53,15 +53,14 @@ func TestMain(m *testing.M) {
 		logger.Fatal().Err(dErr)
 	}
 	defer func(d *db.ConnectionManager) {
-		err := d.Disconnect()
-		if err != nil {
-			logger.Error().Err(err).Msg("unable to disconnect from db")
+		discErr := d.Disconnect()
+		if discErr != nil {
+			logger.Error().Err(discErr).Msg("unable to disconnect from db")
 		}
 	}(d)
 	testDBMgr = d
 	insertTestData(logger)
-
-	os.Exit(m.Run())
+	m.Run()
 }
 
 func insertTestData(logger *log.AppLogger) {
@@ -101,7 +100,7 @@ func TestDatabase(t *testing.T) {
 
 func TestPing(t *testing.T) {
 	err := testDBMgr.Ping()
-	assert.Nil(t, err)
+	require.NoError(t, err)
 }
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
@@ -109,7 +108,7 @@ func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	logger := log.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)
 	assert.Nil(t, d)
-	assert.Error(t, dErr)
+	require.Error(t, dErr)
 	assert.EqualValues(t, db.ErrInvalidConnURL, dErr)
 }
 
@@ -120,7 +119,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	logger := log.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)
 	assert.Nil(t, d)
-	assert.Error(t, dErr)
+	require.Error(t, dErr)
 	assert.EqualValues(t, db.ErrConnectionEstablish, dErr)
 }
 
