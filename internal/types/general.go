@@ -1,14 +1,10 @@
 package types
 
-import (
-	"github.com/rs/zerolog"
-)
-
 type ServiceInfo struct {
-	Name        string
-	UpTime      string
-	Environment string
-	Version     string
+	Name        string // name of the service
+	UpTime      string // time when the service started
+	Environment string // environment details where the service is running
+	Version     string // version of the service
 }
 
 type ServiceEnv struct {
@@ -18,8 +14,4 @@ type ServiceEnv struct {
 	PrintQueries      bool   // should we print the DB queries that are triggered through this service, defaults to false
 	MongoVaultSideCar string // path to find the mongo sidecar file
 	DisableAuth       bool   // disables authentication , added to make local development/testing easy
-}
-
-func (s ServiceInfo) MarshalZerologObject(e *zerolog.Event) {
-
 }

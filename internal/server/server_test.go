@@ -6,20 +6,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
+	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	svcInfo = types.ServiceEnv{
+func TestListOfRoutes(t *testing.T) {
+	svcInfo := types.ServiceEnv{
 		Name:        "test",
 		Port:        "8080",
 	}
-)
-
-func TestListOfRoutes(t *testing.T) {
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, nil)
+	logger := log.New("server_test")
+	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()
 
@@ -37,34 +36,37 @@ func TestListOfRoutes(t *testing.T) {
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodGet,
-		Path:   "/api/v1/orders",
+		Path:   "/ecommerce/v1/orders",
 	})
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodGet,
-		Path:   "/api/v1/orders/:id",
+		Path:   "/ecommerce/v1/orders/:id",
 	})
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodPost,
-		Path:   "/api/v1/orders",
+		Path:   "/ecommerce/v1/orders",
 	})
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodPut,
-		Path:   "/api/v1/orders",
+		Path:   "/ecommerce/v1/orders",
 	})
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodDelete,
-		Path:   "/api/v1/orders/:id",
+		Path:   "/ecommerce/v1/orders/:id",
 	})
-
 }
 
 func TestModeSpecificRoutes(t *testing.T) {
-	svcInfo.Name = "dev"
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, nil)
+	svcInfo := types.ServiceEnv{
+		Name:        "dev",
+		Port:        "8080",
+	}
+	logger := log.New("server_test")
+	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()
 
@@ -72,7 +74,7 @@ func TestModeSpecificRoutes(t *testing.T) {
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodPost,
-		Path:   "/seedDB",
+		Path:   "/internal/seed-local-db",
 	})
 }
 

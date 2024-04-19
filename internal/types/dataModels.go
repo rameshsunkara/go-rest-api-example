@@ -5,7 +5,7 @@ import (
 )
 
 type Order struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"order_id"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"orderId"`
 	CreatedAt string             `bson:"createdAt,omitempty" json:"createdAt"`
 	UpdatedAt string             `bson:"updatedAt,omitempty" json:"updatedAt"`
 	Products  []Product          `bson:"products,omitempty" json:"products"`

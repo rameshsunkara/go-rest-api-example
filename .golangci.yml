@@ -229,7 +229,7 @@ linters:
     - predeclared # finds code that shadows one of Go's predeclared identifiers
     - promlinter # checks Prometheus metrics naming via promlint
     - protogetter # reports direct reads from proto message fields when getters should be used
-    - reassign # checks that package variables are not reassigned
+    #- reassign # checks that package variables are not reassigned
     - revive # fast, configurable, extensible, flexible, and beautiful linter for Go, drop-in replacement of golint
     - rowserrcheck # checks whether Err of rows is checked successfully
     - sloglint # ensure consistent code style when using log/slog

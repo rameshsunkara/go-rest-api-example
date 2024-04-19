@@ -81,6 +81,7 @@ func MustEnvConfig() types.ServiceEnv {
 		panic("dbName should be defined in env configuration")
 	}
 
+	// printDBQueries is optional, default is false, when set to true, it will print all the queries to the console.
 	printDBQueries, err := strconv.ParseBool(os.Getenv("printDBQueries"))
 	if err != nil {
 		printDBQueries = false
@@ -91,6 +92,8 @@ func MustEnvConfig() types.ServiceEnv {
 		panic("mongo sidecar file path should be defined in env configuration")
 	}
 
+	// disableAuth is optional, default is false, when set to true, it will disable authentication.
+	// Added for development purpose, do not use in production.
 	disableAuth, authEnvErr := strconv.ParseBool(os.Getenv("disableAuth"))
 	if authEnvErr != nil {
 		// do not disable authentication by default, added this flexibility just for local development purpose
