@@ -67,7 +67,7 @@ func TestMain(m *testing.M) {
 func insertTestData(logger *log.AppLogger) {
 	database := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(database)
-	for i := 0; i < 500; i++ {
+	for i := 0; i < 100; i++ {
 		product := []types.Product{
 			{
 				Name:        faker.Name(),
@@ -102,4 +102,78 @@ func TestDatabase(t *testing.T) {
 func TestPing(t *testing.T) {
 	err := testDBMgr.Ping()
 	assert.Nil(t, err)
+}
+
+func TestNewMongoManager_InvalidConnURL(t *testing.T) {
+	creds := &db.MongoDBCredentials{}
+	logger := log.Setup("test")
+	d, dErr := db.NewMongoManager(creds, nil, logger)
+	assert.Nil(t, d)
+	assert.Error(t, dErr)
+	assert.EqualValues(t, db.ErrInvalidConnURL, dErr)
+}
+
+func TestNewMongoManager_InvalidClient(t *testing.T) {
+	creds := &db.MongoDBCredentials{
+		Hostname: "non-existent-hostname",
+	}
+	logger := log.Setup("test")
+	d, dErr := db.NewMongoManager(creds, nil, logger)
+	assert.Nil(t, d)
+	assert.Error(t, dErr)
+	assert.EqualValues(t, db.ErrConnectionEstablish, dErr)
+}
+
+func TestFillConnectionOpts(t *testing.T) {
+	testCases := []struct {
+		description string
+		input       *db.ConnectionOpts
+		output      db.ConnectionOpts
+	}{
+		{
+			description: "expect connect time out and database set to default",
+			input: &db.ConnectionOpts{
+				PrintQueries: true,
+			},
+			output: db.ConnectionOpts{
+				Database:          db.DefDatabase,
+				ConnectionTimeout: db.DefConnectionTimeOut,
+				PrintQueries:      true,
+			},
+		},
+		{
+			description: "expect showQueries to be false",
+			input: &db.ConnectionOpts{
+				ConnectionTimeout: db.DefConnectionTimeOut,
+			},
+			output: db.ConnectionOpts{
+				Database:          db.DefDatabase,
+				ConnectionTimeout: db.DefConnectionTimeOut,
+				PrintQueries:      false,
+			},
+		},
+		{
+			description: "expect connect time out set to default and showQueries to be false",
+			input:       &db.ConnectionOpts{},
+			output: db.ConnectionOpts{
+				Database:          db.DefDatabase,
+				ConnectionTimeout: db.DefConnectionTimeOut,
+				PrintQueries:      false,
+			},
+		},
+		{
+			description: "expect connect time out set to default and showQueries to be false when input is nil",
+			input:       nil,
+			output: db.ConnectionOpts{
+				Database:          db.DefDatabase,
+				ConnectionTimeout: db.DefConnectionTimeOut,
+				PrintQueries:      false,
+			},
+		},
+	}
+
+	for i, tc := range testCases {
+		actual := db.FillConnectionOpts(tc.input)
+		assert.Equal(t, tc.output, *actual, "test case %d:%s failed", i, tc.description)
+	}
 }

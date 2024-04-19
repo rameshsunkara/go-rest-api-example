@@ -22,8 +22,8 @@ var (
 )
 
 const (
-	defaultConnTimeout = 10 * time.Second
-	defaultDatabase    = "ecommerce"
+	DefConnectionTimeOut = 10 * time.Second
+	DefDatabase          = "ecommerce"
 )
 
 type MongoDatabase interface {
@@ -63,7 +63,7 @@ func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *log.AppL
 		logger:        lgr,
 		connectionURL: connURL,
 	}
-	connOpts := fillConnectionOpts(opts)
+	connOpts := FillConnectionOpts(opts)
 	var err error
 	var c *mongo.Client
 	if c, err = connMgr.newClient(connOpts); err == nil {
@@ -79,19 +79,19 @@ func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *log.AppL
 	return nil, err
 }
 
-func fillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
+func FillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
 	if opts == nil {
 		return &ConnectionOpts{
 			PrintQueries:      false,
-			ConnectionTimeout: defaultConnTimeout,
-			Database:          defaultDatabase,
+			ConnectionTimeout: DefConnectionTimeOut,
+			Database:          DefDatabase,
 		}
 	}
 	if opts.ConnectionTimeout == 0 {
-		opts.ConnectionTimeout = defaultConnTimeout
+		opts.ConnectionTimeout = DefConnectionTimeOut
 	}
 	if opts.Database == "" {
-		opts.Database = defaultDatabase
+		opts.Database = DefDatabase
 	}
 	return opts
 }

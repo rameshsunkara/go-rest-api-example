@@ -22,7 +22,7 @@ var (
 	ErrSideCarFileRead   = errors.New("unable to read the mongo side car file")
 )
 
-const defaultMongoDBSidecar string = "/vault/secrets/mongodb.json"
+const DefaultMongoDBSidecar string = "/vault/secrets/mongodb.json"
 const mongoAtlasIdentifier string = "mongodb.net"
 
 func MongoConnectionURL(mc *MongoDBCredentials) string {
@@ -78,7 +78,7 @@ func MaskedMongoConnectionURL(mc *MongoDBCredentials) string {
 
 func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoDBCredentials, error) {
 	if sideCarFile == "" {
-		sideCarFile = defaultMongoDBSidecar
+		sideCarFile = DefaultMongoDBSidecar
 	}
 	jsonFile, err := os.Open(sideCarFile)
 	if err != nil {
