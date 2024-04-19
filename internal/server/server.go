@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/gin-contrib/gzip"
-	"github.com/rameshsunkara/go-rest-api-example/internal/log"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ import (
 
 var startOnce sync.Once
 
-func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogger) {
+func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppLogger) {
 	startOnce.Do(func() {
 		r := WebRouter(svcEnv, dbMgr, lgr)
 		err := r.Run(":" + svcEnv.Port)
@@ -29,7 +29,7 @@ func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLo
 	})
 }
 
-func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogger) *gin.Engine {
+func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppLogger) *gin.Engine {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcEnv.Name) {
 		ginMode = gin.DebugMode

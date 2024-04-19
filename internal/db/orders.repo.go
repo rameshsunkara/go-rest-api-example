@@ -4,10 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
-	"github.com/rs/zerolog/log"
-
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,6 +41,7 @@ type OrdersDataService interface {
 // OrdersRepo - Implements OrdersDataService.
 type OrdersRepo struct {
 	collection *mongo.Collection
+	logger     logger.AppLogger
 }
 
 func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
@@ -51,26 +51,25 @@ func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
 	return iDBSvc
 }
 
-func (ordDataSvc *OrdersRepo) Create(ctx context.Context, po *types.Order) (string, error) {
-	if err := validate(ordDataSvc.collection); err != nil {
+func (o *OrdersRepo) Create(ctx context.Context, po *types.Order) (string, error) {
+	if err := validate(o.collection); err != nil {
 		return "", err
 	}
 	if !po.ID.IsZero() {
 		return "", ErrInvalidPOIDCreate
 	}
-	po.UpdatedAt = util.CurrentISOTime()
 
-	result, err := ordDataSvc.collection.InsertOne(ctx, po)
+	result, err := o.collection.InsertOne(ctx, po)
 	if err != nil {
-		log.Err(err).Msg("error occurred while creating order")
+		o.logger.Error().Err(err).Msg("error occurred while creating order")
 		return "", ErrFailedToCreateOrder
 	}
-	log.Info().Msgf("created new order: %s", result.InsertedID.(primitive.ObjectID).Hex())
+	o.logger.Info().Str("order_id", result.InsertedID.(primitive.ObjectID).Hex()).Msg("created new order")
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (ordDataSvc *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
-	if err := validate(ordDataSvc.collection); err != nil {
+func (o *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
+	if err := validate(o.collection); err != nil {
 		return err
 	}
 
@@ -83,23 +82,23 @@ func (ordDataSvc *OrdersRepo) Update(ctx context.Context, po *types.Order) error
 
 	filter := bson.D{primitive.E{Key: "_id", Value: po.ID}}
 	update := bson.D{primitive.E{Key: "$set", Value: po}}
-	result, err := ordDataSvc.collection.UpdateOne(ctx, filter, update, nil)
+	result, err := o.collection.UpdateOne(ctx, filter, update, nil)
 
 	if err != nil {
-		log.Err(err).Msg("error occurred while updating order")
+		o.logger.Error().Err(err).Msg("error occurred while updating order")
 		return ErrUnexpectedUpdateOrder
 	}
 
 	if result.MatchedCount == 0 {
-		log.Info().Msg("order id given for updating the order is not found")
+		o.logger.Info().Msg("order id given for updating the order is not found")
 		return ErrPOIDNotFound
 	}
 
 	return nil
 }
 
-func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
-	if vErr := validate(ordDataSvc.collection); vErr != nil {
+func (o *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
+	if vErr := validate(o.collection); vErr != nil {
 		return nil, vErr
 	}
 
@@ -107,7 +106,7 @@ func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error
 	findOptions := options.Find()
 	findOptions.SetLimit(DefaultPageSize)
 
-	cursor, err := ordDataSvc.collection.Find(ctx, filter, findOptions)
+	cursor, err := o.collection.Find(ctx, filter, findOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -119,8 +118,8 @@ func (ordDataSvc *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error
 	return &results, nil
 }
 
-func (ordDataSvc *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Order, error) {
-	if err := validate(ordDataSvc.collection); err != nil {
+func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Order, error) {
+	if err := validate(o.collection); err != nil {
 		return nil, err
 	}
 
@@ -132,7 +131,7 @@ func (ordDataSvc *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Or
 	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
 
 	var result types.Order
-	err = ordDataSvc.collection.FindOne(ctx, filter).Decode(&result)
+	err = o.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrPOIDNotFound
@@ -143,8 +142,8 @@ func (ordDataSvc *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Or
 	return &result, nil
 }
 
-func (ordDataSvc *OrdersRepo) DeleteByID(ctx context.Context, id string) (int64, error) {
-	if err := validate(ordDataSvc.collection); err != nil {
+func (o *OrdersRepo) DeleteByID(ctx context.Context, id string) (int64, error) {
+	if err := validate(o.collection); err != nil {
 		return 0, err
 	}
 
@@ -154,7 +153,7 @@ func (ordDataSvc *OrdersRepo) DeleteByID(ctx context.Context, id string) (int64,
 	}
 	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
 
-	res, err := ordDataSvc.collection.DeleteOne(ctx, filter)
+	res, err := o.collection.DeleteOne(ctx, filter)
 	if err != nil {
 		return 0, ErrUnexpectedDeleteOrder
 	}

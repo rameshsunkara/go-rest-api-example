@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/log"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +17,7 @@ func TestListOfRoutes(t *testing.T) {
 		Name: "test",
 		Port: "8080",
 	}
-	logger := log.Setup("server_test")
+	logger := logger.Setup("server_test")
 	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()
@@ -65,7 +65,7 @@ func TestModeSpecificRoutes(t *testing.T) {
 		Name: "dev",
 		Port: "8080",
 	}
-	logger := log.Setup("server_test")
+	logger := logger.Setup("server_test")
 	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()

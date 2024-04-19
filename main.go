@@ -7,7 +7,7 @@ import (
 
 	"github.com/rameshsunkara/deferrun"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/log"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
@@ -28,7 +28,7 @@ func main() {
 	svcEnv := MustEnvConfig()
 
 	// setup : service logger
-	logger := log.Setup(svcEnv.Name)
+	logger := logger.Setup(svcEnv)
 
 	// setup : database connection
 	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
@@ -100,6 +100,11 @@ func MustEnvConfig() types.ServiceEnv {
 		disableAuth = false
 	}
 
+	logLevel := os.Getenv("logLevel")
+	if logLevel == "" {
+		logLevel = "info"
+	}
+
 	envConfigurations := types.ServiceEnv{
 		Name:              envName,
 		Port:              port,
@@ -107,6 +112,7 @@ func MustEnvConfig() types.ServiceEnv {
 		MongoVaultSideCar: mongoSideCar,
 		DisableAuth:       disableAuth,
 		DBName:            dbName,
+		LogLevel:          logLevel,
 	}
 
 	return envConfigurations

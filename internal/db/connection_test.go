@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/log"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rameshsunkara/strikememongo"
@@ -47,7 +47,7 @@ func TestMain(m *testing.M) {
 	creds := &db.MongoDBCredentials{
 		Hostname: strings.TrimPrefix(mongoServer.URI(), "mongodb://"),
 	}
-	logger := log.Setup("test")
+	logger := logger.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)
 	if dErr != nil {
 		logger.Fatal().Err(dErr)
@@ -63,7 +63,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func insertTestData(logger *log.AppLogger) {
+func insertTestData(logger *logger.AppLogger) {
 	database := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(database)
 	for i := 0; i < 100; i++ {
@@ -105,7 +105,7 @@ func TestPing(t *testing.T) {
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	creds := &db.MongoDBCredentials{}
-	logger := log.Setup("test")
+	logger := logger.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
@@ -116,7 +116,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	creds := &db.MongoDBCredentials{
 		Hostname: "non-existent-hostname",
 	}
-	logger := log.Setup("test")
+	logger := logger.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
