@@ -3,10 +3,9 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
-	"github.com/rs/zerolog"
+	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 
@@ -49,19 +48,19 @@ type ConnectionManager struct {
 	client        *mongo.Client
 	database      *mongo.Database
 	credentials   *MongoDBCredentials
-	logger        zerolog.Logger
+	logger        *log.AppLogger
 }
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
-func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, log zerolog.Logger) (*ConnectionManager, error) {
+func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *log.AppLogger) (*ConnectionManager, error) {
 	connURL := MongoConnectionURL(mc)
-	fmt.Println("connURL: ", connURL)
+	lgr.Info().Str("connURL", MaskedMongoConnectionURL(mc)).Msg("connecting to DB")
 	if len(connURL) == 0 {
 		return nil, ErrInvalidConnURL
 	}
 	connMgr := &ConnectionManager{
 		credentials:   mc,
-		logger:        log,
+		logger:        lgr,
 		connectionURL: connURL,
 	}
 	connOpts := fillConnectionOpts(opts)
@@ -112,7 +111,7 @@ func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, 
 	defer cancel()
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		c.logger.Err(err).Msg("failed to create new client")
+		c.logger.Error().Err(err).Msg("failed to create new client")
 		return nil, ErrClientInit
 	}
 
@@ -127,7 +126,7 @@ func (c *ConnectionManager) Database() MongoDatabase {
 // Ping - Validates application's connectivity to the underlying database by pinging.
 func (c *ConnectionManager) Ping() error {
 	if err := c.client.Ping(context.TODO(), readpref.Primary()); err != nil {
-		c.logger.Err(err).Msg("failed to ping DB")
+		c.logger.Error().Err(err).Msg("failed to ping DB")
 		return ErrPingDB
 	}
 	return nil
@@ -136,7 +135,7 @@ func (c *ConnectionManager) Ping() error {
 // Disconnect - Close connection to Database.
 func (c *ConnectionManager) Disconnect() error {
 	if err := c.client.Disconnect(context.Background()); err != nil {
-		c.logger.Err(err).Msg("failed to disconnect from DB")
+		c.logger.Error().Err(err).Msg("failed to disconnect from DB")
 		return ErrConnectionLeak
 	}
 	c.logger.Info().Msg("successfully disconnected from DB")

@@ -35,9 +35,9 @@ type Order struct {
 }
 
 type Product struct {
-	Name      string `bson:"name,omitempty" json:"name"`
-	UpdatedAt string `bson:"updatedAt,omitempty" json:"updatedAt"`
-	Price     uint   `bson:"price,omitempty" json:"price"`
-	Status    string `bson:"status,omitempty" json:"status"`
-	Remarks   string `bson:"remarks,omitempty" json:"remarks"`
+	Name        string `bson:"name,omitempty" json:"name"`
+	UpdatedAt   string `bson:"updatedAt,omitempty" json:"updatedAt"`
+	Price       uint64 `bson:"price,omitempty" json:"price"`
+	Status      string `bson:"status,omitempty" json:"status"`
+	Description string `bson:"remarks,omitempty" json:"remarks"`
 }

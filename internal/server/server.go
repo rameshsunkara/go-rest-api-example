@@ -78,9 +78,9 @@ func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogge
 		}
 	}
 
-	lgr.ZLogger.Info().Msg("Registered routes")
+	lgr.Info().Msg("Registered routes")
 	for _, item := range router.Routes() {
-		lgr.ZLogger.Info().
+		lgr.Info().
 			Str("method", item.Method).
 			Str("path", item.Path).
 			Send()

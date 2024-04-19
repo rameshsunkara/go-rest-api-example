@@ -67,16 +67,16 @@ func insertTestData() {
 	for i := 0; i < 500; i++ {
 		product := []types.Product{
 			{
-				Name:      faker.Name(),
-				Price:     (uint)(rand.Intn(90) + 10),
-				Remarks:   faker.Sentence(),
-				UpdatedAt: faker.TimeString(),
+				Name:        faker.Name(),
+				Price:       (uint)(rand.Intn(90) + 10),
+				Description: faker.Sentence(),
+				UpdatedAt:   faker.TimeString(),
 			},
 			{
-				Name:      faker.Name(),
-				Price:     (uint)(rand.Intn(1000) + 10),
-				Remarks:   faker.Sentence(),
-				UpdatedAt: faker.TimeString(),
+				Name:        faker.Name(),
+				Price:       (uint)(rand.Intn(1000) + 10),
+				Description: faker.Sentence(),
+				UpdatedAt:   faker.TimeString(),
 			},
 		}
 

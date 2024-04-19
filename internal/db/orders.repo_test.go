@@ -25,16 +25,16 @@ func TestCreateSuccess(t *testing.T) {
 	dSvc := db.NewOrdersRepo(d)
 	product := []types.Product{
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(90) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(90) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(1000) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(1000) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 	}
 
@@ -54,16 +54,16 @@ func TestCreate_InvalidReq(t *testing.T) {
 	dSvc := db.NewOrdersRepo(d)
 	product := []types.Product{
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(90) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(90) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(1000) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(1000) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 	}
 
@@ -80,10 +80,10 @@ func TestUpdateSuccess(t *testing.T) {
 	dSvc := db.NewOrdersRepo(d)
 	product := []types.Product{
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(90) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(90) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 	}
 
@@ -101,10 +101,10 @@ func TestUpdate_InvalidId(t *testing.T) {
 	dSvc := db.NewOrdersRepo(d)
 	product := []types.Product{
 		{
-			Name:      faker.Name(),
-			Price:     (uint)(rand.Intn(90) + 10),
-			Remarks:   faker.Sentence(),
-			UpdatedAt: faker.TimeString(),
+			Name:        faker.Name(),
+			Price:       (uint)(rand.Intn(90) + 10),
+			Description: faker.Sentence(),
+			UpdatedAt:   faker.TimeString(),
 		},
 	}
 

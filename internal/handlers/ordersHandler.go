@@ -49,7 +49,7 @@ func (oHandler *OrdersController) Post(c *gin.Context) {
 func (oHandler *OrdersController) GetAll(c *gin.Context) {
 	orders, err := oHandler.dataSvc.GetAll(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error occurred while retrieved purchase orders", "error": err})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "error occurred while retrieving purchase orders", "error": err})
 		c.Abort()
 		return
 	}
