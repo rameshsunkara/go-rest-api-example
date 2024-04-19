@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/go-faker/faker/v4"
@@ -44,7 +45,7 @@ func TestMain(m *testing.M) {
 	}
 	defer mongoServer.Stop()
 	creds := &db.MongoDBCredentials{
-		Hostname: mongoServer.URI(),
+		Hostname: strings.TrimPrefix(mongoServer.URI(), "mongodb://"),
 	}
 	logger := log.Setup("test")
 	d, dErr := db.NewMongoManager(creds, nil, logger)

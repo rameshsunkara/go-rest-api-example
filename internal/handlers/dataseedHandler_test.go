@@ -19,15 +19,16 @@ func TestNewSeedHandler(t *testing.T) {
 	assert.IsType(t, &mocks.MockOrdersDataService{}, sd.OrdersDataSvc)
 }
 
-func TestSeedDB(t *testing.T) {
+func TestSeedDB_Success(t *testing.T) {
 	// Test Setup
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	mocks.CreateFunc = func(ctx context.Context, purchaseOrder *types.Order) (string, error) {
-		return "random-id", nil
-	}
-	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{})
+	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
+		CreateFunc: func(ctx context.Context, purchaseOrder *types.Order) (string, error) {
+			return "random-id", nil
+		},
+	})
 
 	// Call actual function
 	sd.SeedDB(c)
@@ -36,4 +37,24 @@ func TestSeedDB(t *testing.T) {
 
 	// Check results
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
+}
+
+func TestSeedDB_Failure(t *testing.T) {
+	// Test Setup
+	gin.SetMode(gin.TestMode)
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
+		CreateFunc: func(ctx context.Context, purchaseOrder *types.Order) (string, error) {
+			return "", assert.AnError
+		},
+	})
+
+	// Call actual function
+	sd.SeedDB(c)
+
+	resp := w.Result()
+
+	// Check results
+	assert.EqualValues(t, http.StatusInternalServerError, resp.StatusCode)
 }

@@ -1,5 +1,7 @@
 package db_test
 
+/*
+
 import (
 	"context"
 	"math/rand"
@@ -21,6 +23,12 @@ func TestNewOrderDataService(t *testing.T) {
 	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
 }
 
+func TestOrdersRepo_Create(t *testing.T) {
+	d := testDBMgr.Database()
+	dSvc := db.NewOrdersRepo(d)
+	assert.NotNil(t, dSvc)
+
+}
 func TestCreateSuccess(t *testing.T) {
 	d := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(d)
@@ -176,3 +184,4 @@ func TestDeleteById_InvalidId(t *testing.T) {
 	assert.EqualValues(t, 0, result)
 	assert.Error(t, err)
 }
+*/

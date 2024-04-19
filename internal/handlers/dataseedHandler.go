@@ -54,12 +54,13 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "failed to insert data",
 			})
-			panic("failed to insert data")
+			return
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Successfully inserted fake data",
+		"message": "successfully inserted fake data",
 		"Count":   seedRecordCount,
 	})
+	return
 }

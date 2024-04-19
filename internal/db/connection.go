@@ -16,8 +16,8 @@ import (
 var (
 	ErrInvalidConnURL      = errors.New("failed to connect to DB, as the connection string is invalid")
 	ErrConnectionEstablish = errors.New("failed to establish connection to DB")
-	ErrClientInit          = errors.New("failed to initialize db client")
-	ErrConnectionLeak      = errors.New("unable to disconnect from db, potential connection leak")
+	ErrClientInit          = errors.New("failed to initialize DB client")
+	ErrConnectionLeak      = errors.New("unable to disconnect from DB, potential connection leak")
 	ErrPingDB              = errors.New("failed to ping DB")
 )
 
@@ -67,7 +67,7 @@ func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *log.AppL
 	var err error
 	var c *mongo.Client
 	if c, err = connMgr.newClient(connOpts); err == nil {
-		db := c.Database(opts.Database)
+		db := c.Database(connOpts.Database)
 		connMgr.database = db
 		connMgr.client = c
 		// Verify connection
