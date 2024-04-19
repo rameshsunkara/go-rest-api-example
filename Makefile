@@ -83,6 +83,14 @@ coverage:
 coverage-html:
 	go tool cover -html=coverage.out
 
+## tidy: Tidy go modules
+tidy:
+	go mod tidy
+
+## format: Format go code
+format:
+	go fmt ./...
+
 ## lint: Run linter
 lint:
 	golangci-lint run

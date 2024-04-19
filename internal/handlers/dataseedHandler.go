@@ -4,11 +4,11 @@ import (
 	"math/rand"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
-
-	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
 const (
@@ -28,7 +28,7 @@ func NewSeedController(svc db.OrdersDataService) *SeedController {
 
 func (s *SeedController) SeedDB(c *gin.Context) {
 	for i := 0; i < seedRecordCount; i++ {
-		product := []types.Product{
+		products := []types.Product{
 			{
 				Name:      faker.Name(),
 				Price:     (uint)(rand.Intn(90) + 10),
@@ -44,14 +44,18 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 		}
 
 		po := &types.Order{
-			Products: product,
+			CreatedAt: util.CurrentISOTime(),
+			UpdatedAt: util.CurrentISOTime(),
+			Products: products,
+			User:     faker.Email(),
 		}
+
 		_, err := s.OrdersDataSvc.Create(c, po)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Unable inserted data",
+				"message": "failed to insert data",
 			})
-			panic("Unable to insert data")
+			panic("failed to insert data")
 		}
 	}
 

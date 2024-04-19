@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -54,6 +55,7 @@ type ConnectionManager struct {
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
 func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, log zerolog.Logger) (*ConnectionManager, error) {
 	connURL := MongoConnectionURL(mc)
+	fmt.Println("connURL: ", connURL)
 	if len(connURL) == 0 {
 		return nil, ErrInvalidConnURL
 	}
