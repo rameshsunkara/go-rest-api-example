@@ -8,6 +8,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -26,13 +27,13 @@ func TestCreateSuccess(t *testing.T) {
 	product := []types.Product{
 		{
 			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(90) + 10),
+			Price:       util.RandomPrice(),
 			Description: faker.Sentence(),
 			UpdatedAt:   faker.TimeString(),
 		},
 		{
 			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(1000) + 10),
+			Price:       util.RandomPrice(),
 			Description: faker.Sentence(),
 			UpdatedAt:   faker.TimeString(),
 		},
@@ -55,13 +56,13 @@ func TestCreate_InvalidReq(t *testing.T) {
 	product := []types.Product{
 		{
 			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(90) + 10),
+			Price:       util.RandomPrice(),
 			Description: faker.Sentence(),
 			UpdatedAt:   faker.TimeString(),
 		},
 		{
 			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(1000) + 10),
+			Price:       util.RandomPrice(),
 			Description: faker.Sentence(),
 			UpdatedAt:   faker.TimeString(),
 		},

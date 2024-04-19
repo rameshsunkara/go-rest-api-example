@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"crypto/rand"
-	"math/big"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,23 +26,17 @@ func NewSeedController(svc db.OrdersDataService) *SeedController {
 }
 
 func (s *SeedController) SeedDB(c *gin.Context) {
-	var price *big.Int
-	var err error
 	for i := 0; i < seedRecordCount; i++ {
-		if price, err = rand.Int(rand.Reader, big.NewInt(1000)); err != nil {
-			// default price
-			price = big.NewInt(100)
-		}
 		products := []types.Product{
 			{
 				Name:        faker.Name(),
-				Price:       price.Uint64(),
+				Price:       util.RandomPrice(),
 				Description: faker.Sentence(),
 				UpdatedAt:   faker.TimeString(),
 			},
 			{
 				Name:        faker.Name(),
-				Price:       price.Uint64(),
+				Price:       util.RandomPrice(),
 				Description: faker.Sentence(),
 				UpdatedAt:   faker.TimeString(),
 			},

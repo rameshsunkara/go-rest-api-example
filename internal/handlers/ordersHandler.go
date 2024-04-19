@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	OrderIdPath = "id" // Request path variable
+	OrderIDPath = "id" // Request path variable
 )
 
 type OrdersController struct {
@@ -49,19 +49,21 @@ func (oHandler *OrdersController) Post(c *gin.Context) {
 func (oHandler *OrdersController) GetAll(c *gin.Context) {
 	orders, err := oHandler.dataSvc.GetAll(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "error occurred while retrieving purchase orders", "error": err})
+		c.JSON(http.StatusInternalServerError,
+			gin.H{"message": "error occurred while retrieving purchase orders", "error": err})
 		c.Abort()
 		return
 	}
 	c.JSON(http.StatusOK, orders)
 }
 
-func (oHandler *OrdersController) GetById(c *gin.Context) {
-	id := c.Param(OrderIdPath)
+func (oHandler *OrdersController) GetByID(c *gin.Context) {
+	id := c.Param(OrderIDPath)
 	if id != "" {
 		order, err := oHandler.dataSvc.GetByID(c, id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error to retrieve order details", "error": err.Error()})
+			c.JSON(http.StatusInternalServerError,
+				gin.H{"message": "Error to retrieve order details", "error": err.Error()})
 			c.Abort()
 			return
 		}
@@ -72,8 +74,8 @@ func (oHandler *OrdersController) GetById(c *gin.Context) {
 	c.Abort()
 }
 
-func (oHandler *OrdersController) DeleteById(c *gin.Context) {
-	id := c.Param(OrderIdPath)
+func (oHandler *OrdersController) DeleteByID(c *gin.Context) {
+	id := c.Param(OrderIDPath)
 	if id != "" {
 		count, err := oHandler.dataSvc.DeleteByID(c, id)
 		if err != nil {

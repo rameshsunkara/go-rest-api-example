@@ -2,16 +2,16 @@ package db_test
 
 import (
 	"context"
-	"math/rand"
 	"os"
 	"runtime"
 	"testing"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rameshsunkara/strikememongo"
-	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -43,38 +43,40 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 	defer mongoServer.Stop()
-
-	d, dErr := db.NewMongoManager(strikememongo.RandomDatabase(), mongoServer.URI(), nil)
+	creds := &db.MongoDBCredentials{
+		Hostname: mongoServer.URI(),
+	}
+	logger := log.Setup("test")
+	d, dErr := db.NewMongoManager(creds, nil, logger)
 	if dErr != nil {
-		log.Fatal().Err(dErr)
+		logger.Fatal().Err(dErr)
 	}
 	defer func(d *db.ConnectionManager) {
 		err := d.Disconnect()
 		if err != nil {
-			log.Error().Err(err).Msg("unable to disconnect from db")
+			logger.Error().Err(err).Msg("unable to disconnect from db")
 		}
 	}(d)
 	testDBMgr = d
-	insertTestData()
+	insertTestData(logger)
 
 	os.Exit(m.Run())
 }
 
-func insertTestData() {
+func insertTestData(logger *log.AppLogger) {
 	database := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(database)
-
 	for i := 0; i < 500; i++ {
 		product := []types.Product{
 			{
 				Name:        faker.Name(),
-				Price:       (uint)(rand.Intn(90) + 10),
+				Price:       util.RandomPrice(),
 				Description: faker.Sentence(),
 				UpdatedAt:   faker.TimeString(),
 			},
 			{
 				Name:        faker.Name(),
-				Price:       (uint)(rand.Intn(1000) + 10),
+				Price:       util.RandomPrice(),
 				Description: faker.Sentence(),
 				UpdatedAt:   faker.TimeString(),
 			},
@@ -85,7 +87,7 @@ func insertTestData() {
 		}
 		_, err := dSvc.Create(context.TODO(), po)
 		if err != nil {
-			log.Fatal().Err(err).Msg("unable to insert data")
+			logger.Fatal().Err(err).Msg("unable to insert data")
 		}
 	}
 }

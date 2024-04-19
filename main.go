@@ -28,7 +28,7 @@ func main() {
 	svcEnv := MustEnvConfig()
 
 	// setup : service logger
-	logger := log.New(svcEnv.Name)
+	logger := log.Setup(svcEnv.Name)
 
 	// setup : database connection
 	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)

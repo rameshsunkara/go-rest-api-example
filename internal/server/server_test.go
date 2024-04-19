@@ -17,7 +17,7 @@ func TestListOfRoutes(t *testing.T) {
 		Name: "test",
 		Port: "8080",
 	}
-	logger := log.New("server_test")
+	logger := log.Setup("server_test")
 	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()
@@ -65,7 +65,7 @@ func TestModeSpecificRoutes(t *testing.T) {
 		Name: "dev",
 		Port: "8080",
 	}
-	logger := log.New("server_test")
+	logger := log.Setup("server_test")
 	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, logger)
 	list := router.Routes()
 	mode := gin.Mode()

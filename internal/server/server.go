@@ -71,10 +71,10 @@ func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogge
 		{
 			orders := handlers.NewOrdersController(orders)
 			ordersGroup.GET("", orders.GetAll)
-			ordersGroup.GET("/:id", orders.GetById)
+			ordersGroup.GET("/:id", orders.GetByID)
 			ordersGroup.POST("", orders.Post)
 			ordersGroup.PUT("", orders.Post)
-			ordersGroup.DELETE("/:id", orders.DeleteById)
+			ordersGroup.DELETE("/:id", orders.DeleteByID)
 		}
 	}
 

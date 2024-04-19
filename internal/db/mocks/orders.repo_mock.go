@@ -10,8 +10,8 @@ var (
 	CreateFunc     func(ctx context.Context, purchaseOrder *types.Order) (string, error)
 	UpdateFunc     func(ctx context.Context, purchaseOrder *types.Order) error
 	GetAllFunc     func(ctx context.Context) (*[]types.Order, error)
-	GetByIdFunc    func(ctx context.Context, id string) (*types.Order, error)
-	DeleteByIdFunc func(ctx context.Context, id string) (int64, error)
+	GetByIDFunc    func(ctx context.Context, id string) (*types.Order, error)
+	DeleteByIDFunc func(ctx context.Context, id string) (int64, error)
 )
 
 type MockOrdersDataService struct{}
@@ -29,9 +29,9 @@ func (m *MockOrdersDataService) GetAll(ctx context.Context) (*[]types.Order, err
 }
 
 func (m *MockOrdersDataService) GetByID(ctx context.Context, id string) (*types.Order, error) {
-	return GetByIdFunc(ctx, id)
+	return GetByIDFunc(ctx, id)
 }
 
 func (m *MockOrdersDataService) DeleteByID(ctx context.Context, id string) (int64, error) {
-	return DeleteByIdFunc(ctx, id)
+	return DeleteByIDFunc(ctx, id)
 }

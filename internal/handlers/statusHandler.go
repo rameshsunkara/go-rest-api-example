@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 
 	"github.com/rs/zerolog/log"
 
@@ -27,8 +26,7 @@ type StatusResponse struct {
 }
 
 type StatusController struct {
-	svcInfo types.ServiceInfo
-	dbMgr   db.MongoManager
+	dbMgr db.MongoManager
 }
 
 func NewStatusController(m db.MongoManager) *StatusController {
@@ -37,10 +35,8 @@ func NewStatusController(m db.MongoManager) *StatusController {
 	}
 }
 
-// CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability
+// CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability.
 func (s *StatusController) CheckStatus(c *gin.Context) {
-	//reqLogger, _ := log.ReqLogger(c)
-
 	var stat ServiceStatus
 	var code int
 

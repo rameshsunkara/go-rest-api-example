@@ -26,6 +26,6 @@ func (m *MockMongoMgr) Disconnect() error {
 
 type MockMongoDataBase struct{}
 
-func (m *MockMongoDataBase) Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection {
+func (m *MockMongoDataBase) Collection(_ string, _ ...*options.CollectionOptions) *mongo.Collection {
 	return nil
 }
