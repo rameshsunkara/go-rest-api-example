@@ -7,6 +7,8 @@ import (
 	"github.com/google/uuid"
 )
 
+type contextKey string
+
 const RequestIdentifier = "X-Request-ID"
 
 func ReqIDMiddleware() gin.HandlerFunc {
@@ -15,7 +17,7 @@ func ReqIDMiddleware() gin.HandlerFunc {
 		if reqID == "" {
 			reqID = uuid.New().String()
 		}
-		ctx := context.WithValue(c.Request.Context(), RequestIdentifier, reqID)
+		ctx := context.WithValue(c.Request.Context(), contextKey(RequestIdentifier), reqID)
 		c.Request = c.Request.WithContext(ctx)
 		c.Writer.Header().Set(RequestIdentifier, reqID)
 		c.Next()
