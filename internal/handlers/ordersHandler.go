@@ -33,8 +33,8 @@ func (oHandler *OrdersController) Post(c *gin.Context) {
 	}
 
 	order := types.Order{
-		Products: poReq.Products,
-		User: "from-jwt-token",
+		Products:  poReq.Products,
+		User:      "from-jwt-token",
 		CreatedAt: time.Now().UTC().Format(time.RFC3339),
 	}
 

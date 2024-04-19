@@ -12,22 +12,22 @@ import (
 )
 
 const (
-	SeedRecordCount = 500
+	seedRecordCount = 10000
 )
 
 type SeedController struct {
-	dataSvc db.OrdersDataService
+	OrdersDataSvc db.OrdersDataService
 }
 
 func NewSeedController(svc db.OrdersDataService) *SeedController {
 	ic := &SeedController{
-		dataSvc: svc,
+		OrdersDataSvc: svc,
 	}
 	return ic
 }
 
 func (s *SeedController) SeedDB(c *gin.Context) {
-	for i := 0; i < SeedRecordCount; i++ {
+	for i := 0; i < seedRecordCount; i++ {
 		product := []types.Product{
 			{
 				Name:      faker.Name(),
@@ -46,7 +46,7 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 		po := &types.Order{
 			Products: product,
 		}
-		_, err := s.dataSvc.Create(c, po)
+		_, err := s.OrdersDataSvc.Create(c, po)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "Unable inserted data",
@@ -57,6 +57,6 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Successfully inserted fake data",
-		"Count":   SeedRecordCount,
+		"Count":   seedRecordCount,
 	})
 }

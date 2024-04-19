@@ -1,4 +1,5 @@
 package handlers
+
 /*
 
 import (
@@ -56,7 +57,7 @@ func TestNewOrdersHandler(t *testing.T) {
 	o := NewOrdersController(&mocks.MockOrdersDataService{})
 
 	assert.IsType(t, &OrdersController{}, o)
-	assert.IsType(t, &mocks.MockOrdersDataService{}, o.dataSvc)
+	assert.IsType(t, &mocks.MockOrdersDataService{}, o.OrdersDataSvc)
 }
 
 func TestCreateOrderSuccess(t *testing.T) {

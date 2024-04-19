@@ -7,7 +7,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/log"
 )
 
-func RequestLogMiddleware(lgr *log.Logger) gin.HandlerFunc {
+func RequestLogMiddleware(lgr *log.AppLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		l, _ := lgr.WithReqID(c)
 		start := time.Now()

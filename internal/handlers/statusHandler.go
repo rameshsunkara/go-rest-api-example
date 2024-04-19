@@ -33,7 +33,7 @@ type StatusController struct {
 
 func NewStatusController(m db.MongoManager) *StatusController {
 	return &StatusController{
-		dbMgr:   m,
+		dbMgr: m,
 	}
 }
 

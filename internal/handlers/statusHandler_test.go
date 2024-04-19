@@ -1,4 +1,4 @@
-package handlers
+package handlers_test
 
 import (
 	"encoding/json"
@@ -7,30 +7,19 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/stretchr/testify/assert"
 )
 
-func UnMarshalStatusResponse(resp *http.Response) (StatusResponse, error) {
+func UnMarshalStatusResponse(resp *http.Response) (string, error) {
 	body, _ := io.ReadAll(resp.Body)
-	var statusResponse StatusResponse
+	var statusResponse string
 	err := json.Unmarshal(body, &statusResponse)
 	return statusResponse, err
 }
-
-var (
-	svcInfo = &types.ServiceInfo{
-		Name:        "test-api-service",
-		Version:     "rams-fav",
-		UpTime:      time.Now(),
-		Environment: "test",
-	}
-	s = NewStatusController(svcInfo, &mocks.MockMongoMgr{})
-)
 
 func TestStatusSuccess(t *testing.T) {
 	// Test Setup
@@ -40,37 +29,42 @@ func TestStatusSuccess(t *testing.T) {
 	mocks.PingFunc = func() error {
 		return nil
 	}
+	s := handlers.NewStatusController(&mocks.MockMongoMgr{})
 
 	// Call actual function
 	s.CheckStatus(c)
 
-	// Check results
+	// Parse results
 	resp := w.Result()
 	statusResponse, err := UnMarshalStatusResponse(resp)
 	if err != nil {
 		t.Fail()
 	}
+	// Check results
 	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
-	assert.EqualValues(t, "test", statusResponse.Environment)
+	assert.EqualValues(t, handlers.UP, statusResponse)
 }
 
 func TestStatusDown(t *testing.T) {
+	// Test Setup
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-
 	mocks.PingFunc = func() error {
 		return errors.New("DB Connection Failed")
 	}
+	s := handlers.NewStatusController(&mocks.MockMongoMgr{})
 
+	// Call actual function
 	s.CheckStatus(c)
 
+	// Parse results
 	resp := w.Result()
 	statusResponse, err := UnMarshalStatusResponse(resp)
 	if err != nil {
 		t.Fail()
 	}
-
+	// Check results
 	assert.EqualValues(t, http.StatusFailedDependency, resp.StatusCode)
-	assert.EqualValues(t, "rams-fav", statusResponse.Version)
+	assert.EqualValues(t, handlers.DOWN, statusResponse)
 }

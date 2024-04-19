@@ -44,7 +44,7 @@ func TestMain(m *testing.M) {
 	}
 	defer mongoServer.Stop()
 
-	d, dErr := db.NewMongoManager(strikememongo.RandomDatabase(), mongoServer.URI())
+	d, dErr := db.NewMongoManager(strikememongo.RandomDatabase(), mongoServer.URI(), nil)
 	if dErr != nil {
 		log.Fatal().Err(dErr)
 	}

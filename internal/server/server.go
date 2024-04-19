@@ -17,10 +17,10 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
-var _runOnce sync.Once
+var startOnce sync.Once
 
-func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) {
-	_runOnce.Do(func() {
+func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogger) {
+	startOnce.Do(func() {
 		r := WebRouter(svcEnv, dbMgr, lgr)
 		err := r.Run(":" + svcEnv.Port)
 		if err != nil {
@@ -29,7 +29,7 @@ func StartService(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logge
 	})
 }
 
-func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.Logger) *gin.Engine {
+func WebRouter(svcEnv types.ServiceEnv, dbMgr db.MongoManager, lgr *log.AppLogger) *gin.Engine {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcEnv.Name) {
 		ginMode = gin.DebugMode
