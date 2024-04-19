@@ -46,8 +46,8 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 		po := &types.Order{
 			CreatedAt: util.CurrentISOTime(),
 			UpdatedAt: util.CurrentISOTime(),
-			Products: products,
-			User:     faker.Email(),
+			Products:  products,
+			User:      faker.Email(),
 		}
 
 		_, err := s.OrdersDataSvc.Create(c, po)
