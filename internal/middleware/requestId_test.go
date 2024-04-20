@@ -54,7 +54,7 @@ func TestReqIDMiddleware(t *testing.T) {
 		c.Request.Header.Set(util.RequestIdentifier, tc.InputReqID)
 		r.ServeHTTP(resp, c.Request)
 		// Check response header
-		assert.Greater(t, len(resp.Header().Get(util.RequestIdentifier)), 0, tc.Description)
+		assert.NotEmpty(t, resp.Header().Get(util.RequestIdentifier), tc.Description)
 		// Check request id is set in context
 		assert.True(t, hasCorrectReqID, tc.Description)
 	}
