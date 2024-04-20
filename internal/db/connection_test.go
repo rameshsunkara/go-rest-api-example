@@ -47,19 +47,19 @@ func TestMain(m *testing.M) {
 	creds := &db.MongoDBCredentials{
 		Hostname: strings.TrimPrefix(mongoServer.URI(), "mongodb://"),
 	}
-	logger := logger.Setup("test")
-	d, dErr := db.NewMongoManager(creds, nil, logger)
+	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	if dErr != nil {
-		logger.Fatal().Err(dErr)
+		lgr.Fatal().Err(dErr)
 	}
 	defer func(d *db.ConnectionManager) {
 		discErr := d.Disconnect()
 		if discErr != nil {
-			logger.Error().Err(discErr).Msg("unable to disconnect from db")
+			lgr.Error().Err(discErr).Msg("unable to disconnect from db")
 		}
 	}(d)
 	testDBMgr = d
-	insertTestData(logger)
+	insertTestData(lgr)
 	m.Run()
 }
 
@@ -105,8 +105,8 @@ func TestPing(t *testing.T) {
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	creds := &db.MongoDBCredentials{}
-	logger := logger.Setup("test")
-	d, dErr := db.NewMongoManager(creds, nil, logger)
+	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
 	assert.EqualValues(t, db.ErrInvalidConnURL, dErr)
@@ -116,8 +116,8 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	creds := &db.MongoDBCredentials{
 		Hostname: "non-existent-hostname",
 	}
-	logger := logger.Setup("test")
-	d, dErr := db.NewMongoManager(creds, nil, logger)
+	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
 	assert.EqualValues(t, db.ErrConnectionEstablish, dErr)

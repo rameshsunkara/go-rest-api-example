@@ -41,8 +41,7 @@ func Setup(env types.ServiceEnv) *AppLogger {
 
 // WithReqID returns a logger with request ID.
 func (l *AppLogger) WithReqID(ctx *gin.Context) (zerolog.Logger, string) {
-	reqContext := ctx.Request.Context()
-	if rID := reqContext.Value(util.RequestIdentifier); rID != nil {
+	if rID := ctx.Request.Context().Value(util.ContextKey(util.RequestIdentifier)); rID != nil {
 		if reqID, ok := rID.(string); ok {
 			return l.zLogger.With().Str(util.RequestIdentifier, reqID).Logger(), reqID
 		}
