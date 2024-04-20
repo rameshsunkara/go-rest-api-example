@@ -1,0 +1,682 @@
+openapi: 3.1.0
+info:
+  title: Orders API
+  description: API for managing orders in an e-commerce system
+  version: 1.0.0
+servers:
+  - url: https://api.example.com/v1
+security:
+  - apiKey: [] # Example of API key authentication, replace with appropriate security scheme
+tags:
+  - name: Orders
+    description: Operations related to orders
+paths:
+  /orders:
+    get:
+      summary: Retrieve orders with pagination
+      description: Retrieve a list of orders in the system with pagination support
+      tags:
+        - Orders
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+          description: Number of items to skip
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Maximum number of items to return
+      responses:
+        '200':
+          description: A list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+              examples:
+                orders:
+                  value:
+                    - orderId: "123e4567-e89b-12d3-a456-426614174000"
+                      version: 1
+                      createdAt: "2024-04-20T12:00:00Z"
+                      updatedAt: "2024-04-20T12:30:00Z"
+                      products:
+                        - name: "Product A"
+                          updatedAt: "2024-04-20T12:05:00Z"
+                          price: 10.99
+                          status: "available"
+                          remarks: "Good product"
+                      user: "user123"
+                      totalAmount: 10.99
+                      status: "OrderPending"
+                      updates: []
+        '400':
+          description: Bad request. Invalid offset or limit value.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_params:
+                  value:
+                    errorCode: "orders:get_invalid_params"
+                    message: "Invalid offset or limit value"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:get_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. No orders found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:get_not_found"
+                    message: "No orders found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit is reset
+              schema:
+                type: integer
+                format: int32
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:get_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:get_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    post:
+      summary: Create a new order
+      description: Create a new order in the system
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+            examples:
+              new_order:
+                value:
+                  products:
+                    - name: "Product A"
+                      price: 10.99
+                      status: "available"
+                      remarks: "Good product"
+                  user: "user123"
+      responses:
+        '201':
+          description: The created order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                created_order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 1
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:00:00Z"
+                    products:
+                      - name: "Product A"
+                        updatedAt: "2024-04-20T12:00:00Z"
+                        price: 10.99
+                        status: "available"
+                        remarks: "Good product"
+                    user: "user123"
+                    totalAmount: 10.99
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order input data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_input:
+                  value:
+                    errorCode: "orders:create_invalid_input"
+                    message: "Invalid order input data"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:create_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit is reset
+              schema:
+                type: integer
+                format: int32
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:create_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:create_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+  /orders/{orderId}:
+    parameters:
+      - in: path
+        name: orderId
+        required: true
+        schema:
+          type: string
+          format: uuid
+        description: The ID of the order to operate on
+    get:
+      summary: Retrieve a specific order
+      description: Retrieve details of a specific order by ID
+      tags:
+        - Orders
+      responses:
+        '200':
+          description: The requested order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 1
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:30:00Z"
+                    products:
+                      - name: "Product A"
+                        updatedAt: "2024-04-20T12:05:00Z"
+                        price: 10.99
+                        status: "available"
+                        remarks: "Good product"
+                    user: "user123"
+                    totalAmount: 10.99
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_order_id:
+                  value:
+                    errorCode: "orders:get_invalid_order_id"
+                    message: "Invalid order ID"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:get_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:get_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit is reset
+              schema:
+                type: integer
+                format: int32
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:get_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:get_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    put:
+      summary: Update a specific order
+      description: Update details of a specific order by ID
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+            examples:
+              updated_order:
+                value:
+                  products:
+                    - name: "Product B"
+                      price: 15.99
+                      status: "available"
+                      remarks: "Great product"
+                  user: "user456"
+      responses:
+        '200':
+          description: The updated order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                updated_order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 2
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:35:00Z"
+                    products:
+                      - name: "Product B"
+                        updatedAt: "2024-04-20T12:35:00Z"
+                        price: 15.99
+                        status: "available"
+                        remarks: "Great product"
+                    user: "user456"
+                    totalAmount: 15.99
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order ID or input data.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_input:
+                  value:
+                    errorCode: "orders:update_invalid_input"
+                    message: "Invalid order ID or input data"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:update_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:update_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit is reset
+              schema:
+                type: integer
+                format: int32
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:update_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:update_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    delete:
+      summary: Delete a specific order
+      description: Delete a specific order by ID
+      tags:
+        - Orders
+      responses:
+        '204':
+          description: Order deleted successfully
+        '400':
+          description: Bad request. Invalid order ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_order_id:
+                  value:
+                    errorCode: "orders:delete_invalid_order_id"
+                    message: "Invalid order ID"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:delete_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:delete_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            Retry-After:
+              description: Seconds until the rate limit is reset
+              schema:
+                type: integer
+                format: int32
+                minimum: 0
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:delete_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:delete_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+components:
+  schemas:
+    ApiError:
+      type: object
+      description: API Error Object.
+      required:
+        - errorCode
+        - message
+        - debugId
+        - httpStatusCode
+      properties:
+        httpStatusCode:
+          type: integer
+          format: int32
+          minimum: 400
+          maximum: 599
+          description: HTTP equivalent status code
+        message:
+          type: string
+          description: User-friendly error message
+        debugId:
+          type: string
+          format: uuid
+          description: Unique identifier for the instance of this error
+        errorCode:
+          type: string
+          description: A unique machine-friendly, but human-readable identifier for the error
+    Order:
+      type: object
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          description: The unique identifier for the order
+        version:
+          type: integer
+          description: The version of the order
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time when the order was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time when the order was last updated
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+          description: The list of products in the order
+        user:
+          type: string
+          description: The user who placed the order
+        totalAmount:
+          type: number
+          format: float
+          description: The total amount of the order
+        status:
+          type: string
+          enum:
+            - OrderPending
+            - OrderProcessing
+            - OrderShipped
+            - OrderDelivered
+            - OrderCancelled
+          description: The status of the order
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderUpdate'
+          description: The list of updates made to the order
+      required:
+        - orderId
+        - version
+        - createdAt
+        - products
+        - user
+        - totalAmount
+        - status
+    OrderInput:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInput'
+          description: The list of products in the order
+        user:
+          type: string
+          description: The user who is placing the order
+      required:
+        - products
+        - user
+    OrderUpdate:
+      type: object
+      properties:
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time when the order was updated
+        notes:
+          type: string
+          description: Additional notes or comments about the update
+        handledBy:
+          type: string
+          description: The person or system who handled the update
+    Product:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the product
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time when the product information was last updated
+        price:
+          type: number
+          format: float
+          description: The price of the product
+        status:
+          type: string
+          description: The status of the product
+        remarks:
+          type: string
+          description: Additional remarks or description about the product
+    ProductInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the product
+        price:
+          type: number
+          format: float
+          description: The price of the product
+        status:
+          type: string
+          description: The status of the product
+        remarks:
+          type: string
+          description: Additional remarks or description about the product
