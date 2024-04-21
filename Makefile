@@ -13,19 +13,63 @@ DOCKER_CONTAINER_NAME := "$(PROJECT_NAME)-$(VERSION)"
 
 MODULE = $(shell go list -m)
 
+testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+TEST_COVERAGE_THRESHOLD = 50
+
 ## start: Starts everything that is required to serve the APIs
 start:
 	docker-compose up -d
 	make run
 
-## run: Run the API server alone in normal mode (without supplemantary services such as DB etc.,)
+## run: Run the API server alone (without supplementary services such as DB etc.,)
 run:
 	go run ${LDFLAGS} main.go -version="${VERSION}"
-
 
 ## build: Build the API server binary
 build:
 	CGO_ENABLED=0 go build ${LDFLAGS} -a -o ${PROJECT_NAME} $(MODULE)
+
+## version: Display the current version of the API server
+version:
+	@echo $(VERSION)
+
+## test: Run tests
+test:
+	go test ./... -v -coverprofile coverage.out -covermode count
+
+## coverage: Measures and generate code coverage report
+coverage:
+	go test ./... -v -coverprofile coverage.out -covermode count &&
+	go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+' &&
+	go tool cover -html=coverage.out
+
+ci-coverage:
+	@echo "Current unit test coverage: $(testCoverageCmd)"
+	@echo "Test Coverage Threshold: $(TEST_COVERAGE_THRESHOLD)"
+	@echo "-----------------------"
+
+	@if [ "$(shell echo "$(testCoverageCmd) < $(TEST_COVERAGE_THRESHOLD)" | bc -l)" -eq 1 ]; then \
+		echo "Failed, Please add or update tests to improve test code coverage."; \
+		exit 1; \
+	else \
+		echo "OK"; \
+	fi
+
+## tidy: Tidy go modules
+tidy:
+	go mod tidy
+
+## format: Format go code
+format:
+	go fmt ./...
+
+## lint: Run linter
+lint:
+	golangci-lint run
+
+## lint-fix: Run linter and fix the issues
+lint-fix:
+	golangci-lint run --fix
 
 ## docker-build: Build the API server as a docker image
 docker-build:
@@ -45,8 +89,8 @@ docker-run:
 				--env environment=${profile} \
 				$(DOCKER_IMAGE_NAME)
 
-## docker-start: Builts Docker image and runs it.
-docker-start: build-docker run-docker
+## docker-start: Builds Docker image and runs it.
+docker-start: docker-build docker-run
 
 ## docker-stop: Stops the docker container
 docker-stop:
@@ -67,35 +111,7 @@ docker-clean-service-images: docker-stop docker-remove
 docker-clean-build-images: 
 	docker rmi $(docker images --filter label="builder=true")
 
-## version: Display the current version of the API server
-version:
-	@echo $(VERSION)
 
-## test: Run tests
-test:
-	go test -v ./...
-
-## coverage: Measures code coverage
-coverage:
-	go test ./... -v -coverprofile coverage.out -covermode count && go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+' && go tool cover -html=coverage.out
-
-coverage-html:
-	go tool cover -html=coverage.out
-
-## tidy: Tidy go modules
-tidy:
-	go mod tidy
-
-## format: Format go code
-format:
-	go fmt ./...
-
-## lint: Run linter
-lint:
-	golangci-lint run
-
-lint-fix:
-	golangci-lint run --fix
 
 .PHONY: help
 help: Makefile

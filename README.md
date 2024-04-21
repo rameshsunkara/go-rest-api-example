@@ -27,31 +27,31 @@ Pre-requisites: Docker, Docker Compose, [Swag](https://github.com/swaggo/swag)
 
         make start
 
-2. Visit Swagger API in browser
-
-        open http://localhost:8080/swagger/index.html
-
-   If you are a fan of Postman, import the included [Postman collection](orders.postman_collection.json)
+   If you are a fan of Postman, import the included [Postman collection](orders.postman_collection.json) or use the [OpenAPI3 Spec file](./OpenApi-v1.yaml).
 
 Other Options:
 
 Choose a command to run in go-rest-api-example:
 
-        start                         Starts everything that is required to serve the APIs
-        run                           Run the API server alone in normal mode (without supplemantary services such as DB etc.,)
-        build                         Build the API server binary
-        docker-build                  Build the API server as a docker image
-        docker-run                    (WIP) Run the API server as a docker container
-        docker-start                  Builts Docker image and runs it.
-        docker-stop                   Stops the docker container
-        docker-remove                 Removes the docker images and containers
-        docker-clean                  Cleans all docker resources
-        docker-clean-service-images   Stops and Removes the service images
-        docker-clean-build-images     Removes build images
-        version                       Display the current version of the API server
-        api-docs                      Generate OpenAPI3 Spec
-        test                          Run tests
-        coverage                      Measures code coverage
+      start                         Starts everything that is required to serve the APIs
+      run                           Run the API server alone (without supplementary services such as DB etc.,)
+      build                         Build the API server binary
+      version                       Display the current version of the API server
+      test                          Run tests
+      coverage                      Measures and generate code coverage report
+      tidy                          Tidy go modules
+      format                        Format go code
+      lint                          Run linter
+      lint-fix                      Run linter and fix the issues
+      docker-build                  Build the API server as a docker image
+      docker-run                    Run the API server as a docker container
+      docker-start                  Builds Docker image and runs it.
+      docker-stop                   Stops the docker container
+      docker-remove                 Removes the docker images and containers        
+      docker-clean                  Cleans all docker resources
+      docker-clean-service-images   Stops and Removes the service images
+      docker-clean-build-images     Removes build images
+
 
 ### Tools
 
