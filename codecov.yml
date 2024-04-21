@@ -17,6 +17,7 @@ coverage:
         base: auto
         branches:
         - ^main$
+        - ^v2$
         if_ci_failed: error
         only_pulls: false
         paths:
