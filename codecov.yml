@@ -2,13 +2,10 @@ codecov:
   require_ci_to_pass: true
 comment:
   behavior: default
-  layout: reach,diff,flags,tree,reach
-  show_carryforward_flags: false
+  layout: " diff, flags, files"
 coverage:
   precision: 2
-  range:
-  - 70.0
-  - 100.0
+  range: "70...100"
   round: down
   status:
     changes: false
@@ -24,13 +21,10 @@ coverage:
         only_pulls: false
         paths:
         - ^internal.*
-        - ^pkg/util.*
         target: auto
-        threshold: 5.0
+        threshold: 5%
         ignore:
-        - ^docs.*
-        - *_mock.go
-
-
+        - "^docs.*"
+        - "*_mock.go"
 github_checks:
   annotations: true
