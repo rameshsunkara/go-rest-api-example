@@ -50,7 +50,7 @@ jobs:
           chmod +x codecov 
           ./codecov
 
-      - name: :truck:Upload Code Coverage Stats
+      - name: `:truck:` Upload Code Coverage Stats
         run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov 
           chmod +x codecov 
