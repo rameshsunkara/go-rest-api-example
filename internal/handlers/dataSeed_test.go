@@ -25,7 +25,7 @@ func TestSeedDB_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, purchaseOrder *types.Order) (string, error) {
+		CreateFunc: func(_ context.Context, _ *types.Order) (string, error) {
 			return "random-id", nil
 		},
 	})
@@ -45,7 +45,7 @@ func TestSeedDB_Failure(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, purchaseOrder *types.Order) (string, error) {
+		CreateFunc: func(_ context.Context, _ *types.Order) (string, error) {
 			return "", assert.AnError
 		},
 	})
