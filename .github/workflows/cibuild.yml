@@ -46,12 +46,14 @@ jobs:
       - name: 👮‍ Check Code Coverage
         run: |
           make ci-coverage
-          curl -Os https://uploader.codecov.io/latest/linux/codecov 
-          chmod +x codecov 
-          ./codecov
 
       - name: 📮 Upload Code Coverage Stats
-        run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov 
-          chmod +x codecov 
-          ./codecov
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false # optional (default = false)
+          files: coverage.out # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          verbose: true # optional (default = false)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOVTOKEN }}
