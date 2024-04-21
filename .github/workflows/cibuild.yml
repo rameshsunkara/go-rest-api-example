@@ -16,36 +16,42 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Go
+      - name: 🧱Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
           cache: true
 
-      - name: Check go mod
+      - name: 🎗️Check go mod
         run: |
           go mod tidy
           git diff --exit-code -- go.mod
           git diff --exit-code -- go.sum
 
-      - name: Format
+      - name: 🧹Format
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
 
-      - name: Lint
+      - name: 🛡️Lint
         uses: golangci/golangci-lint-action@v3.7.0
         with:
           version: latest
           skip-cache: false
 
-      - name: Build
+      - name: 🏗️Build
         run: make build
 
-      - name: Test
+      - name: 🧪Test
         run: make test
 
-      - name: Check Code Coverage
+      - name: 👮‍Check Code Coverage
         run: |
           make ci-coverage
+          curl -Os https://uploader.codecov.io/latest/linux/codecov 
+          chmod +x codecov 
+          ./codecov
+
+      - name: :truck:Upload Code Coverage Stats
+        run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov 
           chmod +x codecov 
           ./codecov
