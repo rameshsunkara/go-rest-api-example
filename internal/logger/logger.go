@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -23,7 +23,7 @@ type AppLogger struct {
 	zLogger zerolog.Logger
 }
 
-func Setup(env types.ServiceEnv) *AppLogger {
+func Setup(env models.ServiceEnv) *AppLogger {
 	setupOnce.Do(func() {
 		appLogger = &AppLogger{}
 		lvl := getZerologLevel(env.LogLevel)

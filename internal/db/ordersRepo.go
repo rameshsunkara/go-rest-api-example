@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -31,10 +31,10 @@ var (
 
 // OrdersDataService  - Added for tests/mock.
 type OrdersDataService interface {
-	Create(ctx context.Context, purchaseOrder *types.Order) (string, error)
-	Update(ctx context.Context, purchaseOrder *types.Order) error
-	GetAll(ctx context.Context) (*[]types.Order, error)
-	GetByID(ctx context.Context, id string) (*types.Order, error)
+	Create(ctx context.Context, purchaseOrder *models.Order) (string, error)
+	Update(ctx context.Context, purchaseOrder *models.Order) error
+	GetAll(ctx context.Context) (*[]models.Order, error)
+	GetByID(ctx context.Context, id string) (*models.Order, error)
 	DeleteByID(ctx context.Context, id string) (int64, error)
 }
 
@@ -51,7 +51,7 @@ func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
 	return iDBSvc
 }
 
-func (o *OrdersRepo) Create(ctx context.Context, po *types.Order) (string, error) {
+func (o *OrdersRepo) Create(ctx context.Context, po *models.Order) (string, error) {
 	if err := validate(o.collection); err != nil {
 		return "", err
 	}
@@ -68,7 +68,7 @@ func (o *OrdersRepo) Create(ctx context.Context, po *types.Order) (string, error
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
-func (o *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
+func (o *OrdersRepo) Update(ctx context.Context, po *models.Order) error {
 	if err := validate(o.collection); err != nil {
 		return err
 	}
@@ -78,7 +78,7 @@ func (o *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
 		return ErrInvalidPOIDUpdate
 	}
 
-	po.UpdatedAt = util.CurrentISOTime()
+	po.UpdatedAt = time.Now()
 
 	filter := bson.D{primitive.E{Key: "_id", Value: po.ID}}
 	update := bson.D{primitive.E{Key: "$set", Value: po}}
@@ -97,7 +97,7 @@ func (o *OrdersRepo) Update(ctx context.Context, po *types.Order) error {
 	return nil
 }
 
-func (o *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
+func (o *OrdersRepo) GetAll(ctx context.Context) (*[]models.Order, error) {
 	if vErr := validate(o.collection); vErr != nil {
 		return nil, vErr
 	}
@@ -110,7 +110,7 @@ func (o *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	var results []types.Order
+	var results []models.Order
 	if err = cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (o *OrdersRepo) GetAll(ctx context.Context) (*[]types.Order, error) {
 	return &results, nil
 }
 
-func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Order, error) {
+func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*models.Order, error) {
 	if err := validate(o.collection); err != nil {
 		return nil, err
 	}
@@ -130,7 +130,7 @@ func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*types.Order, erro
 
 	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
 
-	var result types.Order
+	var result models.Order
 	err = o.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {

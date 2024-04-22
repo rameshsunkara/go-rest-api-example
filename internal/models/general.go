@@ -1,4 +1,4 @@
-package types
+package models
 
 type ServiceInfo struct {
 	Name        string // name of the service

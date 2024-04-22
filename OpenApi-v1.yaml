@@ -5,6 +5,7 @@ info:
   version: 1.0.0
 servers:
   - url: https://api.example.com/v1
+    description: Sample production server
 security:
   - apiKey: [] # Example of API key authentication, replace with appropriate security scheme
 tags:
@@ -617,20 +618,6 @@ components:
         - user
         - totalAmount
         - status
-    OrderInput:
-      type: object
-      properties:
-        products:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProductInput'
-          description: The list of products in the order
-        user:
-          type: string
-          description: The user who is placing the order
-      required:
-        - products
-        - user
     OrderUpdate:
       type: object
       properties:
@@ -664,6 +651,16 @@ components:
         remarks:
           type: string
           description: Additional remarks or description about the product
+    OrderInput:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInput'
+          description: The list of products in the order
+      required:
+        - products
     ProductInput:
       type: object
       properties:
@@ -672,11 +669,9 @@ components:
           description: The name of the product
         price:
           type: number
-          format: float
+          format: unit64
           description: The price of the product
-        status:
-          type: string
-          description: The status of the product
-        remarks:
-          type: string
-          description: Additional remarks or description about the product
+        quantity:
+          type: number
+          format: uint64
+          description: No.of items

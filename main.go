@@ -8,8 +8,8 @@ import (
 	"github.com/rameshsunkara/deferrun"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
 )
 
 const (
@@ -65,7 +65,7 @@ func main() {
 }
 
 // MustEnvConfig reads all the environmental configurations and panics if something critical is missing.
-func MustEnvConfig() types.ServiceEnv {
+func MustEnvConfig() models.ServiceEnv {
 	envName := os.Getenv("environment")
 	if envName == "" {
 		envName = "local"
@@ -105,7 +105,7 @@ func MustEnvConfig() types.ServiceEnv {
 		logLevel = "info"
 	}
 
-	envConfigurations := types.ServiceEnv{
+	envConfigurations := models.ServiceEnv{
 		Name:              envName,
 		Port:              port,
 		PrintQueries:      printDBQueries,

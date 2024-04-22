@@ -2,11 +2,12 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
@@ -27,24 +28,22 @@ func NewSeedController(svc db.OrdersDataService) *SeedController {
 
 func (s *SeedController) SeedDB(c *gin.Context) {
 	for i := 0; i < seedRecordCount; i++ {
-		products := []types.Product{
+		products := []models.Product{
 			{
-				Name:        faker.Name(),
-				Price:       util.RandomPrice(),
-				Description: faker.Sentence(),
-				UpdatedAt:   faker.TimeString(),
+				Name:      faker.Name(),
+				Price:     util.RandomPrice(),
+				UpdatedAt: time.Now(),
 			},
 			{
-				Name:        faker.Name(),
-				Price:       util.RandomPrice(),
-				Description: faker.Sentence(),
-				UpdatedAt:   faker.TimeString(),
+				Name:      faker.Name(),
+				Price:     util.RandomPrice(),
+				UpdatedAt: time.Now(),
 			},
 		}
 
-		po := &types.Order{
-			CreatedAt: util.CurrentISOTime(),
-			UpdatedAt: util.CurrentISOTime(),
+		po := &models.Order{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
 			Products:  products,
 			User:      faker.Email(),
 		}

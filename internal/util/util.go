@@ -5,6 +5,8 @@ import (
 	"math/big"
 	"strings"
 	"time"
+
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 )
 
 func FormatTimeToISO(timeToFormat time.Time) string {
@@ -31,4 +33,13 @@ func RandomPrice() uint64 {
 		price = big.NewInt(defaultPrice)
 	}
 	return price.Uint64()
+}
+
+// CalculateTotalAmount calculates the total amount of the order based on the prices of products.
+func CalculateTotalAmount(products []models.Product) uint64 {
+	var total uint64
+	for _, product := range products {
+		total += product.Price * product.Quantity
+	}
+	return total
 }

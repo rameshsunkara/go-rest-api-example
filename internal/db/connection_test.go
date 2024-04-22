@@ -5,11 +5,12 @@ import (
 	"runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/types"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rameshsunkara/strikememongo"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,7 @@ func TestMain(m *testing.M) {
 	creds := &db.MongoDBCredentials{
 		Hostname: strings.TrimPrefix(mongoServer.URI(), "mongodb://"),
 	}
-	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	if dErr != nil {
 		lgr.Fatal().Err(dErr)
@@ -67,22 +68,20 @@ func insertTestData(logger *logger.AppLogger) {
 	database := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(database)
 	for i := 0; i < 100; i++ {
-		product := []types.Product{
+		product := []models.Product{
 			{
-				Name:        faker.Name(),
-				Price:       util.RandomPrice(),
-				Description: faker.Sentence(),
-				UpdatedAt:   faker.TimeString(),
+				Name:      faker.Name(),
+				Price:     util.RandomPrice(),
+				UpdatedAt: time.Now(),
 			},
 			{
-				Name:        faker.Name(),
-				Price:       util.RandomPrice(),
-				Description: faker.Sentence(),
-				UpdatedAt:   faker.TimeString(),
+				Name:      faker.Name(),
+				Price:     util.RandomPrice(),
+				UpdatedAt: time.Now(),
 			},
 		}
 
-		po := &types.Order{
+		po := &models.Order{
 			Products: product,
 		}
 		_, err := dSvc.Create(context.TODO(), po)
@@ -105,7 +104,7 @@ func TestPing(t *testing.T) {
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	creds := &db.MongoDBCredentials{}
-	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
@@ -116,7 +115,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	creds := &db.MongoDBCredentials{
 		Hostname: "non-existent-hostname",
 	}
-	lgr := logger.Setup(types.ServiceEnv{Name: "test"})
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
