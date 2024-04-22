@@ -25,7 +25,7 @@ type Order struct {
 	UpdatedAt   time.Time          `json:"updatedAt" bson:"updatedAt"`
 	Products    []Product          `json:"products" bson:"products"`
 	User        string             `json:"user" bson:"user"`
-	TotalAmount uint64             `json:"totalAmount" bson:"totalAmount"`
+	TotalAmount float64            `json:"totalAmount" bson:"totalAmount"`
 	Status      OrderStatus        `json:"status" bson:"status"`
 	Updates     []OrderUpdate      `json:"updates" bson:"updates"`
 }
@@ -41,7 +41,7 @@ type OrderUpdate struct {
 type Product struct {
 	Name      string    `json:"name" bson:"name"`
 	UpdatedAt time.Time `json:"updatedAt" bson:"updatedAt"`
-	Price     uint64    `json:"price" bson:"price"`
+	Price     float64   `json:"price" bson:"price"`
 	Status    string    `json:"status" bson:"status"`
 	Remarks   string    `json:"remarks" bson:"remarks"`
 	Quantity  uint64    `json:"quantity"`
@@ -62,7 +62,7 @@ type OrderInput struct {
 
 // ProductInput represents the structure of input for creating or updating a product.
 type ProductInput struct {
-	Name     string `json:"name" binding:"required"`
-	Price    uint64 `json:"price" binding:"required"`
-	Quantity uint64 `json:"quantity" binding:"required"`
+	Name     string  `json:"name" binding:"required"`
+	Price    float64 `json:"price" binding:"required"`
+	Quantity uint64  `json:"quantity" binding:"required"`
 }

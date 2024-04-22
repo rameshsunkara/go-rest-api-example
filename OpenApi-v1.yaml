@@ -147,9 +147,10 @@ paths:
                   products:
                     - name: "Product A"
                       price: 10.99
-                      status: "available"
-                      remarks: "Good product"
-                  user: "user123"
+                      quantity: 2
+                    - name: "Product B"
+                      price: 11.99
+                      quantity: 1
       responses:
         '201':
           description: The created order
@@ -168,10 +169,13 @@ paths:
                       - name: "Product A"
                         updatedAt: "2024-04-20T12:00:00Z"
                         price: 10.99
-                        status: "available"
-                        remarks: "Good product"
-                    user: "user123"
-                    totalAmount: 10.99
+                        quantity: 2
+                      - name: "Product B"
+                        updatedAt: "2024-04-20T12:00:00Z"
+                        price: 11.99
+                        quantity: 1
+                    user: "user123@gmail.com"
+                    totalAmount: 33.97
                     status: "OrderPending"
                     updates: []
         '400':
@@ -594,7 +598,7 @@ components:
           description: The user who placed the order
         totalAmount:
           type: number
-          format: float
+          format: float64
           description: The total amount of the order
         status:
           type: string
@@ -643,7 +647,7 @@ components:
           description: The date and time when the product information was last updated
         price:
           type: number
-          format: float
+          format: float64
           description: The price of the product
         status:
           type: string
@@ -669,7 +673,7 @@ components:
           description: The name of the product
         price:
           type: number
-          format: unit64
+          format: float64
           description: The price of the product
         quantity:
           type: number

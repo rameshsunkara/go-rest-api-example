@@ -26,20 +26,21 @@ func IsDevMode(s string) bool {
 const defaultPrice = 100
 const MaxPrice = 1000
 
-func RandomPrice() uint64 {
+func RandomPrice() float64 {
 	var price *big.Int
 	var err error
 	if price, err = rand.Int(rand.Reader, big.NewInt(MaxPrice)); err != nil {
 		price = big.NewInt(defaultPrice)
 	}
-	return price.Uint64()
+	pf, _ := price.Float64()
+	return pf
 }
 
 // CalculateTotalAmount calculates the total amount of the order based on the prices of products.
-func CalculateTotalAmount(products []models.Product) uint64 {
-	var total uint64
+func CalculateTotalAmount(products []models.Product) float64 {
+	var total float64
 	for _, product := range products {
-		total += product.Price * product.Quantity
+		total += product.Price * (float64(product.Quantity))
 	}
 	return total
 }

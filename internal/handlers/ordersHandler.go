@@ -42,6 +42,7 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 			DebugID:        requestID,
 		}
 		lgr.Error().
+			Err(err).
 			Int("HttpStatusCode", apiErr.HTTPStatusCode).
 			Str("ErrorCode", apiErr.ErrorCode).
 			Msg(apiErr.Message)
