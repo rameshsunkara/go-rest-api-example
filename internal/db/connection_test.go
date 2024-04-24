@@ -11,6 +11,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rameshsunkara/strikememongo"
 	"github.com/stretchr/testify/assert"
@@ -68,7 +69,7 @@ func insertTestData(logger *logger.AppLogger) {
 	database := testDBMgr.Database()
 	dSvc := db.NewOrdersRepo(database)
 	for i := 0; i < 100; i++ {
-		product := []models.Product{
+		product := []data.Product{
 			{
 				Name:      faker.Name(),
 				Price:     util.RandomPrice(),
@@ -81,7 +82,7 @@ func insertTestData(logger *logger.AppLogger) {
 			},
 		}
 
-		po := &models.Order{
+		po := &data.Order{
 			Products: product,
 		}
 		_, err := dSvc.Create(context.TODO(), po)

@@ -1,4 +1,4 @@
-package models
+package data
 
 import (
 	"time"
@@ -7,14 +7,14 @@ import (
 )
 
 // OrderStatus represents the status of an order.
-type OrderStatus int
+type OrderStatus string
 
 const (
-	OrderPending OrderStatus = iota
-	OrderProcessing
-	OrderShipped
-	OrderDelivered
-	OrderCancelled
+	OrderPending    OrderStatus = "OrderPending"
+	OrderProcessing OrderStatus = "OrderProcessing"
+	OrderShipped    OrderStatus = "OrderShipped"
+	OrderDelivered  OrderStatus = "OrderDelivered"
+	OrderCancelled  OrderStatus = "OrderCancelled"
 )
 
 // Order represents the structure of an order.
@@ -45,24 +45,4 @@ type Product struct {
 	Status    string    `json:"status" bson:"status"`
 	Remarks   string    `json:"remarks" bson:"remarks"`
 	Quantity  uint64    `json:"quantity"`
-}
-
-// APIError represents the structure of an API error response.
-type APIError struct {
-	HTTPStatusCode int    `json:"httpStatusCode"`
-	Message        string `json:"message"`
-	DebugID        string `json:"debugId"`
-	ErrorCode      string `json:"errorCode"`
-}
-
-// OrderInput represents the structure of input for creating or updating an order.
-type OrderInput struct {
-	Products []ProductInput `json:"products" binding:"required"`
-}
-
-// ProductInput represents the structure of input for creating or updating a product.
-type ProductInput struct {
-	Name     string  `json:"name" binding:"required"`
-	Price    float64 `json:"price" binding:"required"`
-	Quantity uint64  `json:"quantity" binding:"required"`
 }

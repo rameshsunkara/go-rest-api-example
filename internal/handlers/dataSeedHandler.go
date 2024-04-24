@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
@@ -28,7 +28,7 @@ func NewSeedController(svc db.OrdersDataService) *SeedController {
 
 func (s *SeedController) SeedDB(c *gin.Context) {
 	for i := 0; i < seedRecordCount; i++ {
-		products := []models.Product{
+		products := []data.Product{
 			{
 				Name:      faker.Name(),
 				Price:     util.RandomPrice(),
@@ -41,7 +41,7 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 			},
 		}
 
-		po := &models.Order{
+		po := &data.Order{
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			Products:  products,

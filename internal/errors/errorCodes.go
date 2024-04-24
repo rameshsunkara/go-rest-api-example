@@ -1,8 +1,8 @@
 package errors
 
-const prefix = "orders:"
+const prefix = "orders_"
 
-const UnexpectedErrorMessage = "Unexpected Error occurred, please try again later."
+const UnexpectedErrorMessage = "unexpected Error occurred, please try again later"
 
 const (
 	OrderGetInvalidParams     = prefix + "get_invalid_params"

@@ -9,7 +9,8 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
@@ -33,9 +34,9 @@ func NewOrdersHandler(dSvc db.OrdersDataService, lgr *logger.AppLogger) *OrdersH
 func (o *OrdersHandler) Create(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
 	// Parse request body
-	var orderInput models.OrderInput
+	var orderInput external.OrderInput
 	if err := c.ShouldBindJSON(&orderInput); err != nil {
-		apiErr := &models.APIError{
+		apiErr := &external.APIError{
 			HTTPStatusCode: http.StatusBadRequest,
 			ErrorCode:      errors.OrderCreateInvalidInput,
 			Message:        "Invalid order request body",
@@ -51,9 +52,9 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 	}
 
 	// Convert ProductInput to Product
-	var products []models.Product
+	var products []data.Product
 	for _, productInput := range orderInput.Products {
-		product := models.Product{
+		product := data.Product{
 			Name:     productInput.Name,
 			Price:    productInput.Price,
 			Quantity: productInput.Quantity,
@@ -62,23 +63,33 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 	}
 
 	// Create new Order object
-	order := models.Order{
+	order := data.Order{
 		Version:     1,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 		Products:    products,
 		User:        faker.Email(), // TODO: Replace with actual user email from trusted source such as JWT token
 		TotalAmount: util.CalculateTotalAmount(products),
-		Status:      models.OrderPending,
+		Status:      data.OrderPending,
 	}
 
-	if _, err := o.oDataSvc.Create(c, &order); err == nil {
+	if id, err := o.oDataSvc.Create(c, &order); err == nil {
 		// Return success response
-		c.JSON(http.StatusCreated, order)
+		extOrder := external.Order{
+			ID:          id,
+			CreatedAt:   util.FormatTimeToISO(order.CreatedAt),
+			UpdatedAt:   util.FormatTimeToISO(order.UpdatedAt),
+			Products:    order.Products,
+			User:        order.User,
+			TotalAmount: order.TotalAmount,
+			Status:      order.Status,
+			Version:     order.Version,
+		}
+		c.JSON(http.StatusCreated, extOrder)
 		return
 	}
 
-	apiErr := &models.APIError{
+	apiErr := &external.APIError{
 		HTTPStatusCode: http.StatusInternalServerError,
 		ErrorCode:      errors.OrderCreateServerError,
 		Message:        errors.UnexpectedErrorMessage,

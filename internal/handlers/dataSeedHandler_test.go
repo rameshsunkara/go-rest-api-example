@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +25,7 @@ func TestSeedDB_Success(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, _ *models.Order) (string, error) {
+		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
 			return "random-id", nil
 		},
 	})
@@ -45,7 +45,7 @@ func TestSeedDB_Failure(t *testing.T) {
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
 	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, _ *models.Order) (string, error) {
+		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
 			return "", assert.AnError
 		},
 	})

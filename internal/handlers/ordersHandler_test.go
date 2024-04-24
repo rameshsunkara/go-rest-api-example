@@ -1,5 +1,142 @@
 package handlers_test
 
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
+	errors2 "github.com/rameshsunkara/go-rest-api-example/internal/errors"
+	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
+	"github.com/stretchr/testify/assert"
+)
+
+func UnMarshalOrderResponse(d []byte) (*external.Order, error) {
+	var r *external.Order
+	err := json.Unmarshal(d, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func TestOrdersHandler_Create_Success(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	r := gin.New()
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+			return "1", nil
+		},
+	}, lgr)
+	r.POST("/orders", handler.Create)
+
+	orderInput := external.OrderInput{
+		Products: []external.ProductInput{
+			{Name: "Product 1", Price: 10.0, Quantity: 2},
+		},
+	}
+
+	body, _ := json.Marshal(orderInput)
+	req, err := http.NewRequest(http.MethodPost, "/orders", bytes.NewReader(body))
+	assert.NoError(t, err)
+
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+
+	var responseOrder external.Order
+	err = json.Unmarshal(w.Body.Bytes(), &responseOrder)
+	assert.NoError(t, err)
+
+	assert.Equal(t, int64(1), responseOrder.Version)
+	assert.NotNil(t, responseOrder.CreatedAt)
+	assert.NotNil(t, responseOrder.UpdatedAt)
+	assert.Equal(t, orderInput.Products[0].Name, responseOrder.Products[0].Name)
+	assert.InEpsilon(t, orderInput.Products[0].Price, responseOrder.Products[0].Price, 0)
+	assert.Equal(t, orderInput.Products[0].Quantity, responseOrder.Products[0].Quantity)
+	assert.Equal(t, "1", responseOrder.ID)
+	assert.InEpsilon(t, 20.0, responseOrder.TotalAmount, 0)
+	assert.Equal(t, data.OrderPending, responseOrder.Status)
+}
+
+func TestOrdersHandler_Create_InvalidInput(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	r := gin.New()
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+			return "mock_order_id", nil
+		},
+	}, lgr)
+	r.POST("/orders", handler.Create)
+
+	invalidInput := "{ invalid JSON }"
+	req, err := http.NewRequest(http.MethodPost, "/orders", bytes.NewReader([]byte(invalidInput)))
+	assert.NoError(t, err)
+
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+
+	var apiErr external.APIError
+	err = json.Unmarshal(w.Body.Bytes(), &apiErr)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusBadRequest, apiErr.HTTPStatusCode)
+	assert.Equal(t, "orders_create_invalid_input", apiErr.ErrorCode)
+	assert.Equal(t, "Invalid order request body", apiErr.Message)
+}
+
+func TestOrdersHandler_Create_InternalServerError(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	r := gin.New()
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+			return "", errors.New(errors2.UnexpectedErrorMessage)
+		},
+	}, lgr)
+	r.POST("/orders", handler.Create)
+
+	orderInput := external.OrderInput{
+		Products: []external.ProductInput{
+			{Name: "Product 1", Price: 10.0, Quantity: 2},
+		},
+	}
+
+	body, _ := json.Marshal(orderInput)
+	req, _ := http.NewRequest(http.MethodPost, "/orders", bytes.NewReader(body))
+
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+
+	var apiErr external.APIError
+	err := json.Unmarshal(w.Body.Bytes(), &apiErr)
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusInternalServerError, apiErr.HTTPStatusCode)
+	assert.Equal(t, "orders_create_server_error", apiErr.ErrorCode)
+	assert.Equal(t, errors2.UnexpectedErrorMessage, apiErr.Message) // Assuming errors.UnexpectedErrorMessage
+}
+
 /*
 
 import (
@@ -72,7 +209,7 @@ func TestCreateOrderSuccess(t *testing.T) {
 		}},
 	})
 	body := bytes.NewReader(order)
-	c.Request, _ = http.NewRequest("POST", "/api/v1/orders", body)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/orders", body)
 	mocks.CreateFunc = func(ctx context.Context, order interface{}) (*mongo.InsertOneResult, error) {
 		data, err := ioutil.ReadFile("../../mockdata/createOrder.json")
 		if err != nil {
@@ -106,7 +243,7 @@ func TestCreateOrderFailure_DBError(t *testing.T) {
 		}},
 	})
 	body := bytes.NewReader(order)
-	c.Request, _ = http.NewRequest("POST", "/api/v1/orders", body)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/orders", body)
 	mocks.CreateFunc = func(ctx context.Context, order interface{}) (*mongo.InsertOneResult, error) {
 		return nil, errors.New("db error")
 	}
@@ -127,7 +264,7 @@ func TestCreateOrderFailure_BadRequest(t *testing.T) {
 	c, _ := gin.CreateTestContext(w)
 	order, _ := json.Marshal("Bad Request")
 	body := bytes.NewReader(order)
-	c.Request, _ = http.NewRequest("POST", "/api/v1/orders", body)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/orders", body)
 	mocks.CreateFunc = func(ctx context.Context, order interface{}) (*mongo.InsertOneResult, error) {
 		return nil, nil
 	}
@@ -155,7 +292,7 @@ func TestUpdateOrderSuccess(t *testing.T) {
 		}},
 	})
 	body := bytes.NewReader(order)
-	c.Request, _ = http.NewRequest("POST", "/api/v1/orders", body)
+	c.Request, _ = http.NewRequest(http.MethodPost, "/api/v1/orders", body)
 	mocks.UpdateFunc = func(ctx context.Context, order interface{}) (int64, error) {
 		return 1, nil
 	}
