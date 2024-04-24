@@ -18,6 +18,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func UnMarshalOrderResponse(d []byte) (*external.Order, error) {
@@ -49,7 +50,7 @@ func TestOrdersHandler_Create_Success(t *testing.T) {
 
 	body, _ := json.Marshal(orderInput)
 	req, err := http.NewRequest(http.MethodPost, "/orders", bytes.NewReader(body))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -59,7 +60,7 @@ func TestOrdersHandler_Create_Success(t *testing.T) {
 
 	var responseOrder external.Order
 	err = json.Unmarshal(w.Body.Bytes(), &responseOrder)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, int64(1), responseOrder.Version)
 	assert.NotNil(t, responseOrder.CreatedAt)
@@ -85,7 +86,7 @@ func TestOrdersHandler_Create_InvalidInput(t *testing.T) {
 
 	invalidInput := "{ invalid JSON }"
 	req, err := http.NewRequest(http.MethodPost, "/orders", bytes.NewReader([]byte(invalidInput)))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
@@ -95,7 +96,7 @@ func TestOrdersHandler_Create_InvalidInput(t *testing.T) {
 
 	var apiErr external.APIError
 	err = json.Unmarshal(w.Body.Bytes(), &apiErr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusBadRequest, apiErr.HTTPStatusCode)
 	assert.Equal(t, "orders_create_invalid_input", apiErr.ErrorCode)
@@ -130,7 +131,7 @@ func TestOrdersHandler_Create_InternalServerError(t *testing.T) {
 
 	var apiErr external.APIError
 	err := json.Unmarshal(w.Body.Bytes(), &apiErr)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusInternalServerError, apiErr.HTTPStatusCode)
 	assert.Equal(t, "orders_create_server_error", apiErr.ErrorCode)
