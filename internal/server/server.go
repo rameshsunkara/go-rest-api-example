@@ -45,6 +45,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 	router.Use(middleware.ReqIDMiddleware())
 	router.Use(middleware.ResponseHeadersMiddleware())
 	router.Use(middleware.RequestLogMiddleware(lgr))
+	router.Use(middleware.QueryParamsCheckMiddleware(lgr))
 
 	internalAPIGrp := router.Group("/internal")
 	internalAPIGrp.Use(middleware.AuthMiddleware())

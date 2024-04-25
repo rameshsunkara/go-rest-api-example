@@ -2,6 +2,8 @@ package util_test
 
 import (
 	"fmt"
+	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -60,3 +62,48 @@ func TestRandomPrice(t *testing.T) {
 		t.Errorf("Price is out of range: %v", price)
 	}
 }
+
+func TestHasUnSupportedQueryParams(t *testing.T) {
+	testCases := []struct {
+		description     string
+		queryParams     url.Values
+		supportedParams map[string]bool
+		expectedVal     bool
+	}{
+		{
+			description:     "All parameters are supported",
+			queryParams:     url.Values{"param1": []string{"value1"}, "param2": []string{"value2"}},
+			supportedParams: map[string]bool{"param1": true, "param2": true},
+			expectedVal:     false,
+		},
+		{
+			description:     "Some parameters are not supported",
+			queryParams:     url.Values{"param1": []string{"value1"}, "param3": []string{"value3"}},
+			supportedParams: map[string]bool{"param1": true, "param2": true},
+			expectedVal:     true,
+		},
+		{
+			description:     "No parameters are supported",
+			queryParams:     url.Values{"param1": []string{"value1"}, "param3": []string{"value3"}},
+			supportedParams: map[string]bool{},
+			expectedVal:     true,
+		},
+		{
+			description:     "handle when nil is passed as supportedParams",
+			queryParams:     url.Values{"param1": []string{"value1"}, "param3": []string{"value3"}},
+			supportedParams: nil,
+			expectedVal:     true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.description, func(t *testing.T) {
+			req := &http.Request{URL: &url.URL{RawQuery: tc.queryParams.Encode()}}
+			supported := util.HasUnSupportedQueryParams(req, tc.supportedParams)
+			if supported != tc.expectedVal {
+				t.Errorf("Expected %v, but got %v", tc.expectedVal, supported)
+			}
+		})
+	}
+}
+

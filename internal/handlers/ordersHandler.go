@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -16,6 +18,7 @@ import (
 
 const (
 	OrderIDPath = "id" // Request path variable
+	MaxPageSize = 100  // Maximum number of records that can be fetched in a single request
 )
 
 type OrdersHandler struct {
@@ -33,6 +36,7 @@ func NewOrdersHandler(dSvc db.OrdersDataService, lgr *logger.AppLogger) *OrdersH
 
 func (o *OrdersHandler) Create(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
+	// Validate  inputs : fail fast order
 	// Parse request body
 	var orderInput external.OrderInput
 	if err := c.ShouldBindJSON(&orderInput); err != nil {
@@ -103,14 +107,42 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 }
 
 func (o *OrdersHandler) GetAll(c *gin.Context) {
+	lgr, requestID := o.logger.WithReqID(c)
+	// Validate  inputs : fail fast order
 	orders, err := o.oDataSvc.GetAll(c)
+	var extOrders []external.Order
+	if orders != nil {
+		extOrders = make([]external.Order, len(*orders))
+		for i, o := range *orders {
+			extOrders[i] = external.Order{
+				ID:          o.ID.Hex(),
+				Version:     o.Version,
+				Status:      o.Status,
+				TotalAmount: o.TotalAmount,
+				User:        o.User,
+				CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
+				UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
+				Products: o.Products,
+			}
+		}
+	}
+
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,
-			gin.H{"message": "error occurred while retrieving purchase orders", "error": err})
+		apiErr := &external.APIError{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorCode:      errors.OrdersGetServerError,
+			Message:        errors.UnexpectedErrorMessage,
+			DebugID:        requestID,
+		}
+		lgr.Error().
+			Int("HttpStatusCode", apiErr.HTTPStatusCode).
+			Str("ErrorCode", apiErr.ErrorCode).
+			Msg(apiErr.Message)
+		c.JSON(apiErr.HTTPStatusCode, apiErr)
 		c.Abort()
 		return
 	}
-	c.JSON(http.StatusOK, orders)
+	c.JSON(http.StatusOK, extOrders)
 }
 
 func (o *OrdersHandler) GetByID(c *gin.Context) {
@@ -144,4 +176,55 @@ func (o *OrdersHandler) DeleteByID(c *gin.Context) {
 	}
 	c.JSON(http.StatusBadRequest, gin.H{"message": "bad request"})
 	c.Abort()
+}
+
+func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context, selectParam bool) (int, *external.APIError) {
+	lgr, requestId := o.logger.WithReqID(c)
+	l := db.DefaultPageSize
+	if input, exists := c.GetQuery("limit"); exists && input != "" {
+		if selectParam {
+			apiErr := &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorCode:      "",
+				Message:        "limit query param is not supported when select query param is used",
+				DebugID:        requestId,
+			}
+			lgr.Error().
+				Int("HttpStatusCode", apiErr.HTTPStatusCode).
+				Str("ErrorCode", apiErr.ErrorCode).
+				Msg(apiErr.Message)
+			return 0, apiErr
+		}
+		var err error
+		l, err = strconv.Atoi(input)
+		if err != nil {
+			apiErr := &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorCode:      "",
+				Message:        fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
+					MaxPageSize),
+				DebugID:        requestId,
+			}
+			lgr.Error().
+				Int("HttpStatusCode", apiErr.HTTPStatusCode).
+				Str("ErrorCode", apiErr.ErrorCode).
+				Msg(apiErr.Message)
+			return 0, apiErr
+		}
+		if l < 1 || l > MaxPageSize {
+			apiErr := &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorCode:      "",
+				Message:        fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
+					MaxPageSize),
+				DebugID:        requestId,
+			}
+			lgr.Error().
+				Int("HttpStatusCode", apiErr.HTTPStatusCode).
+				Str("ErrorCode", apiErr.ErrorCode).
+				Msg(apiErr.Message)
+			return 0, apiErr
+		}
+	}
+	return l, nil
 }

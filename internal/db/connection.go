@@ -102,7 +102,7 @@ func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, 
 	if connOpts.PrintQueries {
 		cmdMonitor = &event.CommandMonitor{
 			Started: func(_ context.Context, evt *event.CommandStartedEvent) {
-				c.logger.Debug().Interface("dbQuery", evt.Command).Send()
+				c.logger.Info().Str("dbQuery", evt.Command.String()).Send()
 			},
 		}
 	}

@@ -9,7 +9,7 @@ const (
 	OrderGetUnauthorized      = prefix + "get_unauthorized"
 	OrderGetNotFound          = prefix + "get_not_found"
 	OrderGetRateLimitExceeded = prefix + "get_rate_limit_exceeded"
-	OrderGetServerError       = prefix + "get_server_error"
+	OrdersGetServerError      = prefix + "get_server_error"
 
 	OrderCreateInvalidInput      = prefix + "create_invalid_input"
 	OrderCreateUnauthorized      = prefix + "create_unauthorized"
