@@ -3,7 +3,6 @@ package util
 import (
 	"crypto/rand"
 	"math/big"
-	"net/http"
 	"strings"
 	"time"
 
@@ -44,16 +43,4 @@ func CalculateTotalAmount(products []data.Product) float64 {
 		total += product.Price * (float64(product.Quantity))
 	}
 	return total
-}
-
-func HasUnSupportedQueryParams(req *http.Request, supportedParams map[string]bool) bool {
-	queryParams := req.URL.Query()
-	// Check for unsupported parameters
-	for param := range queryParams {
-		if _, ok := supportedParams[param]; !ok {
-			// Handle the case of an unsupported parameter
-			return true
-		}
-	}
-	return false
 }

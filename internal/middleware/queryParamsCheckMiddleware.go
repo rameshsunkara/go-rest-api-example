@@ -10,34 +10,49 @@ import (
 
 var GetOrdersListReqParams = map[string]bool{
 	"limit":  true,
-	"offset":   true,
+	"offset": true,
 }
 
 var AllowedQueryParams = map[string]map[string]bool{
-	http.MethodGet + "/ecommerce/v1/orders": GetOrdersListReqParams,
-	http.MethodPost + "/ecommerce/v1/orders": nil,
-	http.MethodGet + "/ecommerce/v1/orders/:id": nil,
+	http.MethodGet + "/ecommerce/v1/orders":        GetOrdersListReqParams,
+	http.MethodPost + "/ecommerce/v1/orders":       nil,
+	http.MethodGet + "/ecommerce/v1/orders/:id":    nil,
 	http.MethodDelete + "/ecommerce/v1/orders/:id": nil,
 }
 
-// QueryParamsCheckMiddleware - Middleware to check for unsupported query parameters
+// QueryParamsCheckMiddleware - Middleware to check for unsupported query parameters.
 func QueryParamsCheckMiddleware(lgr *logger.AppLogger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		l, requestID := lgr.WithReqID(c)
 		// Validate query params
-		hasBadReqParams := HasUnSupportedQueryParams(c.Request, AllowedQueryParams[c.Request.Method+c.FullPath()])
+		allowedQueryParams, ok := AllowedQueryParams[c.Request.Method+c.FullPath()]
+		if !ok {
+			l.Error().
+				Str("method", c.Request.Method).
+				Str("path", c.FullPath()).
+				Msg("unsupported method or path")
+			apiErr := &external.APIError{
+				HTTPStatusCode: http.StatusNotFound,
+				ErrorCode:      "",
+				Message:        "unsupported method or path",
+				DebugID:        requestID,
+			}
+			c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
+			return
+		}
+		hasBadReqParams := HasUnSupportedQueryParams(c.Request, allowedQueryParams)
 		if hasBadReqParams {
-			l.Info().Str("url path", c.Request.URL.Path).Msg("QueryParamsCheckMiddleware")
+			l.Error().Str("given query params", c.Request.URL.RawQuery).
+				Interface("allowed query params", allowedQueryParams).
+				Str("requestPath", c.FullPath()).
+				Str("requestMethod", c.Request.Method).
+				Msg("request has unsupported query params")
 			apiErr := &external.APIError{
 				HTTPStatusCode: http.StatusBadRequest,
 				ErrorCode:      "",
 				Message:        "Invalid query params",
 				DebugID:        requestID,
 			}
-			l.Error().
-				Int("HttpStatusCode", apiErr.HTTPStatusCode).
-				Str("ErrorCode", apiErr.ErrorCode).
-				Msg(apiErr.Message)
 			c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
 			return
 		}
@@ -56,4 +71,3 @@ func HasUnSupportedQueryParams(req *http.Request, supportedParams map[string]boo
 	}
 	return false
 }
-

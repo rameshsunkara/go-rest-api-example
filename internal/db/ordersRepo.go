@@ -33,7 +33,7 @@ var (
 type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *data.Order) (string, error)
 	Update(ctx context.Context, purchaseOrder *data.Order) error
-	GetAll(ctx context.Context) (*[]data.Order, error)
+	GetAll(ctx context.Context, limit int64) (*[]data.Order, error)
 	GetByID(ctx context.Context, id string) (*data.Order, error)
 	DeleteByID(ctx context.Context, id string) (int64, error)
 }
@@ -97,14 +97,14 @@ func (o *OrdersRepo) Update(ctx context.Context, po *data.Order) error {
 	return nil
 }
 
-func (o *OrdersRepo) GetAll(ctx context.Context) (*[]data.Order, error) {
+func (o *OrdersRepo) GetAll(ctx context.Context, limit int64) (*[]data.Order, error) {
 	if vErr := validate(o.collection); vErr != nil {
 		return nil, vErr
 	}
 
 	filter := bson.M{}
 	findOptions := options.Find()
-	findOptions.SetLimit(DefaultPageSize)
+	findOptions.SetLimit(limit)
 
 	cursor, err := o.collection.Find(ctx, filter, findOptions)
 	if err != nil {

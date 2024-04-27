@@ -109,7 +109,15 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 func (o *OrdersHandler) GetAll(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
 	// Validate  inputs : fail fast order
-	orders, err := o.oDataSvc.GetAll(c)
+	// Parse query params
+	limit, apiErr := o.parseLimitQueryParam(c)
+	if apiErr != nil {
+		c.JSON(apiErr.HTTPStatusCode, apiErr)
+		c.Abort()
+		return
+	}
+
+	orders, err := o.oDataSvc.GetAll(c, limit)
 	var extOrders []external.Order
 	if orders != nil {
 		extOrders = make([]external.Order, len(*orders))
@@ -122,23 +130,23 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 				User:        o.User,
 				CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
 				UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
-				Products: o.Products,
+				Products:    o.Products,
 			}
 		}
 	}
 
 	if err != nil {
-		apiErr := &external.APIError{
+		aErr := &external.APIError{
 			HTTPStatusCode: http.StatusInternalServerError,
 			ErrorCode:      errors.OrdersGetServerError,
 			Message:        errors.UnexpectedErrorMessage,
 			DebugID:        requestID,
 		}
 		lgr.Error().
-			Int("HttpStatusCode", apiErr.HTTPStatusCode).
-			Str("ErrorCode", apiErr.ErrorCode).
-			Msg(apiErr.Message)
-		c.JSON(apiErr.HTTPStatusCode, apiErr)
+			Int("HttpStatusCode", aErr.HTTPStatusCode).
+			Str("ErrorCode", aErr.ErrorCode).
+			Msg(aErr.Message)
+		c.JSON(aErr.HTTPStatusCode, aErr)
 		c.Abort()
 		return
 	}
@@ -178,32 +186,19 @@ func (o *OrdersHandler) DeleteByID(c *gin.Context) {
 	c.Abort()
 }
 
-func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context, selectParam bool) (int, *external.APIError) {
-	lgr, requestId := o.logger.WithReqID(c)
+func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.APIError) {
+	lgr, requestID := o.logger.WithReqID(c)
 	l := db.DefaultPageSize
 	if input, exists := c.GetQuery("limit"); exists && input != "" {
-		if selectParam {
-			apiErr := &external.APIError{
-				HTTPStatusCode: http.StatusBadRequest,
-				ErrorCode:      "",
-				Message:        "limit query param is not supported when select query param is used",
-				DebugID:        requestId,
-			}
-			lgr.Error().
-				Int("HttpStatusCode", apiErr.HTTPStatusCode).
-				Str("ErrorCode", apiErr.ErrorCode).
-				Msg(apiErr.Message)
-			return 0, apiErr
-		}
 		var err error
 		l, err = strconv.Atoi(input)
 		if err != nil {
 			apiErr := &external.APIError{
 				HTTPStatusCode: http.StatusBadRequest,
 				ErrorCode:      "",
-				Message:        fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
+				Message: fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
 					MaxPageSize),
-				DebugID:        requestId,
+				DebugID: requestID,
 			}
 			lgr.Error().
 				Int("HttpStatusCode", apiErr.HTTPStatusCode).
@@ -215,9 +210,9 @@ func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context, selectParam bool) (
 			apiErr := &external.APIError{
 				HTTPStatusCode: http.StatusBadRequest,
 				ErrorCode:      "",
-				Message:        fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
+				Message: fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
 					MaxPageSize),
-				DebugID:        requestId,
+				DebugID: requestID,
 			}
 			lgr.Error().
 				Int("HttpStatusCode", apiErr.HTTPStatusCode).
@@ -226,5 +221,5 @@ func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context, selectParam bool) (
 			return 0, apiErr
 		}
 	}
-	return l, nil
+	return int64(l), nil
 }
