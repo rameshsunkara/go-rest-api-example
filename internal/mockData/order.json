@@ -1,0 +1,34 @@
+{
+  "orderId": "609d9ed771df2a0d99bf0077",
+  "version": 1,
+  "createdAt": "2024-04-27T08:00:00Z",
+  "updatedAt": "2024-04-27T08:00:00Z",
+  "products": [
+    {
+      "name": "Product 1",
+      "updatedAt": "2024-04-27T08:00:00Z",
+      "price": 10.5,
+      "status": "In Stock",
+      "remarks": "",
+      "quantity": 2
+    },
+    {
+      "name": "Product 2",
+      "updatedAt": "2024-04-27T08:00:00Z",
+      "price": 15.75,
+      "status": "In Stock",
+      "remarks": "",
+      "quantity": 1
+    }
+  ],
+  "user": "user123",
+  "totalAmount": 36.75,
+  "status": "Pending",
+  "updates": [
+    {
+      "updatedAt": "2024-04-27T08:00:00Z",
+      "notes": "Order created",
+      "handledBy": "admin"
+    }
+  ]
+}
