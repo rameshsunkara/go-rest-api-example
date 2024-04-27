@@ -51,7 +51,7 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 			Int("HttpStatusCode", apiErr.HTTPStatusCode).
 			Str("ErrorCode", apiErr.ErrorCode).
 			Msg(apiErr.Message)
-		c.JSON(apiErr.HTTPStatusCode, apiErr)
+		c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
 		return
 	}
 
@@ -103,7 +103,7 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 		Int("HttpStatusCode", apiErr.HTTPStatusCode).
 		Str("ErrorCode", apiErr.ErrorCode).
 		Msg(apiErr.Message)
-	c.JSON(apiErr.HTTPStatusCode, apiErr)
+	c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
 }
 
 func (o *OrdersHandler) GetAll(c *gin.Context) {
@@ -112,8 +112,7 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 	// Parse query params
 	limit, apiErr := o.parseLimitQueryParam(c)
 	if apiErr != nil {
-		c.JSON(apiErr.HTTPStatusCode, apiErr)
-		c.Abort()
+		c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
 		return
 	}
 
@@ -146,8 +145,7 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 			Int("HttpStatusCode", aErr.HTTPStatusCode).
 			Str("ErrorCode", aErr.ErrorCode).
 			Msg(aErr.Message)
-		c.JSON(aErr.HTTPStatusCode, aErr)
-		c.Abort()
+		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
 		return
 	}
 	c.JSON(http.StatusOK, extOrders)
@@ -166,8 +164,7 @@ func (o *OrdersHandler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusOK, order)
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "bad request"})
-	c.Abort()
+	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
 }
 
 func (o *OrdersHandler) DeleteByID(c *gin.Context) {

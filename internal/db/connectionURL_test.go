@@ -20,7 +20,7 @@ func TestMongoDBCredentialFromSideCar(t *testing.T) {
 	var testCases = []mongoCredentialTestCase{
 		{
 			Description: "ensure MongoDBCredentialFromSideCar returns expected MongoDBCredential",
-			Input:       "./mockData/mongoDB_test_credentials.json",
+			Input:       "../mockData/mongoDB_test_credentials.json",
 			ExpectedOut: &db.MongoDBCredentials{
 				Hostname:   "test",
 				Password:   "123456789",
@@ -31,12 +31,12 @@ func TestMongoDBCredentialFromSideCar(t *testing.T) {
 		},
 		{
 			Description: "ensure MongoDBCredentialFromSideCar returns error when invalid file path is given",
-			Input:       "./mockData/non-existent.json",
+			Input:       "../mockData/non-existent.json",
 			ExpectedErr: db.ErrSideCarFileRead,
 		},
 		{
 			Description: "expect nil when invalid json file is given",
-			Input:       "./mockData/mongoDB_test_credentials_fail.json",
+			Input:       "../mockData/mongoDB_test_credentials_fail.json",
 			ExpectedOut: nil,
 			ExpectedErr: db.ErrSideCarFileFormat,
 		},
@@ -78,7 +78,7 @@ func TestMongoConnectionUrl(t *testing.T) {
 			Description: "connection url should have username and password in url",
 			Input: func() *db.MongoDBCredentials {
 				var m db.MongoDBCredentials
-				data, _ := os.ReadFile("./mockData/mongoDB_test_credentials.json")
+				data, _ := os.ReadFile("../mockData/mongoDB_test_credentials.json")
 				_ = json.Unmarshal(data, &m)
 				return &m
 			}(),

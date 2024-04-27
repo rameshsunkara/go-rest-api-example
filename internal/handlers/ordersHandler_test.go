@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -21,14 +22,24 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func UnMarshalOrderResponse(d []byte) (*external.Order, error) {
-	var r *external.Order
+func UnMarshalOrderResponse(d []byte) (*data.Order, error) {
+	var r data.Order
 	err := json.Unmarshal(d, &r)
 	if err != nil {
 		return nil, err
 	}
 
-	return r, nil
+	return &r, nil
+}
+
+func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
+	var r []data.Order
+	err := json.Unmarshal(d, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return &r, nil
 }
 
 func TestOrdersHandler_Create_Success(t *testing.T) {
@@ -136,6 +147,107 @@ func TestOrdersHandler_Create_InternalServerError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, apiErr.HTTPStatusCode)
 	assert.Equal(t, "orders_create_server_error", apiErr.ErrorCode)
 	assert.Equal(t, errors2.UnexpectedErrorMessage, apiErr.Message) // Assuming errors.UnexpectedErrorMessage
+}
+
+func TestGetAllOrdersSuccess(t *testing.T) {
+	// Test Setup
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	r := gin.New()
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		GetAllFunc: func(_ context.Context, _ int64) (*[]data.Order, error) {
+			dataBytes, err := os.ReadFile("../mockData/orders.json")
+			if err != nil {
+				return nil, err
+			}
+			dataOrders, _ := UnMarshalOrdersData(dataBytes)
+			return dataOrders, nil
+		},
+	}, lgr)
+	r.GET("/orders", handler.GetAll)
+
+	req, err := http.NewRequest(http.MethodGet, "/orders", nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var respOrders []external.Order
+	err = json.Unmarshal(w.Body.Bytes(), &respOrders)
+	require.NoError(t, err)
+	assert.Len(t, respOrders, 10)
+}
+
+func TestGetAllOrdersFailure_DBRead(t *testing.T) {
+	// Test Setup
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	r := gin.New()
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		GetAllFunc: func(_ context.Context, _ int64) (*[]data.Order, error) {
+			dataBytes, err := os.ReadFile("../mockData/non-existent.json")
+			if err != nil {
+				return nil, err
+			}
+			dataOrders, _ := UnMarshalOrdersData(dataBytes)
+			return dataOrders, nil
+		},
+	}, lgr)
+	r.GET("/orders", handler.GetAll)
+
+	req, err := http.NewRequest(http.MethodGet, "/orders", nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestGetAllOrdersFailure_LimitOutOfBounds(t *testing.T) {
+	// Test Setup
+	resp := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(resp)
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{}, lgr)
+	r.GET("/orders", handler.GetAll)
+
+	c.Request, _ = http.NewRequest(http.MethodGet, "/orders", nil)
+	q := c.Request.URL.Query()
+	q.Add("limit", "10000")
+	c.Request.URL.RawQuery = q.Encode()
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, c.Request)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestGetAllOrdersFailure_InvalidLimit(t *testing.T) {
+	// Test Setup
+	resp := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(resp)
+	gin.SetMode(gin.TestMode)
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{}, lgr)
+	r.GET("/orders", handler.GetAll)
+
+	c.Request, _ = http.NewRequest(http.MethodGet, "/orders", nil)
+	q := c.Request.URL.Query()
+	q.Add("limit", "ABC")
+	c.Request.URL.RawQuery = q.Encode()
+
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, c.Request)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
 /*

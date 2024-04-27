@@ -15,7 +15,7 @@ func TestAuthMiddleware(t *testing.T) {
 	router := gin.New()
 
 	// Use the middleware
-	router.Use(middleware.InternalAuthMiddleware())
+	router.Use(middleware.AuthMiddleware())
 
 	// Define a test route
 	router.GET("/test", func(c *gin.Context) {
@@ -39,7 +39,7 @@ func TestAuthMiddleware_WithNext(t *testing.T) {
 	var nextCalled bool
 
 	// Use the middleware
-	router.Use(middleware.InternalAuthMiddleware())
+	router.Use(middleware.AuthMiddleware())
 
 	// Define a test route
 	router.GET("/test", func(c *gin.Context) {
