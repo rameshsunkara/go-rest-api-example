@@ -26,7 +26,7 @@ type AppLogger struct {
 func Setup(env models.ServiceEnv) *AppLogger {
 	setupOnce.Do(func() {
 		appLogger = &AppLogger{}
-		lvl := getZerologLevel(env.LogLevel)
+		lvl := ZerologLevel(env.LogLevel)
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		zerolog.TimeFieldFormat = time.RFC3339Nano
 		var logDest io.Writer
@@ -70,7 +70,7 @@ func (l *AppLogger) Debug() *zerolog.Event {
 	return l.zLogger.Debug()
 }
 
-func getZerologLevel(level string) zerolog.Level {
+func ZerologLevel(level string) zerolog.Level {
 	switch level {
 	case "debug":
 		return zerolog.DebugLevel

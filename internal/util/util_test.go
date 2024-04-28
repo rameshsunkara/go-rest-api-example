@@ -65,7 +65,8 @@ func TestRandomPrice(t *testing.T) {
 func TestCalculateTotalAmount(t *testing.T) {
 	// Test case: Empty input
 	emptyTotal := util.CalculateTotalAmount([]data.Product{})
-	assert.InEpsilon(t, float64(0), emptyTotal, 0.0001)
+	// ugly hack to avoid lint error to use InEpsilon and InEpsilon limitation for 0 values
+	assert.InEpsilon(t, 1, emptyTotal+1, 0)
 
 	// Test case: Single product
 	singleProductTotal := util.CalculateTotalAmount([]data.Product{
@@ -86,5 +87,6 @@ func TestCalculateTotalAmount(t *testing.T) {
 		{Name: "Product 1", Price: 10.0, Quantity: 0},
 		{Name: "Product 2", Price: 20.0, Quantity: 0},
 	})
-	assert.InEpsilon(t, 0.0, zeroQuantityProductsTotal, 0.0001)
+	// ugly hack to avoid lint error to use InEpsilon and InEpsilon limitation for 0 values
+	assert.InEpsilon(t, 1, zeroQuantityProductsTotal+1, 0)
 }
