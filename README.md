@@ -91,6 +91,7 @@ Other Options:
 - [ ] Add missing references/inspirations
 - [ ] Implement Update Operations mentioned in the API Spec
 - [ ] Improve data model and add more fields
+- [ ] Add git hooks for pre-commit and pre-push
 
 ### References
 
