@@ -15,7 +15,7 @@ servers:
   - url: https://api.example.com/v1
     description: Sample production server
 security:
-  - apiKey: [] # Example of API key authentication, replace with appropriate security scheme
+  - Bearer: []
 tags:
   - name: Orders
     description: Operations related to orders
@@ -33,6 +33,7 @@ paths:
           schema:
             type: integer
             minimum: 0
+            maximum: 100000
             format: int64
           description: Number of items to skip
         - in: query
@@ -262,6 +263,7 @@ paths:
         schema:
           type: string
           format: uuid
+          maxLength: 36
         description: The ID of the order to operate on
     get:
       summary: Retrieve a specific order
@@ -568,6 +570,12 @@ paths:
                     debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
                     httpStatusCode: 500
 components:
+  securitySchemes:
+    Bearer:
+      description: Personal access token compliant with RFC8725 issued by the HPE GreenLake platform.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     ApiError:
       type: object
@@ -587,13 +595,18 @@ components:
         message:
           type: string
           description: User-friendly error message
+          maxLength: 100
+          format: string
         debugId:
           type: string
           format: uuid
+          maxLength: 36
           description: Unique identifier for the instance of this error
         errorCode:
           type: string
           description: A unique machine-friendly, but human-readable identifier for the error
+          maxLength: 50
+          format: string
     Order:
       type: object
       description: Object representing an order in the system.
@@ -601,6 +614,7 @@ components:
         orderId:
           type: string
           format: uuid
+          maxLength: 36
           description: The unique identifier for the order
         version:
           type: integer
@@ -611,10 +625,12 @@ components:
         createdAt:
           type: string
           format: date-time
+          maxLength: 20
           description: The date and time when the order was created
         updatedAt:
           type: string
           format: date-time
+          maxLength: 20
           description: The date and time when the order was last updated
         products:
           type: array
@@ -626,6 +642,8 @@ components:
         user:
           type: string
           description: The user who placed the order
+          maxLength: 50
+          format: string
         totalAmount:
           type: number
           format: float64
@@ -661,13 +679,18 @@ components:
         updatedAt:
           type: string
           format: date-time
+          maxLength: 20
           description: The date and time when the order was updated
         notes:
           type: string
+          maxLength: 100
           description: Additional notes or comments about the update
+          format: string
         handledBy:
           type: string
+          maxLength: 50
           description: The person or system who handled the update
+          format: string
     Product:
       type: object
       description: Object representing a product in the system.
@@ -675,9 +698,12 @@ components:
         name:
           type: string
           description: The name of the product
+          maxLength: 100
+          format: string
         updatedAt:
           type: string
           format: date-time
+          maxLength: 20
           description: The date and time when the product information was last updated
         price:
           type: number
@@ -686,9 +712,13 @@ components:
         status:
           type: string
           description: The status of the product
+          maxLength: 50
+          format: string
         remarks:
           type: string
           description: Additional remarks or description about the product
+          maxLength: 10000
+          format: string
     OrderInput:
       type: object
       description: Object representing the input data for creating or updating an order.
@@ -709,6 +739,8 @@ components:
         name:
           type: string
           description: The name of the product
+          maxLength: 100
+          format: string
         price:
           type: number
           format: float64
