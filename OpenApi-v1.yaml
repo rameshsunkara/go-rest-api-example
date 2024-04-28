@@ -30,23 +30,40 @@ paths:
       parameters:
         - in: query
           name: offset
+          description: Number of items to skip
           schema:
             type: integer
             minimum: 0
             maximum: 100000
             format: int64
-          description: Number of items to skip
+          examples:
+            offset1:
+              value: 0
+            offset2:
+              value: 10
         - in: query
           name: limit
+          description: Maximum number of items to return
           schema:
             type: integer
             minimum: 1
             maximum: 100
             format: int64
-          description: Maximum number of items to return
+          examples:
+            limit1:
+              value: 10
+            limit2:
+              value: 20
       responses:
         '200':
           description: A list of orders
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -74,6 +91,13 @@ paths:
                       updates: []
         '400':
           description: Bad request. Invalid offset or limit value.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -87,6 +111,13 @@ paths:
                     httpStatusCode: 400
         '401':
           description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -100,6 +131,13 @@ paths:
                     httpStatusCode: 401
         '404':
           description: Not found. No orders found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -114,13 +152,14 @@ paths:
         '429':
           description: Too many requests. Rate limit exceeded.
           headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
             Retry-After:
-              description: Seconds until the rate limit is reset
-              schema:
-                type: integer
-                format: int32
-                minimum: 0
-                maximum: 3600
+                $ref: '#/components/schemas/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -134,6 +173,13 @@ paths:
                     httpStatusCode: 429
         '500':
           description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -171,6 +217,13 @@ paths:
       responses:
         '201':
           description: The created order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -197,6 +250,13 @@ paths:
                     updates: []
         '400':
           description: Bad request. Invalid order input data.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -210,6 +270,13 @@ paths:
                     httpStatusCode: 400
         '401':
           description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -224,13 +291,14 @@ paths:
         '429':
           description: Too many requests. Rate limit exceeded.
           headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
             Retry-After:
-              description: Seconds until the rate limit is reset
-              schema:
-                type: integer
-                format: int32
-                minimum: 0
-                maximum: 3600
+                $ref: '#/components/schemas/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -244,6 +312,13 @@ paths:
                     httpStatusCode: 429
         '500':
           description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -274,6 +349,13 @@ paths:
       responses:
         '200':
           description: The requested order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -297,6 +379,13 @@ paths:
                     updates: []
         '400':
           description: Bad request. Invalid order ID.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -310,6 +399,13 @@ paths:
                     httpStatusCode: 400
         '401':
           description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -323,6 +419,13 @@ paths:
                     httpStatusCode: 401
         '404':
           description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -337,13 +440,14 @@ paths:
         '429':
           description: Too many requests. Rate limit exceeded.
           headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
             Retry-After:
-              description: Seconds until the rate limit is reset
-              schema:
-                type: integer
-                format: int32
-                minimum: 0
-                maximum: 3600
+                $ref: '#/components/schemas/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -357,6 +461,13 @@ paths:
                     httpStatusCode: 429
         '500':
           description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -393,6 +504,13 @@ paths:
       responses:
         '200':
           description: The updated order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -416,6 +534,13 @@ paths:
                     updates: []
         '400':
           description: Bad request. Invalid order ID or input data.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -429,6 +554,13 @@ paths:
                     httpStatusCode: 400
         '401':
           description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -442,6 +574,13 @@ paths:
                     httpStatusCode: 401
         '404':
           description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -456,13 +595,14 @@ paths:
         '429':
           description: Too many requests. Rate limit exceeded.
           headers:
-            Retry-After:
-              description: Seconds until the rate limit is reset
-              schema:
-                type: integer
-                format: int32
-                minimum: 0
-                maximum: 3600
+              X-RateLimit-Limit:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+              X-RateLimit-Remaining:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+              X-RateLimit-Reset:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+              Retry-After:
+                  $ref: '#/components/schemas/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -476,6 +616,13 @@ paths:
                     httpStatusCode: 429
         '500':
           description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -496,8 +643,22 @@ paths:
       responses:
         '204':
           description: Order deleted successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
         '400':
           description: Bad request. Invalid order ID.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -511,6 +672,13 @@ paths:
                     httpStatusCode: 400
         '401':
           description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -524,6 +692,13 @@ paths:
                     httpStatusCode: 401
         '404':
           description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -538,13 +713,14 @@ paths:
         '429':
           description: Too many requests. Rate limit exceeded.
           headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
             Retry-After:
-              description: Seconds until the rate limit is reset
-              schema:
-                type: integer
-                format: int32
-                minimum: 0
-                maximum: 3600
+                $ref: '#/components/schemas/headers/Retry-After'
           content:
             application/json:
               schema:
@@ -558,6 +734,13 @@ paths:
                     httpStatusCode: 429
         '500':
           description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
           content:
             application/json:
               schema:
@@ -749,3 +932,29 @@ components:
           type: number
           format: uint64
           description: No.of items
+    headers:
+      description: Common headers for API responses
+      X-Rate-Limit-Limit:
+        type: integer
+        format: int64
+        description: The maximum number of requests that the client is permitted to make in 60 second window.
+        minimum: 0
+        maximum: 1000
+      X-Rate-Limit-Remaining:
+        type: integer
+        format: int64
+        description: The number of requests remaining in the current 60 second window.
+        minimum: 0
+        maximum: 1000
+      X-Rate-Limit-Reset:
+        type: integer
+        format: int64
+        description: The Unix timestamp at which the rate limit will be reset
+        minimum: 0
+        maximum: 2147483647
+      Retry-After:
+        type: integer
+        format: int32
+        description: Seconds until the rate limit is reset
+        minimum: 0
+        maximum: 3600
