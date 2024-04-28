@@ -21,7 +21,7 @@ There are many open source boilerplate repos but why I did this ?
 
 ### QuickStart
 
-Pre-requisites: Docker, Docker Compose, [Swag](https://github.com/swaggo/swag)
+Pre-requisites: Docker, Docker Compose, Make
 
 1. Start the service
 
@@ -31,8 +31,8 @@ Pre-requisites: Docker, Docker Compose, [Swag](https://github.com/swaggo/swag)
 
 Other Options:
 
-Choose a command to run in go-rest-api-example:
-
+   Choose a command to run in go-rest-api-example:
+   
       start                         Starts everything that is required to serve the APIs
       run                           Run the API server alone (without supplementary services such as DB etc.,)
       build                         Build the API server binary
@@ -51,20 +51,20 @@ Choose a command to run in go-rest-api-example:
       docker-clean                  Cleans all docker resources
       docker-clean-service-images   Stops and Removes the service images
       docker-clean-build-images     Removes build images
+      owasp-report                  Generate OWASP report
+
 
 
 ### Tools
 
 1. Routing - [Gin](https://github.com/gin-gonic/gin)
-2. Logging - [zerolog](https://github.com/rs/zerolog)
-3. Configuration - [Viper](https://github.com/spf13/viper)
-4. Database - [Mongo](https://www.mongodb.com/)
-5. Container - [Docker](https://www.docker.com/)
-6. API Spec Generation - [Swag](https://github.com/swaggo/swag)
+1. Logging - [zerolog](https://github.com/rs/zerolog)
+1. Database - [Mongo](https://www.mongodb.com/)
+1. Container - [Docker](https://www.docker.com/)
 
 ### Features
 
-- OpenApi3 Spec generation
+- OpenApi3.1 Spec
 - Easy to use 'make' tasks to do everything
 - Multi-Stage container build (cache enabled)
 - Versioning using git commit (both Application and Docker objects)
@@ -74,13 +74,10 @@ Choose a command to run in go-rest-api-example:
 ### TODO
 
 - [ ] Add more and clear documentation about the features this offers and how to replace tools
-- [ ] Automate Open API3 Spec Generation completely
 - [ ] Add DB Migration Support
 - [ ] Add more profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
 - [ ] Deploy to cloud
 - [ ] Add missing references/inspirations
-- [ ] Improvements to the api in terms of error handling, proper messaging etc., ( that wasn't focus)
-- [ ] API Documentation - Lot of potential to improve
 
 ### References
 
@@ -92,8 +89,4 @@ Choose a command to run in go-rest-api-example:
 
 - Please feel free to Open PRs
 - Please create issues with any problem you noticed
-
-## Known Issues
-
-- Default Swagger Docs doesn't use generated OpenAPI3 Spec
-- Docker Run make targets are for build server for now
+- Please suggest any improvements
