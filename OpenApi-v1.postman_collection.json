@@ -7,16 +7,30 @@
 	},
 	"item": [
 		{
-			"name": "Check Health",
+			"name": "Check Service Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/status",
+					"raw": "http://{{host}}/status",
+					"protocol": "http",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
 						"status"
 					]
@@ -30,15 +44,20 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders",
+					"raw": "{{host}}/ecommerce/v1/orders?limit=10",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
-						"api",
+						"ecommerce",
 						"v1",
 						"orders"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						}
 					]
 				}
 			},
@@ -50,16 +69,15 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders/629536b3fac02728de50c042",
+					"raw": "{{host}}/ecommerce/v1/orders/66290ba42c3c91543e0b3dbf",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
-						"api",
+						"ecommerce",
 						"v1",
 						"orders",
-						"629536b3fac02728de50c042"
+						"66290ba42c3c91543e0b3dbf"
 					]
 				}
 			},
@@ -71,16 +89,16 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders/628c545c0a9474f2c15a2ce2",
+					"raw": "localhost:8080/ecommerce/v1/orders/\"\"",
 					"host": [
-						"{{host}}"
+						"localhost"
 					],
-					"port": "{{port}}",
+					"port": "8080",
 					"path": [
-						"api",
+						"ecommerce",
 						"v1",
 						"orders",
-						"628c545c0a9474f2c15a2ce2"
+						"\"\""
 					]
 				}
 			},
@@ -92,16 +110,15 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders/628c545c0a9474f2c15a2ce2",
+					"raw": "{{host}}/ecommerce/v1/orders/66290ba42c3c91543e0b3dbf",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
-						"api",
+						"ecommerce",
 						"v1",
 						"orders",
-						"628c545c0a9474f2c15a2ce2"
+						"66290ba42c3c91543e0b3dbf"
 					]
 				}
 			},
@@ -114,7 +131,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"products\": [{\n        \"name\": \"iphone13\",\n        \"price\": 1300\n    }, {\n        \"name\": \"iphone12\",\n        \"price\": 1200\n    }, {\n        \"name\": \"iphone11\",\n        \"price\": 1100\n    }, {\n        \"name\": \"iphoneX\",\n        \"price\": 1000\n    }]\n}",
+					"raw": "{\n  \"products\": [\n    {\n      \"name\": \"Product A\",\n      \"price\": 10.99,\n      \"quantity\": 2\n    },\n    {\n      \"name\": \"Product B\",\n      \"price\": 11.99,\n      \"quantity\": 1\n    }\n  ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -122,13 +139,12 @@
 					}
 				},
 				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders",
+					"raw": "{{host}}/ecommerce/v1/orders",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
-						"api",
+						"ecommerce",
 						"v1",
 						"orders"
 					]
@@ -137,47 +153,18 @@
 			"response": []
 		},
 		{
-			"name": "Update Order",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"order_id\": \"628c556112951bff10538abc\",\n    \"products\": [{\n        \"name\": \"iphone14\",\n        \"price\": 1300\n    }]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{host}}:{{port}}/api/v1/orders",
-					"host": [
-						"{{host}}"
-					],
-					"port": "{{port}}",
-					"path": [
-						"api",
-						"v1",
-						"orders"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Seed DB",
+			"name": "Seed Local Developer DB",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "{{host}}:{{port}}/seedDB",
+					"raw": "{{host}}/internal/seed-local-db",
 					"host": [
 						"{{host}}"
 					],
-					"port": "{{port}}",
 					"path": [
-						"seedDB"
+						"internal",
+						"seed-local-db"
 					]
 				}
 			},

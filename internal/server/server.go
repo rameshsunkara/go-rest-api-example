@@ -45,7 +45,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 	router.Use(middleware.ReqIDMiddleware())
 	router.Use(middleware.ResponseHeadersMiddleware())
 	router.Use(middleware.RequestLogMiddleware(lgr))
-	router.Use(middleware.QueryParamsCheckMiddleware(lgr))
+
 
 	internalAPIGrp := router.Group("/internal")
 	internalAPIGrp.Use(middleware.AuthMiddleware())
@@ -67,6 +67,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 	// Routes - Ecommerce
 	externalAPIGrp := router.Group("/ecommerce/v1")
 	externalAPIGrp.Use(middleware.AuthMiddleware())
+	externalAPIGrp.Use(middleware.QueryParamsCheckMiddleware(lgr))
 	{
 		ordersGroup := externalAPIGrp.Group("orders")
 		{
