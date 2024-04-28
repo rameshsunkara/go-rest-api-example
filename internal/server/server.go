@@ -74,7 +74,6 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 			ordersGroup.GET("", orders.GetAll)
 			ordersGroup.GET("/:id", orders.GetByID)
 			ordersGroup.POST("", orders.Create)
-			ordersGroup.PUT("", orders.Create)
 			ordersGroup.DELETE("/:id", orders.DeleteByID)
 		}
 	}

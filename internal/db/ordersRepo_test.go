@@ -235,3 +235,31 @@ func TestOrdersRepo_UpdateOrder_BadOrderID(t *testing.T) {
 	err := dSvc.Update(context.TODO(), po)
 	assert.EqualError(t, err, db.ErrInvalidPOIDUpdate.Error())
 }
+
+func TestOrdersRepo_UpdateOrder_NonExistingID(t *testing.T) {
+	d := testDBMgr.Database()
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
+		{
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
+		},
+	}
+	orderID, _ := primitive.ObjectIDFromHex("non-existent-id")
+
+	po := &data.Order{
+		ID:          orderID,
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
+	}
+
+	po.Status = data.OrderDelivered
+	err := dSvc.Update(context.TODO(), po)
+	assert.EqualError(t, err, db.ErrInvalidPOIDUpdate.Error())
+}

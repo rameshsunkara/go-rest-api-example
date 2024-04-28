@@ -50,11 +50,6 @@ func TestListOfRoutes(t *testing.T) {
 	})
 
 	assertRoutePresent(t, list, gin.RouteInfo{
-		Method: http.MethodPut,
-		Path:   "/ecommerce/v1/orders",
-	})
-
-	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodDelete,
 		Path:   "/ecommerce/v1/orders/:id",
 	})
