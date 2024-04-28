@@ -3,6 +3,14 @@ info:
   title: Orders API
   description: API for managing orders in an e-commerce system
   version: 1.0.0
+  contact:
+    name: Ramesh Sunkara
+    email: test@gmail.com
+    url: 'https://www.rsunkara.com'
+  license:
+    name: TBD
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+
 servers:
   - url: https://api.example.com/v1
     description: Sample production server
@@ -16,6 +24,7 @@ paths:
     get:
       summary: Retrieve orders with pagination
       description: Retrieve a list of orders in the system with pagination support
+      operationId: getOrders
       tags:
         - Orders
       parameters:
@@ -24,6 +33,7 @@ paths:
           schema:
             type: integer
             minimum: 0
+            format: int64
           description: Number of items to skip
         - in: query
           name: limit
@@ -31,6 +41,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 100
+            format: int64
           description: Maximum number of items to return
       responses:
         '200':
@@ -41,6 +52,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Order'
+                minItems: 0
+                maxItems: 100
               examples:
                 orders:
                   value:
@@ -106,6 +119,7 @@ paths:
                 type: integer
                 format: int32
                 minimum: 0
+                maximum: 3600
           content:
             application/json:
               schema:
@@ -133,9 +147,11 @@ paths:
     post:
       summary: Create a new order
       description: Create a new order in the system
+      operationId: createOrder
       tags:
         - Orders
       requestBody:
+        description: Order input data
         required: true
         content:
           application/json:
@@ -213,6 +229,7 @@ paths:
                 type: integer
                 format: int32
                 minimum: 0
+                maximum: 3600
           content:
             application/json:
               schema:
@@ -249,6 +266,7 @@ paths:
     get:
       summary: Retrieve a specific order
       description: Retrieve details of a specific order by ID
+      operationId: getOrder
       tags:
         - Orders
       responses:
@@ -323,6 +341,7 @@ paths:
                 type: integer
                 format: int32
                 minimum: 0
+                maximum: 3600
           content:
             application/json:
               schema:
@@ -350,9 +369,11 @@ paths:
     put:
       summary: Update a specific order
       description: Update details of a specific order by ID
+      operationId: updateOrder
       tags:
         - Orders
       requestBody:
+        description: Order input data
         required: true
         content:
           application/merge-patch+json:
@@ -439,6 +460,7 @@ paths:
                 type: integer
                 format: int32
                 minimum: 0
+                maximum: 3600
           content:
             application/json:
               schema:
@@ -466,6 +488,7 @@ paths:
     delete:
       summary: Delete a specific order
       description: Delete a specific order by ID
+      operationId: deleteOrder
       tags:
         - Orders
       responses:
@@ -519,6 +542,7 @@ paths:
                 type: integer
                 format: int32
                 minimum: 0
+                maximum: 3600
           content:
             application/json:
               schema:
@@ -572,6 +596,7 @@ components:
           description: A unique machine-friendly, but human-readable identifier for the error
     Order:
       type: object
+      description: Object representing an order in the system.
       properties:
         orderId:
           type: string
@@ -579,7 +604,10 @@ components:
           description: The unique identifier for the order
         version:
           type: integer
+          format: int64
           description: The version of the order
+          minimum: 1
+          maximum: 1000
         createdAt:
           type: string
           format: date-time
@@ -592,6 +620,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Product'
+          minItems: 1
+          maxItems: 100
           description: The list of products in the order
         user:
           type: string
@@ -613,6 +643,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OrderUpdate'
+          minItems: 0
+          maxItems: 1000
           description: The list of updates made to the order
       required:
         - orderId
@@ -624,6 +656,7 @@ components:
         - status
     OrderUpdate:
       type: object
+      description: Object representing an update to an order.
       properties:
         updatedAt:
           type: string
@@ -637,6 +670,7 @@ components:
           description: The person or system who handled the update
     Product:
       type: object
+      description: Object representing a product in the system.
       properties:
         name:
           type: string
@@ -657,16 +691,20 @@ components:
           description: Additional remarks or description about the product
     OrderInput:
       type: object
+      description: Object representing the input data for creating or updating an order.
       properties:
         products:
           type: array
           items:
             $ref: '#/components/schemas/ProductInput'
+          minItems: 1
+          maxItems: 100
           description: The list of products in the order
       required:
         - products
     ProductInput:
       type: object
+      description: Object representing the input data for creating or updating a product belonging to an order.
       properties:
         name:
           type: string

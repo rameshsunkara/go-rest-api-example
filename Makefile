@@ -111,7 +111,9 @@ docker-clean-service-images: docker-stop docker-remove
 docker-clean-build-images: 
 	docker rmi $(docker images --filter label="builder=true")
 
-
+## owasp-report: Generate OWASP report
+owasp-report:
+	vacuum html-report -z OpenApi-v1.yaml
 
 .PHONY: help
 help: Makefile

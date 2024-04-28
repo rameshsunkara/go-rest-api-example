@@ -479,5 +479,8 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# OWAS Report
+report.html
+
 # End of https://www.toptal.com/developers/gitignore/api/go,intellij+iml,vs
 /.idea/sonarlint/
