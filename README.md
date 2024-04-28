@@ -27,8 +27,6 @@ Pre-requisites: Docker, Docker Compose, Make
 
         make start
 
-   If you are a fan of Postman, import the included [Postman collection](orders.postman_collection.json) or use the [OpenAPI3 Spec file](./OpenApi-v1.yaml).
-
 Other Options:
 
    Choose a command to run in go-rest-api-example:
@@ -52,6 +50,8 @@ Other Options:
       docker-clean-service-images   Stops and Removes the service images
       docker-clean-build-images     Removes build images
       owasp-report                  Generate OWASP report
+
+2. OpenAPI Spec
 
 
 
@@ -77,6 +77,7 @@ Other Options:
 - [ ] Add DB Migration Support
 - [ ] Add more profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
 - [ ] Deploy to cloud
+- [ ] Implement all OWASP security checks specified in the API Spec.
 - [ ] Add missing references/inspirations
 
 ### References
