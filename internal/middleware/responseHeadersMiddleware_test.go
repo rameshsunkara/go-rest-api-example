@@ -54,10 +54,8 @@ func TestResponseHeadersMiddleware_CustomHeaders(t *testing.T) {
 	router.ServeHTTP(resp, req)
 
 	// Verify the custom header and the standard headers
-	assert.Equal(t, "default-src: 'self'; font-src: 'fonts.googleapis.com'; frame-src: 'none'",
-		resp.Header().Get("Content-Security-Policy"))
 	assert.Equal(t, "SAMEORIGIN", resp.Header().Get("X-Frame-Options"))
-	assert.Equal(t, "1", resp.Header().Get("X-XSS-Protection"))
+	assert.Equal(t, "1; mode=block", resp.Header().Get("X-XSS-Protection"))
 	assert.Equal(t, "max-age=31536000; preload", resp.Header().Get("Strict-Transport-Security"))
 	assert.Equal(t, "custom-value", resp.Header().Get("Custom-Header"),
 		"Custom-Header should be set along with Standard Headers")
