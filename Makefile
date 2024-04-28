@@ -115,6 +115,10 @@ docker-clean-build-images:
 owasp-report:
 	vacuum html-report -z OpenApi-v1.yaml
 
+## go-work: Generate the go work file
+go-work:
+	go work init .
+
 .PHONY: help
 help: Makefile
 	@echo

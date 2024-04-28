@@ -32,6 +32,7 @@ coverage.txt
 
 # Go workspace file
 go.work
+go.work.sum
 
 ### Go Patch ###
 /vendor/
