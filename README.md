@@ -3,21 +3,10 @@
 [![codecov](https://codecov.io/gh/rameshsunkara/go-rest-api-example/branch/main/graph/badge.svg)](https://app.codecov.io/gh/rameshsunkara/go-rest-api-example)
 
 
-# REST API microservice in golang
+# REST API microservice in Go
 
-## Why?
+## [Why this ?](#why-this-)
 
-There are many open source boilerplate repos but why I did this ?
-
-1. Coming from years of building Full Stack application in ReactJS and JVM based languages, I did not like any of them
-   completely.
-   So I created my own while obeying 'GO' principles and guidelines.
-   You will find a lot of similarities in this repo when compared to the most popular go boilerplate templates because I
-   probably borrowed ideas from them. (my apologies if I failed to miss any of them in the references)
-
-2. I wanted to pick the tools for Routing, Logging, Configuration Management etc., to my liking and preferences.
-
-3. I wanted a version where I have full control to change/update based on my professional work requirements.
 
 ### QuickStart
 
@@ -91,3 +80,17 @@ Other Options:
 - Please feel free to Open PRs
 - Please create issues with any problem you noticed
 - Please suggest any improvements
+
+#### Why this ?
+
+There are many open source boilerplate repos but why I did this ?
+
+1. Coming from years of building Full Stack application in ReactJS and JVM based languages, I did not like any of them
+   completely.
+   So I created my own while obeying 'GO' principles and guidelines.
+   You will find a lot of similarities in this repo when compared to the most popular go boilerplate templates because I
+   probably borrowed ideas from them. (my apologies if I failed to miss any of them in the references)
+
+2. I wanted to pick the tools for Routing, Logging, Configuration Management etc., to my liking and preferences.
+
+3. I wanted a version where I have full control to change/update based on my professional work requirements.
