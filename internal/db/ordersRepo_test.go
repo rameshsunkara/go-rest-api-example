@@ -1,187 +1,237 @@
 package db_test
 
-/*
-
 import (
 	"context"
-	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var orderId primitive.ObjectID
-
 func TestNewOrderDataService(t *testing.T) {
 	d := testDBMgr.Database()
-	ds := db.NewOrdersRepo(d)
+	ds := db.NewOrdersRepo(d, lgr)
 	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
 }
 
-func TestOrdersRepo_Create(t *testing.T) {
+func TestOrdersRepo_Create_Success(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	assert.NotNil(t, dSvc)
 
-}
-func TestCreateSuccess(t *testing.T) {
-	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	product := []models.Product{
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
 		{
-			Name:        faker.Name(),
-			Price:       util.RandomPrice(),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
-		},
-		{
-			Name:        faker.Name(),
-			Price:       util.RandomPrice(),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
 		},
 	}
 
-	po := &models.Order{
-		Products: product,
+	po := &data.Order{
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
 	}
-	result, err := dSvc.Create(context.TODO(), po)
+
+	resultID, err := dSvc.Create(context.TODO(), po)
 	if err != nil {
 		t.Fail()
 	}
-	orderId = result.InsertedID.(primitive.ObjectID)
-	assert.True(t, !orderId.IsZero())
+	assert.Greater(t, len(resultID), 5)
 }
 
-func TestCreate_InvalidReq(t *testing.T) {
+func TestOrdersRepo_Create_BadOrderID(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	product := []models.Product{
+
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
 		{
-			Name:        faker.Name(),
-			Price:       util.RandomPrice(),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
-		},
-		{
-			Name:        faker.Name(),
-			Price:       util.RandomPrice(),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
 		},
 	}
 
-	po := &models.Order{
-		ID:       primitive.NewObjectID(),
-		Products: product,
+	po := &data.Order{
+		ID: primitive.ObjectID{
+			0x01, 0x02, 0x03, 0x04,
+		},
+		Version:  1,
+		Products: products,
 	}
+
 	_, err := dSvc.Create(context.TODO(), po)
-	assert.Error(t, err)
+	require.Error(t, err)
+	assert.EqualError(t, err, db.ErrInvalidPOIDCreate.Error())
 }
 
-func TestUpdateSuccess(t *testing.T) {
+func TestOrdersRepo_GetByIDSuccess(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	product := []models.Product{
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
 		{
-			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(90) + 10),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
 		},
 	}
 
-	po := &models.Order{
-		ID:       orderId,
-		Products: product,
-	}
-	result, err := dSvc.Update(context.TODO(), po)
-	assert.EqualValues(t, 1, result)
-	assert.Nil(t, err)
-}
-
-func TestUpdate_InvalidId(t *testing.T) {
-	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	product := []models.Product{
-		{
-			Name:        faker.Name(),
-			Price:       (uint)(rand.Intn(90) + 10),
-			Description: faker.Sentence(),
-			UpdatedAt:   faker.TimeString(),
-		},
+	po := &data.Order{
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
 	}
 
-	po := &models.Order{
-		ID:       primitive.NilObjectID,
-		Products: product,
-	}
-	result, err := dSvc.Update(context.TODO(), po)
-	assert.EqualValues(t, 0, result)
-	assert.Error(t, err)
-}
-
-func TestGetAllSuccess(t *testing.T) {
-	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	results, _ := dSvc.GetAll(context.TODO())
-	orders := results.(*[]models.Order)
-	assert.EqualValues(t, 100, len(*orders))
-}
-
-func TestGetByIdSuccess(t *testing.T) {
-	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	result, _ := dSvc.GetByID(context.TODO(), orderId.Hex())
-	order := result.(*models.Order)
+	resultID, _ := dSvc.Create(context.TODO(), po)
+	orderID, _ := primitive.ObjectIDFromHex(resultID)
+	result, _ := dSvc.GetByID(context.TODO(), orderID)
 	assert.NotNil(t, result)
-	assert.EqualValues(t, orderId, order.ID)
+	assert.EqualValues(t, orderID, result.ID)
 }
 
-func TestGetByIdSuccess_NoData(t *testing.T) {
+func TestOrdersRepo_GetByIDSuccess_NoData(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	const id = "000000000000000000000000"
-	result, err := dSvc.GetByID(context.TODO(), id)
+	dSvc := db.NewOrdersRepo(d, lgr)
+	orderID, _ := primitive.ObjectIDFromHex("non-existent-id")
+	result, err := dSvc.GetByID(context.TODO(), orderID)
 	assert.Nil(t, result)
-	assert.Nil(t, err)
+	assert.EqualError(t, err, db.ErrPOIDNotFound.Error())
 }
 
-func TestGetById_InvalidId(t *testing.T) {
+func TestOrdersRepo_DeleteByIDSuccess(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.GetByID(context.TODO(), "i-am-an-invalid-id")
-	assert.Nil(t, result)
-	assert.Error(t, err)
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
+		{
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
+		},
+	}
+
+	po := &data.Order{
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
+	}
+
+	resultID, _ := dSvc.Create(context.TODO(), po)
+	orderID, _ := primitive.ObjectIDFromHex(resultID)
+	err := dSvc.DeleteByID(context.TODO(), orderID)
+	require.NoError(t, err)
 }
 
-func TestDeleteByIdSuccess(t *testing.T) {
+func TestOrdersRepo_DeleteByIDSuccess_NoData(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.DeleteByID(context.TODO(), orderId.Hex())
-	assert.Nil(t, err)
-	assert.EqualValues(t, 1, result)
+	dSvc := db.NewOrdersRepo(d, lgr)
+	orderID, _ := primitive.ObjectIDFromHex("non-existent-id")
+	err := dSvc.DeleteByID(context.TODO(), orderID)
+	assert.EqualError(t, err, db.ErrPOIDNotFound.Error())
 }
 
-func TestDeleteByIdSuccess_NoData(t *testing.T) {
+func TestOrdersRepo_GetAll(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	const id = "000000000000000000000000"
-	result, err := dSvc.DeleteByID(context.TODO(), id)
-	assert.Nil(t, err)
-	assert.EqualValues(t, 0, result)
+	dSvc := db.NewOrdersRepo(d, lgr)
+	results, _ := dSvc.GetAll(context.TODO(), int64(4))
+	assert.Len(t, *results, 4)
 }
 
-func TestDeleteById_InvalidId(t *testing.T) {
+func TestOrdersRepo_UpdateOrderSuccess(t *testing.T) {
 	d := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(d)
-	result, err := dSvc.DeleteByID(context.TODO(), "i-am-an-invalid-id")
-	assert.EqualValues(t, 0, result)
-	assert.Error(t, err)
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
+		{
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
+		},
+	}
+
+	po := &data.Order{
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
+	}
+
+	resultID, _ := dSvc.Create(context.TODO(), po)
+	orderID, _ := primitive.ObjectIDFromHex(resultID)
+
+	po.ID = orderID
+	po.Status = data.OrderDelivered
+	err := dSvc.Update(context.TODO(), po)
+	require.NoError(t, err)
 }
-*/
+
+func TestOrdersRepo_UpdateOrder_EmptyOrderID(t *testing.T) {
+	d := testDBMgr.Database()
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
+		{
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
+		},
+	}
+
+	po := &data.Order{
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
+	}
+
+	po.Status = data.OrderDelivered
+	err := dSvc.Update(context.TODO(), po)
+	assert.EqualError(t, err, db.ErrInvalidPOIDUpdate.Error())
+}
+
+func TestOrdersRepo_UpdateOrder_BadOrderID(t *testing.T) {
+	d := testDBMgr.Database()
+	dSvc := db.NewOrdersRepo(d, lgr)
+	products := []data.Product{
+		{
+			Name:      faker.Name(),
+			Price:     util.RandomPrice(),
+			UpdatedAt: time.Now(),
+		},
+	}
+
+	po := &data.Order{
+		ID:          primitive.ObjectID{},
+		Version:     1,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		Products:    products,
+		User:        faker.Email(),
+		Status:      data.OrderPending,
+		TotalAmount: util.CalculateTotalAmount(products),
+	}
+
+	po.Status = data.OrderDelivered
+	err := dSvc.Update(context.TODO(), po)
+	assert.EqualError(t, err, db.ErrInvalidPOIDUpdate.Error())
+}

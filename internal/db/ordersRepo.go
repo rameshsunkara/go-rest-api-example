@@ -40,12 +40,13 @@ type OrdersDataService interface {
 // OrdersRepo - Implements OrdersDataService.
 type OrdersRepo struct {
 	collection *mongo.Collection
-	logger     logger.AppLogger
+	logger     *logger.AppLogger
 }
 
-func NewOrdersRepo(db MongoDatabase) *OrdersRepo {
+func NewOrdersRepo(db MongoDatabase, lgr *logger.AppLogger) *OrdersRepo {
 	iDBSvc := &OrdersRepo{
 		collection: db.Collection(OrdersCollection),
+		logger:     lgr,
 	}
 	return iDBSvc
 }
@@ -63,7 +64,7 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 		o.logger.Error().Err(err).Msg("error occurred while creating order")
 		return "", ErrFailedToCreateOrder
 	}
-	o.logger.Info().Str("order_id", result.InsertedID.(primitive.ObjectID).Hex()).Msg("created new order")
+	o.logger.Info().Str("orderId", result.InsertedID.(primitive.ObjectID).Hex()).Msg("created new order")
 	return result.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 

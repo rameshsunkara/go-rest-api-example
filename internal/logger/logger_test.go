@@ -107,4 +107,3 @@ func TestGetZerologLevel(t *testing.T) {
 		})
 	}
 }
-

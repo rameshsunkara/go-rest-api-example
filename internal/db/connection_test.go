@@ -21,6 +21,7 @@ import (
 
 var (
 	testDBMgr db.MongoManager
+	lgr       = logger.Setup(models.ServiceEnv{Name: "test"})
 )
 
 const AppleChip = "arm64"
@@ -49,7 +50,6 @@ func TestMain(m *testing.M) {
 	creds := &db.MongoDBCredentials{
 		Hostname: strings.TrimPrefix(mongoServer.URI(), "mongodb://"),
 	}
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	if dErr != nil {
 		lgr.Fatal().Err(dErr)
@@ -67,8 +67,8 @@ func TestMain(m *testing.M) {
 
 func insertTestData(logger *logger.AppLogger) {
 	database := testDBMgr.Database()
-	dSvc := db.NewOrdersRepo(database)
-	for i := 0; i < 100; i++ {
+	dSvc := db.NewOrdersRepo(database, logger)
+	for i := 0; i < 10; i++ {
 		product := []data.Product{
 			{
 				Name:      faker.Name(),
@@ -105,7 +105,7 @@ func TestPing(t *testing.T) {
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	creds := &db.MongoDBCredentials{}
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
@@ -116,7 +116,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	creds := &db.MongoDBCredentials{
 		Hostname: "non-existent-hostname",
 	}
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+
 	d, dErr := db.NewMongoManager(creds, nil, lgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)

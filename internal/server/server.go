@@ -56,7 +56,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 
 	// Dependencies for handlers
 	d := dbMgr.Database()
-	orders := db.NewOrdersRepo(d)
+	orders := db.NewOrdersRepo(d, lgr)
 
 	// This is a dev mode only route to seed the local db
 	if util.IsDevMode(svcEnv.Name) {
