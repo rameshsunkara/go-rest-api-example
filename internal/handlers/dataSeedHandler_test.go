@@ -14,9 +14,8 @@ import (
 )
 
 func TestNewSeedHandler(t *testing.T) {
-	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{})
-	assert.IsType(t, &handlers.SeedController{}, sd)
-	assert.IsType(t, &mocks.MockOrdersDataService{}, sd.OrdersDataSvc)
+	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{})
+	assert.IsType(t, &handlers.SeedHandler{}, sd)
 }
 
 func TestSeedDB_Success(t *testing.T) {
@@ -24,7 +23,7 @@ func TestSeedDB_Success(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
+	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
 		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
 			return "random-id", nil
 		},
@@ -44,7 +43,7 @@ func TestSeedDB_Failure(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	sd := handlers.NewSeedController(&mocks.MockOrdersDataService{
+	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
 		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
 			return "", assert.AnError
 		},

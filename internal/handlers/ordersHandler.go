@@ -14,6 +14,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -27,11 +28,11 @@ type OrdersHandler struct {
 }
 
 func NewOrdersHandler(dSvc db.OrdersDataService, lgr *logger.AppLogger) *OrdersHandler {
-	ic := &OrdersHandler{
+	o := &OrdersHandler{
 		oDataSvc: dSvc,
 		logger:   lgr,
 	}
-	return ic
+	return o
 }
 
 func (o *OrdersHandler) Create(c *gin.Context) {
@@ -152,35 +153,75 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 }
 
 func (o *OrdersHandler) GetByID(c *gin.Context) {
+	lgr, requestID := o.logger.WithReqID(c)
 	id := c.Param(OrderIDPath)
-	if id != "" {
-		order, err := o.oDataSvc.GetByID(c, id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError,
-				gin.H{"message": "Error to retrieve order details", "error": err.Error()})
-			c.Abort()
-			return
+	oID, err := primitive.ObjectIDFromHex(id)
+	if oID.IsZero() || err != nil {
+		aErr := &external.APIError{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorCode:      "",
+			Message:        "invalid order ID",
+			DebugID:        requestID,
 		}
-		c.JSON(http.StatusOK, order)
+		lgr.Error().
+			Int("HttpStatusCode", aErr.HTTPStatusCode).
+			Str("ErrorCode", aErr.ErrorCode).
+			Msg(aErr.Message)
+		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
 		return
 	}
-	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"message": "bad request"})
+	order, err := o.oDataSvc.GetByID(c, oID)
+	if err != nil {
+		aErr := &external.APIError{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorCode:      "",
+			Message:        "fill this in with a meaningful error message",
+			DebugID:        requestID,
+		}
+		lgr.Error().
+			Int("HttpStatusCode", aErr.HTTPStatusCode).
+			Str("ErrorCode", aErr.ErrorCode).
+			Msg(aErr.Message)
+		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+		return
+	}
+	c.JSON(http.StatusOK, order)
 }
 
 func (o *OrdersHandler) DeleteByID(c *gin.Context) {
+	lgr, requestID := o.logger.WithReqID(c)
 	id := c.Param(OrderIDPath)
-	if id != "" {
-		count, err := o.oDataSvc.DeleteByID(c, id)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error to retrieve order details", "error": err.Error()})
-			c.Abort()
-			return
+	oID, err := primitive.ObjectIDFromHex(id)
+	if oID.IsZero() || err != nil {
+		aErr := &external.APIError{
+			HTTPStatusCode: http.StatusBadRequest,
+			ErrorCode:      "",
+			Message:        "invalid order ID",
+			DebugID:        requestID,
 		}
-		c.JSON(http.StatusOK, count)
+		lgr.Error().
+			Int("HttpStatusCode", aErr.HTTPStatusCode).
+			Str("ErrorCode", aErr.ErrorCode).
+			Msg(aErr.Message)
+		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"message": "bad request"})
-	c.Abort()
+	dErr := o.oDataSvc.DeleteByID(c, oID)
+	if dErr != nil {
+		aErr := &external.APIError{
+			HTTPStatusCode: http.StatusInternalServerError,
+			ErrorCode:      "",
+			Message:        "fill this in with a meaningful error message",
+			DebugID:        requestID,
+		}
+		lgr.Error().
+			Int("HttpStatusCode", aErr.HTTPStatusCode).
+			Str("ErrorCode", aErr.ErrorCode).
+			Msg(aErr.Message)
+		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
 }
 
 func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.APIError) {

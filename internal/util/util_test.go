@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,4 +60,31 @@ func TestRandomPrice(t *testing.T) {
 	if price > util.MaxPrice {
 		t.Errorf("Price is out of range: %v", price)
 	}
+}
+
+func TestCalculateTotalAmount(t *testing.T) {
+	// Test case: Empty input
+	emptyTotal := util.CalculateTotalAmount([]data.Product{})
+	assert.InEpsilon(t, float64(0), emptyTotal, 0.0001)
+
+	// Test case: Single product
+	singleProductTotal := util.CalculateTotalAmount([]data.Product{
+		{Name: "Product 1", Price: 10.0, Quantity: 1},
+	})
+	assert.InEpsilon(t, 10.0, singleProductTotal, 0.0001)
+
+	// Test case: Multiple products
+	multipleProductsTotal := util.CalculateTotalAmount([]data.Product{
+		{Name: "Product 1", Price: 10.0, Quantity: 2},
+		{Name: "Product 2", Price: 20.0, Quantity: 1},
+		{Name: "Product 3", Price: 15.0, Quantity: 3},
+	})
+	assert.InEpsilon(t, 10.0*2+20.0*1+15.0*3, multipleProductsTotal, 0.0001)
+
+	// Test case: Products with zero quantity
+	zeroQuantityProductsTotal := util.CalculateTotalAmount([]data.Product{
+		{Name: "Product 1", Price: 10.0, Quantity: 0},
+		{Name: "Product 2", Price: 20.0, Quantity: 0},
+	})
+	assert.InEpsilon(t, 0.0, zeroQuantityProductsTotal, 0.0001)
 }

@@ -20,6 +20,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func UnMarshalOrderData(d []byte) (*data.Order, error) {
@@ -229,7 +230,7 @@ func TestGetOrderByIDSuccess(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(recorder)
 	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
-		GetByIDFunc: func(_ context.Context, _ string) (*data.Order, error) {
+		GetByIDFunc: func(_ context.Context, _ primitive.ObjectID) (*data.Order, error) {
 			dataBytes, err := os.ReadFile("../mockData/order.json")
 			if err != nil {
 				return nil, err
@@ -238,8 +239,8 @@ func TestGetOrderByIDSuccess(t *testing.T) {
 			return dataOrder, nil
 		},
 	}, lgr)
-	r.GET("/orders/609d9ed771df2a0d99bf0077", handler.GetByID)
-	c.Request, _ = http.NewRequest(http.MethodGet, "/orders/609d9ed771df2a0d99bf0077", nil)
+	r.GET("/ecommerce/v1/orders/:id", handler.GetByID)
+	c.Request, _ = http.NewRequest(http.MethodGet, "/ecommerce/v1/orders/609d9ed771df2a0d99bf0077", nil)
 
 	r.ServeHTTP(recorder, c.Request)
 
@@ -248,6 +249,101 @@ func TestGetOrderByIDSuccess(t *testing.T) {
 	err := json.Unmarshal(recorder.Body.Bytes(), &respOrder)
 	require.NoError(t, err)
 	assert.Equal(t, "609d9ed771df2a0d99bf0077", respOrder.ID)
+}
+
+func TestGetOrderByID_DBReadFailure(t *testing.T) {
+	// Test Setup
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	recorder := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(recorder)
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		GetByIDFunc: func(_ context.Context, _ primitive.ObjectID) (*data.Order, error) {
+			return nil, errors.New("db error")
+		},
+	}, lgr)
+	r.GET("/ecommerce/v1/orders/:id", handler.GetByID)
+	c.Request, _ = http.NewRequest(http.MethodGet, "/ecommerce/v1/orders/609d9ed771df2a0d99bf0077", nil)
+
+	r.ServeHTTP(recorder, c.Request)
+
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+}
+
+func TestGetOrderByID_BadPathParam(t *testing.T) {
+	// Test Setup
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	recorder := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(recorder)
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		GetByIDFunc: func(_ context.Context, _ primitive.ObjectID) (*data.Order, error) {
+			return nil, errors.New("db error")
+		},
+	}, lgr)
+	r.GET("/ecommerce/v1/orders/:id", handler.GetByID)
+	c.Request, _ = http.NewRequest(http.MethodGet, "/ecommerce/v1/orders/''", nil)
+
+	r.ServeHTTP(recorder, c.Request)
+
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
+func TestDeleteOrderByIDSuccess(t *testing.T) {
+	// Test Setup
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	recorder := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(recorder)
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		DeleteByIDFunc: func(_ context.Context, _ primitive.ObjectID) error {
+			return nil
+		},
+	}, lgr)
+	r.DELETE("/ecommerce/v1/orders/:id", handler.DeleteByID)
+	c.Request, _ = http.NewRequest(http.MethodDelete, "/ecommerce/v1/orders/609d9ed771df2a0d99bf0077", nil)
+
+	r.ServeHTTP(recorder, c.Request)
+
+	assert.Equal(t, http.StatusNoContent, recorder.Code)
+}
+
+func TestDeleteOrderByID_DBFailure(t *testing.T) {
+	// Test Setup
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	recorder := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(recorder)
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		DeleteByIDFunc: func(_ context.Context, _ primitive.ObjectID) error {
+			return errors.New("db error")
+		},
+	}, lgr)
+	r.DELETE("/ecommerce/v1/orders/:id", handler.DeleteByID)
+	c.Request, _ = http.NewRequest(http.MethodDelete, "/ecommerce/v1/orders/609d9ed771df2a0d99bf0077", nil)
+
+	r.ServeHTTP(recorder, c.Request)
+
+	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
+}
+
+func TestDeleteOrderByID_BadPathParam(t *testing.T) {
+	// Test Setup
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	recorder := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	c, r := gin.CreateTestContext(recorder)
+	handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+		DeleteByIDFunc: func(_ context.Context, _ primitive.ObjectID) error {
+			return nil
+		},
+	}, lgr)
+	r.DELETE("/ecommerce/v1/orders/:id", handler.DeleteByID)
+	c.Request, _ = http.NewRequest(http.MethodDelete, "/ecommerce/v1/orders/''", nil)
+
+	r.ServeHTTP(recorder, c.Request)
+
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 }
 
 /*
@@ -307,7 +403,7 @@ func TestNewOrdersHandler(t *testing.T) {
 	o := NewOrdersHandler(&mocks.MockOrdersDataService{})
 
 	assert.IsType(t, &OrdersHandler{}, o)
-	assert.IsType(t, &mocks.MockOrdersDataService{}, o.OrdersDataSvc)
+	assert.IsType(t, &mocks.MockOrdersDataService{}, o.oDataSvc)
 }
 
 func TestCreateOrderSuccess(t *testing.T) {

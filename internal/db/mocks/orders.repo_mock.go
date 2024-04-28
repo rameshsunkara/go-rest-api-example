@@ -4,14 +4,15 @@ import (
 	"context"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockOrdersDataService struct {
 	CreateFunc     func(ctx context.Context, purchaseOrder *data.Order) (string, error)
 	UpdateFunc     func(ctx context.Context, purchaseOrder *data.Order) error
 	GetAllFunc     func(ctx context.Context, limit int64) (*[]data.Order, error)
-	GetByIDFunc    func(ctx context.Context, id string) (*data.Order, error)
-	DeleteByIDFunc func(ctx context.Context, id string) (int64, error)
+	GetByIDFunc    func(ctx context.Context, id primitive.ObjectID) (*data.Order, error)
+	DeleteByIDFunc func(ctx context.Context, id primitive.ObjectID) error
 }
 
 func (m *MockOrdersDataService) Create(ctx context.Context, purchaseOrder *data.Order) (string, error) {
@@ -26,10 +27,10 @@ func (m *MockOrdersDataService) GetAll(ctx context.Context, limit int64) (*[]dat
 	return m.GetAllFunc(ctx, limit)
 }
 
-func (m *MockOrdersDataService) GetByID(ctx context.Context, id string) (*data.Order, error) {
+func (m *MockOrdersDataService) GetByID(ctx context.Context, id primitive.ObjectID) (*data.Order, error) {
 	return m.GetByIDFunc(ctx, id)
 }
 
-func (m *MockOrdersDataService) DeleteByID(ctx context.Context, id string) (int64, error) {
+func (m *MockOrdersDataService) DeleteByID(ctx context.Context, id primitive.ObjectID) error {
 	return m.DeleteByIDFunc(ctx, id)
 }

@@ -25,7 +25,6 @@ var (
 	ErrUnexpectedUpdateOrder = errors.New("unexpected error occurred while updating order")
 	ErrPOIDNotFound          = errors.New("purchase order doesn't exist with given id")
 	ErrFailedToCreateOrder   = errors.New("failed to create order")
-	ErrInvalidPOIDDelete     = errors.New("invalid order id")
 	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
 )
 
@@ -34,8 +33,8 @@ type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *data.Order) (string, error)
 	Update(ctx context.Context, purchaseOrder *data.Order) error
 	GetAll(ctx context.Context, limit int64) (*[]data.Order, error)
-	GetByID(ctx context.Context, id string) (*data.Order, error)
-	DeleteByID(ctx context.Context, id string) (int64, error)
+	GetByID(ctx context.Context, id primitive.ObjectID) (*data.Order, error)
+	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 }
 
 // OrdersRepo - Implements OrdersDataService.
@@ -118,20 +117,14 @@ func (o *OrdersRepo) GetAll(ctx context.Context, limit int64) (*[]data.Order, er
 	return &results, nil
 }
 
-func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*data.Order, error) {
+func (o *OrdersRepo) GetByID(ctx context.Context, oID primitive.ObjectID) (*data.Order, error) {
 	if err := validate(o.collection); err != nil {
 		return nil, err
 	}
 
-	oID, err := primitive.ObjectIDFromHex(id)
-	if oID.IsZero() || err != nil {
-		return nil, ErrInvalidPOIDUpdate
-	}
-
 	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
-
 	var result data.Order
-	err = o.collection.FindOne(ctx, filter).Decode(&result)
+	err := o.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrPOIDNotFound
@@ -142,26 +135,22 @@ func (o *OrdersRepo) GetByID(ctx context.Context, id string) (*data.Order, error
 	return &result, nil
 }
 
-func (o *OrdersRepo) DeleteByID(ctx context.Context, id string) (int64, error) {
+func (o *OrdersRepo) DeleteByID(ctx context.Context, id primitive.ObjectID) error {
 	if err := validate(o.collection); err != nil {
-		return 0, err
+		return err
 	}
 
-	oID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return 0, ErrInvalidPOIDDelete
-	}
-	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
+	filter := bson.D{primitive.E{Key: "_id", Value: id}}
 
 	res, err := o.collection.DeleteOne(ctx, filter)
 	if err != nil {
-		return 0, ErrUnexpectedDeleteOrder
+		return ErrUnexpectedDeleteOrder
 	}
 
 	if res.DeletedCount == 0 {
-		return 0, ErrPOIDNotFound
+		return ErrPOIDNotFound
 	}
-	return res.DeletedCount, nil
+	return nil
 }
 
 func validate(collection *mongo.Collection) error {

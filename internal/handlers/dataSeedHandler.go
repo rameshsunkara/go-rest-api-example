@@ -15,18 +15,18 @@ const (
 	seedRecordCount = 10000
 )
 
-type SeedController struct {
-	OrdersDataSvc db.OrdersDataService
+type SeedHandler struct {
+	oDataSvc db.OrdersDataService
 }
 
-func NewSeedController(svc db.OrdersDataService) *SeedController {
-	ic := &SeedController{
-		OrdersDataSvc: svc,
+func NewDataSeedHandler(svc db.OrdersDataService) *SeedHandler {
+	sc := &SeedHandler{
+		oDataSvc: svc,
 	}
-	return ic
+	return sc
 }
 
-func (s *SeedController) SeedDB(c *gin.Context) {
+func (s *SeedHandler) SeedDB(c *gin.Context) {
 	for i := 0; i < seedRecordCount; i++ {
 		products := []data.Product{
 			{
@@ -51,9 +51,9 @@ func (s *SeedController) SeedDB(c *gin.Context) {
 			TotalAmount: util.CalculateTotalAmount(products),
 		}
 
-		_, err := s.OrdersDataSvc.Create(c, po)
+		_, err := s.oDataSvc.Create(c, po)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"message": "failed to insert data",
 			})
 			return

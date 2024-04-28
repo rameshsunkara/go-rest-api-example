@@ -60,7 +60,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 
 	// This is a dev mode only route to seed the local db
 	if util.IsDevMode(svcEnv.Name) {
-		seed := handlers.NewSeedController(orders)
+		seed := handlers.NewDataSeedHandler(orders)
 		internalAPIGrp.POST("/seed-local-db", seed.SeedDB) // /seedDB
 	}
 
