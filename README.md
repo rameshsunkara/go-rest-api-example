@@ -40,11 +40,30 @@
 12. Multi-Stage Docker build for faster builds
 13. Versioning using git commit
 
-## What it is not ?
-- This is no way a complete solution for all your needs. This is just a boilerplate to start with.
-- This is no way a starting point for a ecommerce application. What I provided is a simple CRUD API.
+## Folder Structure
 
-### QuickStart
+```
+📦 go-rest-api-example
+├─ main.go
+├─ internal
+│  ├─ db
+│  ├─ errors
+│  ├─ handlers
+│  ├─ logger
+│  ├─ middleware
+│  ├─ models
+│  ├─ server
+│  ├─ util
+│  └─ mockData
+├─ localDevelopment
+├─ Makefile
+├─ Dockerfile
+├─ OpenApi-vi.yaml
+├─ docker-compose.yml
+└─ OpenApi-v1.postman_collection.json
+```
+
+## QuickStart
 
 Pre-requisites: Docker, Docker Compose, Make
 
@@ -77,14 +96,14 @@ Other Options:
       owasp-report                  Generate OWASP report
       go-work                       Generate the go work file
 
-### Tools
+## Tools
 
 1. Routing - [Gin](https://github.com/gin-gonic/gin)
 2. Logging - [zerolog](https://github.com/rs/zerolog)
 3. Database - [MongoDB](https://www.mongodb.com/)
 4. Container - [Docker](https://www.docker.com/)
 
-### TODO
+## TODO
 
 - [ ] Add more and clear documentation about the features this offers and how to replace tools
 - [ ] Add DB Migration Support
@@ -97,27 +116,28 @@ Other Options:
 - [ ] Improve data model and add more fields
 - [ ] Add git hooks for pre-commit and pre-push
 
-### References
+## References
 
 - [gin-boilerplate](https://github.com/Massad/gin-boilerplate)
 - [go-rest-api](https://github.com/qiangxue/go-rest-api)
 - [go-base](https://github.com/dhax/go-base)
 
-### Contribute
+## Contribute
 
 - Please feel free to Open PRs
 - Please create issues with any problem you noticed
 - Please suggest any improvements
 
-#### Why this ?
+## What it is not ?
 
-I ventured into creating my own open-source boilerplate repository for several reasons:
+- This isn't a complete solution for all your needs. It's more like a basic template to kickstart your project.
+- This isn't the best place to begin if you want to make an online store. What I've provided is just a simple tool for managing data through an API.
 
-1. After years of crafting Full Stack applications using ReactJS and JVM-based languages, I found existing boilerplate's are either too much or too little. 
-   Hence, I decided to develop my own while adhering to the principles and guidelines of Go. 
-   While you may notice similarities with popular Go boilerplate templates, I've tailored this repository to align more closely with my preferences and experiences. 
-   (Apologies if I inadvertently missed crediting any existing templates.)
+## Why this ?
 
-2. I desired the freedom to handpick the tools for essential functionalities like Routing, Logging, and Configuration Management, ensuring they align perfectly with my preferences and requirements.
 
-3. Creating my own version allows me complete control to adapt and update the boilerplate according to the specific needs and demands of my professional work. This flexibility enables me to continually refine and optimize the repository based on evolving project requirements.
+I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
+
+After years of developing Full Stack applications utilizing ReactJS and JVM-based languages, I observed that existing boilerplates tended to be either excessive or insufficient for my needs. Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. While similarities with popular Go boilerplate templates may be evident, I have customized this repository to better align with my preferences and accumulated experiences. (My apologies if I inadvertently overlooked crediting any existing templates.)
+
+I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
