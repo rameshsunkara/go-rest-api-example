@@ -59,7 +59,7 @@ go-rest-api-example/
 ├── Makefile
 ├── Dockerfile
 ├── OpenApi-vi.yaml
-├── docker-compose.yml
+├── docker-compose.yaml
 └── OpenApi-v1.postman_collection.json
 ```
 
