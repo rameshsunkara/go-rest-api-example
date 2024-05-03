@@ -7,38 +7,36 @@
 
 ## [Why this ?](#why-this--1)
 
-## What does it offer ?
+## Offered Features
 
 ### API Features:
-1. OWASP Compliant [Open API 3 Spec](./OpenApi-v1.yaml)
-2. Middleware for 
-   - Logging : Helps in debugging and monitoring
-   - Authentication : Placeholder for different authentication mechanisms
-   - Tracing by Request ID : Helps in debugging
-   - Panic Recovery : Helps in keeping the service up
-   - Common Security Headers : Keeps the service secure
-   - Query Params Validation : Helps in keeping the service secure
-3. Standard Error Handling
-   - All errors are handled and returned in a standard format
-4. Versioning
-5. Model Management
-   - Generally, the data model used internally is different from the data model exposed to the client.
-     This helps in keeping the internal model separate from the exposed model.
- 
+1. **OWASP Compliant Open API 3 Specification**: Refer to [OpenApi-v1.yaml](./OpenApi-v1.yaml) for details.
+2. **Middleware for**:
+   - **Logging**: Facilitates debugging and monitoring processes.
+   - **Authentication**: Provides a placeholder for diverse authentication mechanisms.
+   - **Tracing by Request ID**: Assists in debugging procedures.
+   - **Panic Recovery**: Ensures service continuity by managing unexpected errors.
+   - **Common Security Headers**: Safeguards the service against potential vulnerabilities.
+   - **Query Parameters Validation**: Enhances service security by validating query parameters.
+3. **Standardized Error Handling**: All errors are managed and returned in a uniform format.
+4. **Versioning**
+5. **Model Management**:
+   - Internally used data models differ from those exposed to clients, ensuring separation and security.
+
 ### Go Application Features:
-1. Configuration Management through Environment Variables
-2. A Dockerized environment to run the service
-3. A Makefile to do all common tasks
-4. A Git Action to build, run tests, generate code coverage
-5. Integrated GO Formatter and Linter
-6. Mechanism to load secrets from Sidecar
-7. Enables connecting to multiple databases
-8. Follows the best practices for connecting to MongoDB
-9. Good mocking practises for Unit test patterns
-10. Seed data for local development
-11. Standard filename conventions for better readability
-12. Multi-Stage Docker build for faster builds
-13. Versioning using git commit
+1. **Configuration Management**: via Environment Variables
+2. **Dockerized Environment**: Facilitates service deployment.
+3. **Makefile**: Automates common tasks for developers.
+4. **Git Action**: Automates build processes, runs tests, and generates code coverage.
+5. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
+6. **Secrets Loading Mechanism from Sidecar**
+7. **Support for Multiple Databases**: Enables connections to various database systems.
+8. **Best Practices for MongoDB Connection**
+9. **Effective Mocking Practices for Unit Test Patterns**
+10. **Seed Data**: for Local Development
+11. **Standardized Filename Conventions**: Enhances code readability.
+12. **Multi-Stage Docker Build**: Accelerates build processes.
+13. **Versioning** Utilizing Git Commit History
 
 ## Folder Structure
 
