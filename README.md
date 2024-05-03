@@ -130,11 +130,6 @@ Other Options:
 - Please create issues with any problem you noticed
 - Please suggest any improvements
 
-## What it is not ?
-
-- This isn't a complete solution for all your needs. It's more like a basic template to kickstart your project.
-- This isn't the best place to begin if you want to make an online store. What I've provided is just a simple tool for managing data through an API.
-
 ## Why this ?
 
 
@@ -143,3 +138,8 @@ I embarked on the endeavor of crafting my own open-source boilerplate repository
 After years of developing Full Stack applications utilizing ReactJS and JVM-based languages, I observed that existing boilerplates tended to be either excessive or insufficient for my needs. Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. While similarities with popular Go boilerplate templates may be evident, I have customized this repository to better align with my preferences and accumulated experiences. (My apologies if I inadvertently overlooked crediting any existing templates.)
 
 I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
+
+## What this is not ?
+
+- This isn't a complete solution for all your needs. It's more like a basic template to kickstart your project.
+- This isn't the best place to begin if you want to make an online store. What I've provided is just a simple tool for managing data through an API.
