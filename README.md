@@ -105,16 +105,18 @@ Other Options:
 
 ## TODO
 
-- [ ] Add more and clear documentation about the features this offers and how to replace tools
-- [ ] Add DB Migration Support
-- [ ] Add more profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
-- [ ] Deploy to cloud
-- [ ] Implement all OWASP security checks specified in the API Spec
-- [ ] Improve error codes and messages
-- [ ] Add missing references/inspirations
-- [ ] Implement Update Operations mentioned in the API Spec
-- [ ] Improve data model and add more fields
-- [ ] Add git hooks for pre-commit and pre-push
+-  Add more and clear documentation about the features this offers and how to replace tools
+-  Add DB Migration Support
+-  Add more environmental profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
+-  Implement all OWASP security checks specified in the API Spec
+-  Improve error codes and messages
+-  Add git hooks for pre-commit and pre-push
+
+## Good to have
+
+-  Improve data model and add more fields
+-  Deploy to cloud
+-  Implement Update Operations mentioned in the API Spec
 
 ## References
 
