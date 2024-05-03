@@ -43,24 +43,24 @@
 ## Folder Structure
 
 ```
-📦 go-rest-api-example
-├─ main.go
-├─ internal
-│  ├─ db
-│  ├─ errors
-│  ├─ handlers
-│  ├─ logger
-│  ├─ middleware
-│  ├─ models
-│  ├─ server
-│  ├─ util
-│  └─ mockData
-├─ localDevelopment
-├─ Makefile
-├─ Dockerfile
-├─ OpenApi-vi.yaml
-├─ docker-compose.yaml
-└─ OpenApi-v1.postman_collection.json
+go-rest-api-example/
+├── main.go
+├── internal/
+│   ├── db
+│   ├── errors
+│   ├── handlers
+│   ├── logger
+│   ├── middleware
+│   ├── models
+│   ├── server
+│   ├── util
+│   └── mockData
+├── localDevelopment/
+├── Makefile
+├── Dockerfile
+├── OpenApi-vi.yaml
+├── docker-compose.yml
+└── OpenApi-v1.postman_collection.json
 ```
 
 ## QuickStart
