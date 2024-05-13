@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-faker/faker/v4 v4.4.1
 	github.com/google/uuid v1.6.0
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 	github.com/rameshsunkara/deferrun v1.0.2
 	github.com/rameshsunkara/strikememongo v0.2.5
 	github.com/rs/zerolog v1.32.0
