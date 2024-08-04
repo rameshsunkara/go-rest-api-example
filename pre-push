@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# List all the files to be pushed
+files_to_check=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$')
+
+# Check if there are any Go files to format
+if [ -z "$files_to_check" ]; then
+  echo "No Go files to check."
+  exit 0
+fi
+
+# Run gofmt on each Go file
+unformatted_files=$(gofmt -s -l $files_to_check)
+
+if [ -n "$unformatted_files" ]; then
+  echo "The following Go files are not properly formatted:"
+  echo "$unformatted_files"
+  echo "Please run 'gofmt -w <file>' to format the files."
+  exit 1
+fi
+
+exit 0
+
