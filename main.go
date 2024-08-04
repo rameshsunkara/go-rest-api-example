@@ -27,31 +27,31 @@ func main() {
 	// setup : read environmental configurations
 	svcEnv := MustEnvConfig()
 
-	// setup : service logger
-	logger := logger.Setup(svcEnv)
+	// setup : service lgr
+	lgr := logger.Setup(svcEnv)
 
 	// setup : database connection
 	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("failed to fetch DB credentials")
+		lgr.Fatal().Err(err).Msg("failed to fetch DB credentials")
 	}
 	connOpts := &db.ConnectionOpts{
 		Database:     svcEnv.DBName,
 		PrintQueries: svcEnv.PrintQueries,
 	}
-	dbConnMgr, err := db.NewMongoManager(dbCredentials, connOpts, logger)
+	dbConnMgr, err := db.NewMongoManager(dbCredentials, connOpts, lgr)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("unable to initialize DB connection")
+		lgr.Fatal().Err(err).Msg("unable to initialize DB connection")
 	}
 	sigHandler.OnSignal(func() {
 		dErr := dbConnMgr.Disconnect()
 		if dErr != nil {
-			logger.Error().Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
+			lgr.Error().Err(dErr).Msg("unable to disconnect from DB, potential connection leak")
 			return
 		}
 	})
 
-	logger.Info().
+	lgr.Info().
 		Str("name", serviceName).
 		Str("environment", svcEnv.Name).
 		Str("started", upTime).
@@ -59,9 +59,9 @@ func main() {
 		Msg("service details, starting the service")
 
 	// setup : start service
-	server.StartService(svcEnv, dbConnMgr, logger)
+	server.StartService(svcEnv, dbConnMgr, lgr)
 
-	logger.Fatal().Msg("service stopped")
+	lgr.Fatal().Msg("service stopped")
 }
 
 // MustEnvConfig reads all the environmental configurations and panics if something critical is missing.
