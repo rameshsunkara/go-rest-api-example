@@ -11,7 +11,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 )
 
-func TestRequestLogMiddleware(t *testing.T) {
+func TestRequestLogMiddleware(_ *testing.T) {
 	type requestLogMiddlewareTestCase struct {
 		Description  string
 		InputReqPath string
