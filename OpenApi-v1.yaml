@@ -1,0 +1,960 @@
+openapi: 3.1.0
+info:
+  title: Orders API
+  description: API for managing orders in an e-commerce system
+  version: 1.0.0
+  contact:
+    name: Ramesh Sunkara
+    email: test@gmail.com
+    url: 'https://www.rsunkara.com'
+  license:
+    name: TBD
+    url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+
+servers:
+  - url: https://api.example.com/v1
+    description: Sample production server
+security:
+  - Bearer: []
+tags:
+  - name: Orders
+    description: Operations related to orders
+paths:
+  /orders:
+    get:
+      summary: Retrieve orders with pagination
+      description: Retrieve a list of orders in the system with pagination support
+      operationId: getOrders
+      tags:
+        - Orders
+      parameters:
+        - in: query
+          name: offset
+          description: Number of items to skip
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100000
+            format: int64
+          examples:
+            offset1:
+              value: 0
+            offset2:
+              value: 10
+        - in: query
+          name: limit
+          description: Maximum number of items to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            format: int64
+          examples:
+            limit1:
+              value: 10
+            limit2:
+              value: 20
+      responses:
+        '200':
+          description: A list of orders
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+                minItems: 0
+                maxItems: 100
+              examples:
+                orders:
+                  value:
+                    - orderId: "123e4567-e89b-12d3-a456-426614174000"
+                      version: 1
+                      createdAt: "2024-04-20T12:00:00Z"
+                      updatedAt: "2024-04-20T12:30:00Z"
+                      products:
+                        - name: "Product A"
+                          updatedAt: "2024-04-20T12:05:00Z"
+                          price: 10.99
+                          status: "available"
+                          remarks: "Good product"
+                      user: "user123"
+                      totalAmount: 10.99
+                      status: "OrderPending"
+                      updates: []
+        '400':
+          description: Bad request. Invalid offset or limit value.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_params:
+                  value:
+                    errorCode: "orders:get_invalid_params"
+                    message: "Invalid offset or limit value"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:get_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. No orders found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:get_not_found"
+                    message: "No orders found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+            Retry-After:
+                $ref: '#/components/schemas/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:get_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:get_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    post:
+      summary: Create a new order
+      description: Create a new order in the system
+      operationId: createOrder
+      tags:
+        - Orders
+      requestBody:
+        description: Order input data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+            examples:
+              new_order:
+                value:
+                  products:
+                    - name: "Product A"
+                      price: 10.99
+                      quantity: 2
+                    - name: "Product B"
+                      price: 11.99
+                      quantity: 1
+      responses:
+        '201':
+          description: The created order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                created_order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 1
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:00:00Z"
+                    products:
+                      - name: "Product A"
+                        updatedAt: "2024-04-20T12:00:00Z"
+                        price: 10.99
+                        quantity: 2
+                      - name: "Product B"
+                        updatedAt: "2024-04-20T12:00:00Z"
+                        price: 11.99
+                        quantity: 1
+                    user: "user123@gmail.com"
+                    totalAmount: 33.97
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order input data.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_input:
+                  value:
+                    errorCode: "orders:create_invalid_input"
+                    message: "Invalid order input data"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:create_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+            Retry-After:
+                $ref: '#/components/schemas/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:create_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:create_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+  /orders/{orderId}:
+    parameters:
+      - in: path
+        name: orderId
+        required: true
+        schema:
+          type: string
+          format: uuid
+          maxLength: 36
+        description: The ID of the order to operate on
+    get:
+      summary: Retrieve a specific order
+      description: Retrieve details of a specific order by ID
+      operationId: getOrder
+      tags:
+        - Orders
+      responses:
+        '200':
+          description: The requested order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 1
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:30:00Z"
+                    products:
+                      - name: "Product A"
+                        updatedAt: "2024-04-20T12:05:00Z"
+                        price: 10.99
+                        status: "available"
+                        remarks: "Good product"
+                    user: "user123"
+                    totalAmount: 10.99
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order ID.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_order_id:
+                  value:
+                    errorCode: "orders:get_invalid_order_id"
+                    message: "Invalid order ID"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:get_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:get_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+            Retry-After:
+                $ref: '#/components/schemas/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:get_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:get_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    put:
+      summary: Update a specific order
+      description: Update details of a specific order by ID
+      operationId: updateOrder
+      tags:
+        - Orders
+      requestBody:
+        description: Order input data
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/OrderInput'
+            examples:
+              updated_order:
+                value:
+                  products:
+                    - name: "Product B"
+                      price: 15.99
+                      status: "available"
+                      remarks: "Great product"
+                  user: "user456"
+      responses:
+        '200':
+          description: The updated order
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                updated_order:
+                  value:
+                    orderId: "123e4567-e89b-12d3-a456-426614174000"
+                    version: 2
+                    createdAt: "2024-04-20T12:00:00Z"
+                    updatedAt: "2024-04-20T12:35:00Z"
+                    products:
+                      - name: "Product B"
+                        updatedAt: "2024-04-20T12:35:00Z"
+                        price: 15.99
+                        status: "available"
+                        remarks: "Great product"
+                    user: "user456"
+                    totalAmount: 15.99
+                    status: "OrderPending"
+                    updates: []
+        '400':
+          description: Bad request. Invalid order ID or input data.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_input:
+                  value:
+                    errorCode: "orders:update_invalid_input"
+                    message: "Invalid order ID or input data"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:update_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:update_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+              X-RateLimit-Limit:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+              X-RateLimit-Remaining:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+              X-RateLimit-Reset:
+                $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+              Retry-After:
+                  $ref: '#/components/schemas/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:update_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:update_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+    delete:
+      summary: Delete a specific order
+      description: Delete a specific order by ID
+      operationId: deleteOrder
+      tags:
+        - Orders
+      responses:
+        '204':
+          description: Order deleted successfully
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+        '400':
+          description: Bad request. Invalid order ID.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                invalid_order_id:
+                  value:
+                    errorCode: "orders:delete_invalid_order_id"
+                    message: "Invalid order ID"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 400
+        '401':
+          description: Unauthorized. Authentication required.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                unauthorized:
+                  value:
+                    errorCode: "orders:delete_unauthorized"
+                    message: "Authentication required"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 401
+        '404':
+          description: Not found. Order with the specified ID not found.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                not_found:
+                  value:
+                    errorCode: "orders:delete_not_found"
+                    message: "Order with the specified ID not found"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 404
+        '429':
+          description: Too many requests. Rate limit exceeded.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+            Retry-After:
+                $ref: '#/components/schemas/headers/Retry-After'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                rate_limit_exceeded:
+                  value:
+                    errorCode: "orders:delete_rate_limit_exceeded"
+                    message: "Rate limit exceeded"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 429
+        '500':
+          description: Internal server error. Please try again later.
+          headers:
+            X-RateLimit-Limit:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Limit'
+            X-RateLimit-Remaining:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Remaining'
+            X-RateLimit-Reset:
+              $ref: '#/components/schemas/headers/X-Rate-Limit-Reset'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+              examples:
+                server_error:
+                  value:
+                    errorCode: "orders:delete_server_error"
+                    message: "Internal server error. Please try again later"
+                    debugId: "a8fe597c-193b-4da3-b8b1-195e8ef1603f"
+                    httpStatusCode: 500
+components:
+  securitySchemes:
+    Bearer:
+      description: Personal access token compliant with RFC8725 issued by the HPE GreenLake platform.
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ApiError:
+      type: object
+      description: API Error Object.
+      required:
+        - errorCode
+        - message
+        - debugId
+        - httpStatusCode
+      properties:
+        httpStatusCode:
+          type: integer
+          format: int32
+          minimum: 400
+          maximum: 599
+          description: HTTP equivalent status code
+        message:
+          type: string
+          description: User-friendly error message
+          maxLength: 100
+          format: string
+        debugId:
+          type: string
+          format: uuid
+          maxLength: 36
+          description: Unique identifier for the instance of this error
+        errorCode:
+          type: string
+          description: A unique machine-friendly, but human-readable identifier for the error
+          maxLength: 50
+          format: string
+    Order:
+      type: object
+      description: Object representing an order in the system.
+      properties:
+        orderId:
+          type: string
+          format: uuid
+          maxLength: 36
+          description: The unique identifier for the order
+        version:
+          type: integer
+          format: int64
+          description: The version of the order
+          minimum: 1
+          maximum: 1000
+        createdAt:
+          type: string
+          format: date-time
+          maxLength: 20
+          description: The date and time when the order was created
+        updatedAt:
+          type: string
+          format: date-time
+          maxLength: 20
+          description: The date and time when the order was last updated
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+          minItems: 1
+          maxItems: 100
+          description: The list of products in the order
+        user:
+          type: string
+          description: The user who placed the order
+          maxLength: 50
+          format: string
+        totalAmount:
+          type: number
+          format: float64
+          description: The total amount of the order
+        status:
+          type: string
+          enum:
+            - OrderPending
+            - OrderProcessing
+            - OrderShipped
+            - OrderDelivered
+            - OrderCancelled
+          description: The status of the order
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderUpdate'
+          minItems: 0
+          maxItems: 1000
+          description: The list of updates made to the order
+      required:
+        - orderId
+        - version
+        - createdAt
+        - products
+        - user
+        - totalAmount
+        - status
+    OrderUpdate:
+      type: object
+      description: Object representing an update to an order.
+      properties:
+        updatedAt:
+          type: string
+          format: date-time
+          maxLength: 20
+          description: The date and time when the order was updated
+        notes:
+          type: string
+          maxLength: 100
+          description: Additional notes or comments about the update
+          format: string
+        handledBy:
+          type: string
+          maxLength: 50
+          description: The person or system who handled the update
+          format: string
+    Product:
+      type: object
+      description: Object representing a product in the system.
+      properties:
+        name:
+          type: string
+          description: The name of the product
+          maxLength: 100
+          format: string
+        updatedAt:
+          type: string
+          format: date-time
+          maxLength: 20
+          description: The date and time when the product information was last updated
+        price:
+          type: number
+          format: float64
+          description: The price of the product
+        status:
+          type: string
+          description: The status of the product
+          maxLength: 50
+          format: string
+        remarks:
+          type: string
+          description: Additional remarks or description about the product
+          maxLength: 10000
+          format: string
+    OrderInput:
+      type: object
+      description: Object representing the input data for creating or updating an order.
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductInput'
+          minItems: 1
+          maxItems: 100
+          description: The list of products in the order
+      required:
+        - products
+    ProductInput:
+      type: object
+      description: Object representing the input data for creating or updating a product belonging to an order.
+      properties:
+        name:
+          type: string
+          description: The name of the product
+          maxLength: 100
+          format: string
+        price:
+          type: number
+          format: float64
+          description: The price of the product
+        quantity:
+          type: number
+          format: uint64
+          description: No.of items
+    headers:
+      description: Common headers for API responses
+      X-Rate-Limit-Limit:
+        type: integer
+        format: int64
+        description: The maximum number of requests that the client is permitted to make in 60 second window.
+        minimum: 0
+        maximum: 1000
+      X-Rate-Limit-Remaining:
+        type: integer
+        format: int64
+        description: The number of requests remaining in the current 60 second window.
+        minimum: 0
+        maximum: 1000
+      X-Rate-Limit-Reset:
+        type: integer
+        format: int64
+        description: The Unix timestamp at which the rate limit will be reset
+        minimum: 0
+        maximum: 2147483647
+      Retry-After:
+        type: integer
+        format: int32
+        description: Seconds until the rate limit is reset
+        minimum: 0
+        maximum: 3600

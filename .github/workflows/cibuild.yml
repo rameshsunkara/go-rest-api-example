@@ -1,0 +1,59 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, v2 ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🧱 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: 🎗️ Check go mod
+        run: |
+          go mod tidy
+          git diff --exit-code -- go.mod
+          git diff --exit-code -- go.sum
+
+      - name: 🧹 Format
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
+      - name: 🛡️ Lint
+        uses: golangci/golangci-lint-action@v3.7.0
+        with:
+          version: latest
+          skip-cache: true
+
+      - name: 🏗️ Build
+        run: make build
+
+      - name: 🧪 Test
+        run: make test
+
+      - name: 👮‍ Check Code Coverage
+        run: |
+          make ci-coverage
+
+      - name: 📮 Upload Code Coverage Stats
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false # optional (default = false)
+          files: coverage.out # optional
+          flags: unittests # optional
+          name: codecov-umbrella # optional
+          verbose: true # optional (default = false)
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOVTOKEN }}

@@ -1,0 +1,16 @@
+name: orders
+
+services:
+    database:
+        image: mongodb/mongodb-community-server
+        container_name: orders_db
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: badpassword
+        ports:
+            - "27017:27017"
+        volumes:
+              - data_store:/data/db
+
+volumes:
+    data_store:

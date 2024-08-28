@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "4513b26b-eb10-4cca-886a-7704799f9a51",
+		"name": "ordersapi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1129965"
+	},
+	"item": [
+		{
+			"name": "Check Service Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/status",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all Orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/ecommerce/v1/orders?limit=10",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"ecommerce",
+						"v1",
+						"orders"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One Order",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/ecommerce/v1/orders/66290ba42c3c91543e0b3dbf",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"ecommerce",
+						"v1",
+						"orders",
+						"66290ba42c3c91543e0b3dbf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get One Order - Bad Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/ecommerce/v1/orders/\"\"",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"ecommerce",
+						"v1",
+						"orders",
+						"\"\""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete One Order",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/ecommerce/v1/orders/66290ba42c3c91543e0b3dbf",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"ecommerce",
+						"v1",
+						"orders",
+						"66290ba42c3c91543e0b3dbf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create - New Order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"products\": [\n    {\n      \"name\": \"Product A\",\n      \"price\": 10.99,\n      \"quantity\": 2\n    },\n    {\n      \"name\": \"Product B\",\n      \"price\": 11.99,\n      \"quantity\": 1\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{host}}/ecommerce/v1/orders",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"ecommerce",
+						"v1",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Seed Local Developer DB",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/internal/seed-local-db",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"internal",
+						"seed-local-db"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
