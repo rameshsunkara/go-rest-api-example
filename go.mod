@@ -13,7 +13,7 @@ require (
 	github.com/rameshsunkara/strikememongo v0.2.5
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
-	go.mongodb.org/mongo-driver v1.17.0
+	go.mongodb.org/mongo-driver v1.17.1
 )
 
 require (
