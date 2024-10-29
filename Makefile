@@ -1,143 +1,155 @@
-# Read the .env file and export its variables
-ifeq (,$(wildcard ./.env))
-$(error .env file not found)
+# Load and export environment variables from .env file
+ifneq (,$(wildcard ./.env))
+    include .env
+    export $(shell sed 's/=.*//' .env)
 else
-include .env
-export $(shell sed 's/=.*//' .env)
+    $(error .env file not found)
 endif
 
+# Project-specific variables
 PROJECT_NAME := $(shell basename "$(PWD)" | tr '[:upper:]' '[:lower:]')
-
-# GIT commit id will be used as version of the application
 VERSION ?= $(shell git rev-parse --short HEAD)
-LDFLAGS := -ldflags "-X main.version=${VERSION}"
+LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 
 DOCKER_IMAGE_NAME := "$(PROJECT_NAME):$(VERSION)"
 DOCKER_CONTAINER_NAME := "$(PROJECT_NAME)-$(VERSION)"
-
-MODULE = $(shell go list -m)
-
-testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+MODULE := $(shell go list -m)
 TEST_COVERAGE_THRESHOLD = 50
 
-## start: Starts everything that is required to serve the APIs
-start:
-	docker-compose up -d
-	make run
+# Test coverage command
+testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '{print $$3}')
 
-## setup: Start the dependencies only
-setup:
-	docker-compose up -d
+# Start all necessary services and API server
+.PHONY: start
+start: docker-compose-up run
 
-## run: Run the API server alone (without supplementary services such as DB etc.,)
+# Start only dependencies
+.PHONY: setup
+setup: docker-compose-up
+
+# Run the API server
+.PHONY: run
 run:
-	go run ${LDFLAGS} main.go -version="${VERSION}"
+	go run $(LDFLAGS) main.go -version=$(VERSION)
 
-## build: Build the API server binary
+# Build the API server binary
+.PHONY: build
 build:
-	CGO_ENABLED=0 go build ${LDFLAGS} -a -o ${PROJECT_NAME} $(MODULE)
+	CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME) $(MODULE)
 
-## version: Display the current version of the API server
+# Display the current version of the API server
+.PHONY: version
 version:
 	@echo $(VERSION)
 
-## test: Run tests
+# Run tests with coverage
+.PHONY: test
 test:
-	go test ./... -v -coverprofile coverage.out -covermode count
+	go test ./... -v -coverprofile=coverage.out -covermode=count
 
-## coverage: Measures and generate code coverage report
-coverage:
-	@go test ./... -v -coverprofile coverage.out -covermode count
-	@go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+' | xargs -I {} echo "Total test coverage: {}%"
+# Generate and display the code coverage report
+.PHONY: coverage
+coverage: test
+	@go tool cover -func=coverage.out | grep total | awk '{print "Total test coverage: "$$3}'
 	@go tool cover -html=coverage.out
 
-ci-coverage:
+# Check if test coverage meets the threshold
+.PHONY: ci-coverage
+ci-coverage: test
 	@echo "Current unit test coverage: $(testCoverageCmd)"
 	@echo "Test Coverage Threshold: $(TEST_COVERAGE_THRESHOLD)"
-	@echo "-----------------------"
-
-	@if [ "$(shell echo "$(testCoverageCmd) < $(TEST_COVERAGE_THRESHOLD)" | bc -l)" -eq 1 ]; then \
-		echo "Failed, Please add or update tests to improve test code coverage."; \
+	@if [ $$(echo "$(testCoverageCmd) < $(TEST_COVERAGE_THRESHOLD)" | bc -l) -eq 1 ]; then \
+		echo "Failed, please add or update tests to improve test coverage."; \
 		exit 1; \
 	else \
 		echo "OK"; \
 	fi
 
-## tidy: Tidy go modules
+# Tidy Go modules
+.PHONY: tidy
 tidy:
 	go mod tidy
 
-## format: Format go code
+# Format Go code
+.PHONY: format
 format:
 	go fmt ./...
 
-## lint: Run linter
+# Run the linter
+.PHONY: lint
 lint:
 	golangci-lint run
 
-## lint-fix: Run linter and fix the issues
+# Run the linter and fix issues
+.PHONY: lint-fix
 lint-fix:
 	golangci-lint run --fix
 
-## clean: Clean all docker resources
-clean:
-	docker-compose down
-	docker ps --filter name=orders -q | xargs docker stop
-	docker network ls --filter name=orders -q | xargs docker prune --force
-	docker volume ls --filter name=orders -q | xargs docker volume rm
+# Clean all Docker resources
+.PHONY: clean
+clean: docker-clean
 
-## docker-build: Build the API server as a docker image
+# Build the Docker image
+.PHONY: docker-build
 docker-build:
-	$(info ---> Building Docker Image: ${DOCKER_IMAGE_NAME}, Exposed Port: ${port})
-	docker build -t ${DOCKER_IMAGE_NAME} . \
-		--build-arg port=${port} \
+	$(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
+	docker build -t $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .
 
+# Build the Docker image without cache
+.PHONY: docker-build-debug
 docker-build-debug:
-	$(info ---> Building Docker Image: ${DOCKER_IMAGE_NAME}, Exposed Port: ${port})
-	docker build --no-cache --progress plain -t ${DOCKER_IMAGE_NAME} . \
-		--build-arg port=${port}
+	$(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
+	docker build --no-cache --progress=plain -t $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .
 
-## owasp-report: Generate OWASP report
+# Generate OWASP report
+.PHONY: owasp-report
 owasp-report:
 	vacuum html-report -z OpenApi-v1.yaml
 
-## go-work: Generate the go work file
+# Generate Go work file
+.PHONY: go-work
 go-work:
 	go work init .
 
-## docker-run: Run the API server as a docker container
+# Run the Docker container
+.PHONY: docker-run
 docker-run:
-	$(info ---> Running Docker Container: ${DOCKER_CONTAINER_NAME} in Environment: ${profile})
-	docker run --name ${DOCKER_CONTAINER_NAME} -it \
-				--env environment=${profile} \
-				$(DOCKER_IMAGE_NAME)
+	$(info ---> Running Docker Container: $(DOCKER_CONTAINER_NAME) in Environment: $(profile))
+	docker run --name $(DOCKER_CONTAINER_NAME) -it --env environment=$(profile) $(DOCKER_IMAGE_NAME)
 
-## docker-start: Builds Docker image and runs it.
+# Build and run the Docker container
+.PHONY: docker-start
 docker-start: docker-build docker-run
 
-## docker-stop: Stops the docker container
+# Stop the Docker container
+.PHONY: docker-stop
 docker-stop:
 	docker stop $(DOCKER_CONTAINER_NAME)
 
-## docker-remove: Removes the docker images and containers
+# Remove Docker images and containers
+.PHONY: docker-remove
 docker-remove:
 	docker rm $(DOCKER_CONTAINER_NAME)
 	docker rmi $(DOCKER_IMAGE_NAME)
 
-## docker-clean: Cleans all docker resources
+# Clean all Docker resources
+.PHONY: docker-clean
 docker-clean: docker-clean-service-images docker-clean-build-images
 
-## docker-clean-service-images: Stops and Removes the service images
+# Stop and remove service images
+.PHONY: docker-clean-service-images
 docker-clean-service-images: docker-stop docker-remove
 
-## docker-clean-build-images: Removes build images
+# Remove build images
+.PHONY: docker-clean-build-images
 docker-clean-build-images:
-	docker rmi $(docker images --filter label="builder=true")
+	docker rmi $$(docker images --filter label="builder=true" -q)
 
+# Display help
 .PHONY: help
 help: Makefile
 	@echo
-	@echo " Choose a command to run in "$(PROJECT_NAME)":"
+	@echo " Choose a command to run in $(PROJECT_NAME):"
 	@echo
-	@sed -n 's/^##//p' $< | column -t -s ':' |	sed -e 's/^/ /'
+	@sed -n 's/^##//p' $< | column -t -s ':' | sed -e 's/^/ /'
 	@echo
