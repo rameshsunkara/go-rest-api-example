@@ -6,6 +6,22 @@ else
     $(error .env file not found)
 endif
 
+# Get the number of CPU cores for parallelism
+#get_cpu_cores := $(shell getconf _NPROCESSORS_ONLN)
+# Shell function to determine the number of CPU cores based on the OS
+get_cpu_cores = \
+  if [ "$$(uname)" = "Linux" ]; then \
+    nproc; \
+  elif [ "$$(uname)" = "Darwin" ]; then \
+    sysctl -n hw.ncpu; \
+  else \
+    echo "Unsupported OS, default to 1"; \
+    echo 1; \
+  fi
+
+# Assign the result of the get_cpu_cores shell command to a variable
+cpu_cores := $(shell $(get_cpu_cores))
+
 # Project-specific variables
 PROJECT_NAME := $(shell basename "$(PWD)" | tr '[:upper:]' '[:lower:]')
 VERSION ?= $(shell git rev-parse --short HEAD)
@@ -21,7 +37,7 @@ testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '
 
 # Helper variables
 GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME)
-GO_TEST_CMD := go test ./... -v -coverprofile=coverage.out -covermode=count
+GO_TEST_CMD := go test ./... -v -coverprofile=coverage.out -covermode=count -parallel=$(cpu_cores)
 
 ## Start all necessary services and API server
 .PHONY: start
