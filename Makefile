@@ -133,14 +133,30 @@ docker-start: docker-build docker-run ## Build and run the Docker container
 
 ## Stop the Docker container
 .PHONY: docker-stop
-docker-stop: ## Stop the Docker container
-	docker stop $(DOCKER_CONTAINER_NAME)
+docker-stop:
+	@if [ -n "$$(docker ps -q --filter name=$(DOCKER_CONTAINER_NAME))" ]; then \
+		echo "Stopping container: $(DOCKER_CONTAINER_NAME)"; \
+		docker stop $(DOCKER_CONTAINER_NAME); \
+	else \
+		echo "No container to stop with name: $(DOCKER_CONTAINER_NAME)"; \
+	fi
 
 ## Remove Docker images and containers
 .PHONY: docker-remove
-docker-remove: ## Remove Docker images and containers
-	docker rm $(DOCKER_CONTAINER_NAME)
-	docker rmi $(DOCKER_IMAGE_NAME)
+docker-remove:
+	@if [ -n "$$(docker ps -a -q --filter name=$(DOCKER_CONTAINER_NAME))" ]; then \
+		echo "Removing container: $(DOCKER_CONTAINER_NAME)"; \
+		docker rm $(DOCKER_CONTAINER_NAME); \
+	else \
+		echo "No container to remove with name: $(DOCKER_CONTAINER_NAME)"; \
+	fi
+
+	@if [ -n "$$(docker images -q $(DOCKER_IMAGE_NAME))" ]; then \
+		echo "Removing image: $(DOCKER_IMAGE_NAME)"; \
+		docker rmi $(DOCKER_IMAGE_NAME); \
+	else \
+		echo "No image to remove with name: $(DOCKER_IMAGE_NAME)"; \
+	fi
 
 ## Clean all Docker resources
 .PHONY: docker-clean
@@ -148,8 +164,13 @@ docker-clean: docker-stop docker-remove docker-clean-build-images ## Clean all D
 
 ## Remove build images
 .PHONY: docker-clean-build-images
-docker-clean-build-images: ## Remove build images
-	docker rmi $$(docker images --filter label="builder=true" -q)
+docker-clean-build-images:
+	@if [ -n "$$(docker images --filter label="builder=true" -q)" ]; then \
+		echo "Removing build images..."; \
+		docker rmi $$(docker images --filter label="builder=true" -q); \
+	else \
+		echo "No build images to remove."; \
+	fi
 
 ## Display help
 .PHONY: help
