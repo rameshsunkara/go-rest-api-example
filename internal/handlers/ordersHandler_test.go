@@ -50,6 +50,7 @@ func setupTestContext() (*gin.Context, *gin.Engine, *httptest.ResponseRecorder) 
 }
 
 func TestOrdersHandler_Create(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name           string
 		input          external.OrderInput
@@ -106,7 +107,6 @@ func TestOrdersHandler_Create(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // capture range variable
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
@@ -149,6 +149,7 @@ func TestOrdersHandler_Create(t *testing.T) {
 }
 
 func TestOrdersHandler_GetAll(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name           string
 		limit          string
@@ -187,7 +188,8 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 			name:  "Limit Out of Bounds",
 			limit: "10000",
 			mockGetAllFunc: func(_ context.Context, _ int64) (*[]data.Order, error) {
-				return nil, nil
+				results := make([]data.Order, 10)
+				return &results, nil
 			},
 			expectedCode: http.StatusBadRequest,
 			expectedError: &external.APIError{
@@ -199,7 +201,8 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 			name:  "Invalid Limit",
 			limit: "ABC",
 			mockGetAllFunc: func(_ context.Context, _ int64) (*[]data.Order, error) {
-				return nil, nil
+				results := make([]data.Order, 10)
+				return &results, nil
 			},
 			expectedCode: http.StatusBadRequest,
 			expectedError: &external.APIError{
@@ -210,7 +213,6 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt // capture range variable
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
