@@ -64,8 +64,12 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 		o.logger.Error().Err(err).Msg("error occurred while creating order")
 		return "", ErrFailedToCreateOrder
 	}
-	o.logger.Info().Str("orderId", result.InsertedID.(primitive.ObjectID).Hex()).Msg("created new order")
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+	insertedID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", errors.New("failed to assert inserted ID as ObjectID")
+	}
+	o.logger.Info().Str("orderId", insertedID.Hex()).Msg("created new order")
+	return insertedID.Hex(), nil
 }
 
 func (o *OrdersRepo) Update(ctx context.Context, po *data.Order) error {
