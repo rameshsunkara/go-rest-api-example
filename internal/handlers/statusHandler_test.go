@@ -5,66 +5,67 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func UnMarshalStatusResponse(resp *http.Response) (string, error) {
+func UnMarshalStatusResponse(resp *http.Response) (handlers.ServiceStatus, error) {
 	body, _ := io.ReadAll(resp.Body)
-	var statusResponse string
+	var statusResponse handlers.ServiceStatus
 	err := json.Unmarshal(body, &statusResponse)
 	return statusResponse, err
 }
 
-func TestStatusSuccess(t *testing.T) {
-	// Test Setup
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	mocks.PingFunc = func() error {
-		return nil
+func TestStatusHandler(t *testing.T) {
+	tests := []struct {
+		name           string
+		mockPingFunc   func() error
+		expectedStatus handlers.ServiceStatus
+		expectedCode   int
+	}{
+		{
+			name: "StatusSuccess",
+			mockPingFunc: func() error {
+				return nil
+			},
+			expectedStatus: handlers.UP,
+			expectedCode:   http.StatusOK,
+		},
+		{
+			name: "StatusDown",
+			mockPingFunc: func() error {
+				return errors.New("DB Connection Failed")
+			},
+			expectedStatus: handlers.DOWN,
+			expectedCode:   http.StatusFailedDependency,
+		},
 	}
-	s := handlers.NewStatusController(&mocks.MockMongoMgr{})
 
-	// Call actual function
-	s.CheckStatus(c)
+	for _, tt := range tests {
+		tt := tt // capture range variable
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel() // mark the test as capable of running in parallel
 
-	// Parse results
-	resp := w.Result()
-	statusResponse, err := UnMarshalStatusResponse(resp)
-	if err != nil {
-		t.Fail()
+			// Test Setup
+			c, _, recorder := setupTestContext()
+			mocks.PingFunc = tt.mockPingFunc
+			s := handlers.NewStatusController(&mocks.MockMongoMgr{})
+
+			// Call actual function
+			s.CheckStatus(c)
+
+			// Parse results
+			resp := recorder.Result()
+			statusResponse, err := UnMarshalStatusResponse(resp)
+			require.NoError(t, err)
+
+			// Check results
+			assert.Equal(t, tt.expectedCode, resp.StatusCode)
+			assert.Equal(t, tt.expectedStatus, statusResponse)
+		})
 	}
-	// Check results
-	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
-	assert.EqualValues(t, handlers.UP, statusResponse)
-}
-
-func TestStatusDown(t *testing.T) {
-	// Test Setup
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	mocks.PingFunc = func() error {
-		return errors.New("DB Connection Failed")
-	}
-	s := handlers.NewStatusController(&mocks.MockMongoMgr{})
-
-	// Call actual function
-	s.CheckStatus(c)
-
-	// Parse results
-	resp := w.Result()
-	statusResponse, err := UnMarshalStatusResponse(resp)
-	if err != nil {
-		t.Fail()
-	}
-	// Check results
-	assert.EqualValues(t, http.StatusFailedDependency, resp.StatusCode)
-	assert.EqualValues(t, handlers.DOWN, statusResponse)
 }

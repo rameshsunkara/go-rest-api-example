@@ -106,7 +106,10 @@ func TestOrdersHandler_Create(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt // capture range variable
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel() // mark the test as capable of running in parallel
+
 			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
@@ -207,7 +210,10 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		tt := tt // capture range variable
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel() // mark the test as capable of running in parallel
+
 			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
