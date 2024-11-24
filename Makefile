@@ -84,9 +84,13 @@ coverage: test ## Generate and display the code coverage report
 ## Check if test coverage meets the threshold
 .PHONY: ci-coverage
 ci-coverage: test ## Check if test coverage meets the threshold
-	@echo "Current unit test coverage: $(testCoverageCmd)"
-	@echo "Test Coverage Threshold: $(TEST_COVERAGE_THRESHOLD)"
-	@if [ $$(echo "$(testCoverageCmd) < $(TEST_COVERAGE_THRESHOLD)" | bc -l) -eq 1 ]; then \
+	@coverage=$(shell go tool cover -func=coverage.out | grep total | awk '{print $$3}' | sed 's/%//g'); \
+	echo "Current unit test coverage: $$coverage"; \
+	echo "Test Coverage Threshold: $(TEST_COVERAGE_THRESHOLD)"; \
+	if [ -z "$$coverage" ]; then \
+		echo "Test coverage output is empty. Make sure the tests ran successfully."; \
+		exit 1; \
+	elif [ $$(echo "$$coverage < $(TEST_COVERAGE_THRESHOLD)" | bc) -eq 1 ]; then \
 		echo "Test coverage below threshold. Please add more tests."; \
 		exit 1; \
 	else \
