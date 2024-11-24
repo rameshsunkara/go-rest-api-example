@@ -79,6 +79,19 @@ func TestOrdersHandler_Create(t *testing.T) {
 			},
 		},
 		{
+			name:  "Invalid Input 2",
+			input: external.OrderInput{},
+			mockCreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+				return "", errors.New("invalid input")
+			},
+			expectedCode: http.StatusBadRequest, // use this once code is updated properly http.StatusBadRequest,
+			expectedError: &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				ErrorCode:      errors2.OrderCreateInvalidInput,
+				Message:        "Invalid order request body",
+			},
+		},
+		{
 			name: "Internal Server Error",
 			input: external.OrderInput{
 				Products: []external.ProductInput{
