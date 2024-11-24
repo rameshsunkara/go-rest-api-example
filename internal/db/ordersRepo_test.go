@@ -68,6 +68,26 @@ func TestOrdersRepo_Create(t *testing.T) {
 			},
 			wantErr: db.ErrFailedToCreateOrder,
 		},
+		{
+			name: "InvalidIDinDB",
+			order: &data.Order{
+				Version:     1,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
+				User:        "test@example.com",
+				Status:      data.OrderPending,
+				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+			},
+			mock: func(mt *mtest.T) {
+				insert := mtest.CreateSuccessResponse()
+				get := mtest.CreateCursorResponse(1, "ordersdb.orders", mtest.FirstBatch, bson.D{
+					{Key: "_id", Value: "test"},
+				})
+				mt.AddMockResponses(insert, get)
+			},
+			wantErr: nil,
+		},
 	}
 
 	for _, tt := range tests {

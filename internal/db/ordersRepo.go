@@ -27,6 +27,7 @@ var (
 	ErrFailedToCreateOrder   = errors.New("failed to create order")
 	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
 	ErrUnexpectedGetOrder    = errors.New("unexpected error occurred while fetching order")
+	ErrInvalidID             = errors.New("failed to assert inserted ID as ObjectID")
 )
 
 // OrdersDataService  - Added for tests/mock.
@@ -67,7 +68,7 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 	}
 	insertedID, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return "", errors.New("failed to assert inserted ID as ObjectID")
+		return "", ErrInvalidID
 	}
 	o.logger.Info().Str("orderId", insertedID.Hex()).Msg("created new order")
 	return insertedID.Hex(), nil
