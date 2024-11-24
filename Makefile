@@ -83,8 +83,7 @@ coverage: test ## Generate and display the code coverage report
 
 ## Check if test coverage meets the threshold
 .PHONY: ci-coverage
-ci-coverage:  ## Check if test coverage meets the threshold
-    test
+ci-coverage: test ## Check if test coverage meets the threshold
 	@echo "Current unit test coverage: $(testCoverageCmd)"
 	@echo "Test Coverage Threshold: $(TEST_COVERAGE_THRESHOLD)"
 	@if [ $$(echo "$(testCoverageCmd) < $(TEST_COVERAGE_THRESHOLD)" | bc -l) -eq 1 ]; then \
