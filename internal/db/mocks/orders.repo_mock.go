@@ -8,8 +8,8 @@ import (
 )
 
 type MockOrdersDataService struct {
-	CreateFunc     func(ctx context.Context, purchaseOrder *data.Order) (string, error)
-	UpdateFunc     func(ctx context.Context, purchaseOrder *data.Order) error
+	CreateFunc func(ctx context.Context, purchaseOrder *data.Order) (string, error)
+	// UpdateFunc     func(ctx context.Context, purchaseOrder *data.Order) error
 	GetAllFunc     func(ctx context.Context, limit int64) (*[]data.Order, error)
 	GetByIDFunc    func(ctx context.Context, id primitive.ObjectID) (*data.Order, error)
 	DeleteByIDFunc func(ctx context.Context, id primitive.ObjectID) error
@@ -19,8 +19,8 @@ func (m *MockOrdersDataService) Create(ctx context.Context, purchaseOrder *data.
 	return m.CreateFunc(ctx, purchaseOrder)
 }
 
-func (m *MockOrdersDataService) Update(ctx context.Context, purchaseOrder *data.Order) error {
-	return m.UpdateFunc(ctx, purchaseOrder)
+func (m *MockOrdersDataService) Update(_ context.Context, _ *data.Order) error {
+	return nil
 }
 
 func (m *MockOrdersDataService) GetAll(ctx context.Context, limit int64) (*[]data.Order, error) {

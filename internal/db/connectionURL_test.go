@@ -40,6 +40,12 @@ func TestMongoDBCredentialFromSideCar(t *testing.T) {
 			ExpectedOut: nil,
 			ExpectedErr: db.ErrSideCarFileFormat,
 		},
+		{
+			Description: "Default file path is used when no file path is given",
+			Input:       "",
+			ExpectedOut: nil,
+			ExpectedErr: db.ErrSideCarFileRead,
+		},
 	}
 
 	for i, tc := range testCases {

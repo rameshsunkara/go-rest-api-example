@@ -63,33 +63,43 @@ go-rest-api-example/
 
 ## QuickStart
 
-Pre-requisites: Docker, Docker Compose, Make
+### Pre-requisites
 
-1. Start the service
+- Docker
+- [Docker Compose](https://docs.docker.com/compose/install/)
+- Make
+- [golangci-lint](https://golangci-lint.run/welcome/install/#local-installation)
 
-        make start
+### Frequently used commands
+      start                          Start all necessary services and API server
+      run                            Run the API server
+      setup                          Start only dependencies
+      test                           Run tests with coverage
 
-Other Options:
+### Development commands
+      lint                           Run the linter
+      lint-fix                       Run the linter and fix issues
+      clean                          Clean all Docker resources
+      coverage                       Generate and display the code coverage report
+      go-work                        Generate Go work file
+      owasp-report                   Generate OWASP report
+      tidy                           Tidy Go modules
 
-   Choose a command to run in go-rest-api-example:
-   
-      start                         Starts everything that is required to serve the APIs
-      run                           Run the API server alone (without supplementary services such as DB etc.,)
-      build                         Build the API server binary
-      setup                         Start the dependencies only
-      
-      test                          Run tests
-      coverage                      Measures and generate code coverage report
-      tidy                          Tidy go modules
-      format                        Format go code
-      lint                          Run linter
-      lint-fix                      Run linter and fix the issues
-      clean                         Clean the docker resources
-      docker-build                  Build the API server as a docker image
-      owasp-report                  Generate OWASP report
-      go-work                       Generate the go work file
-      
-      version                       Display the current version of the API server
+### CI commands
+      build                          Build the API server binary
+      ci-coverage                    Check if test coverage meets the threshold
+      format                         Format Go code
+      version                        Display the current version of the API server
+
+### Docker commands
+      docker-build                   Build the Docker image
+      docker-build-debug             Build the Docker image without cache
+      docker-clean                   Clean all Docker resources
+      docker-clean-build-images      Remove build images
+      docker-remove                  Remove Docker images and containers
+      docker-run                     Run the Docker container
+      docker-start                   Build and run the Docker container
+      docker-stop                    Stop the Docker container
 
 ## Tools
 
@@ -130,7 +140,7 @@ Other Options:
 
 I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
 
-After years of developing Full Stack applications utilizing ReactJS and JVM-based languages, I observed that existing boilerplates tended to be either excessive or insufficient for my needs. Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. While similarities with popular Go boilerplate templates may be evident, I have customized this repository to better align with my preferences and accumulated experiences. (My apologies if I inadvertently overlooked crediting any existing templates.)
+After years of developing Full Stack applications utilizing ReactJS and JVM-based languages, I observed that existing boilerplate's tended to be either excessive or insufficient for my needs. Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. While similarities with popular Go boilerplate templates may be evident, I have customized this repository to better align with my preferences and accumulated experiences. (My apologies if I inadvertently overlooked crediting any existing templates.)
 
 I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
 
