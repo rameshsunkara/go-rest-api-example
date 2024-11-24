@@ -28,26 +28,58 @@ func TestValidate(t *testing.T) {
 	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	ds := db.NewOrdersRepo(&mocks.MockMongoDataBase{}, lgr)
 
-	_, cErr := ds.Create(context.Background(), &data.Order{})
-	require.Error(t, cErr)
-	assert.Equal(t, db.ErrInvalidInitialization, cErr)
+	testCases := []struct {
+		name     string
+		testFunc func() error
+		wantErr  error
+	}{
+		{
+			name: "Create with invalid initialization",
+			testFunc: func() error {
+				_, err := ds.Create(context.Background(), &data.Order{})
+				return err
+			},
+			wantErr: db.ErrInvalidInitialization,
+		},
+		{
+			name: "GetAll with invalid initialization",
+			testFunc: func() error {
+				_, err := ds.GetAll(context.Background(), 10)
+				return err
+			},
+			wantErr: db.ErrInvalidInitialization,
+		},
+		{
+			name: "GetByID with invalid initialization",
+			testFunc: func() error {
+				_, err := ds.GetByID(context.Background(), primitive.NewObjectID())
+				return err
+			},
+			wantErr: db.ErrInvalidInitialization,
+		},
+		{
+			name: "Update with invalid initialization",
+			testFunc: func() error {
+				return ds.Update(context.Background(), &data.Order{})
+			},
+			wantErr: db.ErrInvalidInitialization,
+		},
+		{
+			name: "DeleteByID with invalid initialization",
+			testFunc: func() error {
+				return ds.DeleteByID(context.Background(), primitive.NewObjectID())
+			},
+			wantErr: db.ErrInvalidInitialization,
+		},
+	}
 
-	_, getAllErr := ds.GetAll(context.Background(), 10)
-	require.Error(t, getAllErr)
-	assert.Equal(t, db.ErrInvalidInitialization, getAllErr)
-
-	_, getByIDErr := ds.GetByID(context.Background(), primitive.NewObjectID())
-	require.Error(t, getByIDErr)
-	assert.Equal(t, db.ErrInvalidInitialization, getByIDErr)
-
-	updateErr := ds.Update(context.Background(), &data.Order{})
-	require.Error(t, updateErr)
-	assert.Equal(t, db.ErrInvalidInitialization, updateErr)
-
-	err := ds.DeleteByID(context.Background(), primitive.NewObjectID())
-	require.Error(t, err)
-	assert.Equal(t, db.ErrInvalidInitialization, err)
-
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.testFunc()
+			require.Error(t, err)
+			assert.Equal(t, tc.wantErr, err)
+		})
+	}
 }
 
 func TestOrdersRepo_Create(t *testing.T) {
