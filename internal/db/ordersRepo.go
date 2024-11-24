@@ -26,6 +26,7 @@ var (
 	ErrPOIDNotFound          = errors.New("purchase order doesn't exist with given id")
 	ErrFailedToCreateOrder   = errors.New("failed to create order")
 	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
+	ErrUnexpectedGetOrder    = errors.New("unexpected error occurred while fetching order")
 )
 
 // OrdersDataService  - Added for tests/mock.
@@ -134,7 +135,7 @@ func (o *OrdersRepo) GetByID(ctx context.Context, oID primitive.ObjectID) (*data
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrPOIDNotFound
 		}
-		return nil, err
+		return nil, ErrUnexpectedGetOrder
 	}
 
 	return &result, nil

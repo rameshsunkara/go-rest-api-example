@@ -47,10 +47,26 @@ func TestOrdersRepo_Create(t *testing.T) {
 		{
 			name: "InvalidData",
 			order: &data.Order{
-				ID: primitive.NewObjectID(), // Invalid ID for creation
+				ID: primitive.NewObjectID(),
 			},
 			mock:    func(_ *mtest.T) {},
 			wantErr: db.ErrInvalidPOIDCreate,
+		},
+		{
+			name: "InsertError",
+			order: &data.Order{
+				Version:     1,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
+				User:        "test@example.com",
+				Status:      data.OrderPending,
+				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+			},
+			mock: func(mt *mtest.T) {
+				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))
+			},
+			wantErr: db.ErrFailedToCreateOrder,
 		},
 	}
 
@@ -115,6 +131,39 @@ func TestOrdersRepo_Update(t *testing.T) {
 			},
 			wantErr: db.ErrPOIDNotFound,
 		},
+		{
+			name: "ZeroID",
+			order: &data.Order{
+				Version:     1,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
+				User:        "test@example.com",
+				Status:      data.OrderPending,
+				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+			},
+			mock: func(mt *mtest.T) {
+				mt.AddMockResponses(mtest.CreateSuccessResponse())
+			},
+			wantErr: db.ErrInvalidPOIDUpdate,
+		},
+		{
+			name: "UpdateError",
+			order: &data.Order{
+				ID:          primitive.NewObjectID(),
+				Version:     1,
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
+				User:        "test@example.com",
+				Status:      data.OrderPending,
+				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+			},
+			mock: func(mt *mtest.T) {
+				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))
+			},
+			wantErr: db.ErrUnexpectedUpdateOrder,
+		},
 	}
 
 	for _, tt := range tests {
@@ -162,6 +211,14 @@ func TestOrdersRepo_GetByID(t *testing.T) {
 			},
 			wantErr: db.ErrPOIDNotFound,
 		},
+		{
+			name:    "FetchError",
+			orderID: primitive.NilObjectID,
+			mock: func(mt *mtest.T) {
+				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))
+			},
+			wantErr: db.ErrUnexpectedGetOrder,
+		},
 	}
 
 	for _, tt := range tests {
@@ -207,6 +264,14 @@ func TestOrdersRepo_DeleteByID(t *testing.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
 			},
 			wantErr: db.ErrPOIDNotFound,
+		},
+		{
+			name:    "DeleteError",
+			orderID: primitive.NilObjectID,
+			mock: func(mt *mtest.T) {
+				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))
+			},
+			wantErr: db.ErrUnexpectedDeleteOrder,
 		},
 	}
 
