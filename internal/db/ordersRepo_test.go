@@ -24,6 +24,32 @@ func TestNewOrderDataService(t *testing.T) {
 	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
 }
 
+func TestValidate(t *testing.T) {
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	ds := db.NewOrdersRepo(&mocks.MockMongoDataBase{}, lgr)
+
+	_, cErr := ds.Create(context.Background(), &data.Order{})
+	require.Error(t, cErr)
+	assert.Equal(t, db.ErrInvalidInitialization, cErr)
+
+	_, getAllErr := ds.GetAll(context.Background(), 10)
+	require.Error(t, getAllErr)
+	assert.Equal(t, db.ErrInvalidInitialization, getAllErr)
+
+	_, getByIDErr := ds.GetByID(context.Background(), primitive.NewObjectID())
+	require.Error(t, getByIDErr)
+	assert.Equal(t, db.ErrInvalidInitialization, getByIDErr)
+
+	updateErr := ds.Update(context.Background(), &data.Order{})
+	require.Error(t, updateErr)
+	assert.Equal(t, db.ErrInvalidInitialization, updateErr)
+
+	err := ds.DeleteByID(context.Background(), primitive.NewObjectID())
+	require.Error(t, err)
+	assert.Equal(t, db.ErrInvalidInitialization, err)
+
+}
+
 func TestOrdersRepo_Create(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
