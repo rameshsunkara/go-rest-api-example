@@ -2,58 +2,56 @@ package handlers_test
 
 import (
 	"context"
+	"errors"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestNewSeedHandler(t *testing.T) {
-	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{})
-	assert.IsType(t, &handlers.SeedHandler{}, sd)
-}
-
-func TestSeedDB_Success(t *testing.T) {
-	// Test Setup
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
-			return "random-id", nil
+func TestDataSeedHandler(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name           string
+		mockCreateFunc func(context.Context, *data.Order) (string, error)
+		expectedCode   int
+	}{
+		{
+			name: "SeedDB_Success",
+			mockCreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+				return "random-id", nil
+			},
+			expectedCode: http.StatusOK,
 		},
-	})
-
-	// Call actual function
-	sd.SeedDB(c)
-
-	resp := w.Result()
-
-	// Check results
-	assert.EqualValues(t, http.StatusOK, resp.StatusCode)
-}
-
-func TestSeedDB_Failure(t *testing.T) {
-	// Test Setup
-	gin.SetMode(gin.TestMode)
-	w := httptest.NewRecorder()
-	c, _ := gin.CreateTestContext(w)
-	sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
-		CreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
-			return "", assert.AnError
+		{
+			name: "SeedDB_Failure",
+			mockCreateFunc: func(_ context.Context, _ *data.Order) (string, error) {
+				return "", errors.New("create error")
+			},
+			expectedCode: http.StatusInternalServerError,
 		},
-	})
+	}
 
-	// Call actual function
-	sd.SeedDB(c)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel() // mark the test as capable of running in parallel
 
-	resp := w.Result()
+			c, r, recorder := setupTestContext()
+			sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
+				CreateFunc: tt.mockCreateFunc,
+			})
+			r.POST("/seed", sd.SeedDB)
 
-	// Check results
-	assert.EqualValues(t, http.StatusInternalServerError, resp.StatusCode)
+			c.Request, _ = http.NewRequest(http.MethodPost, "/seed", nil)
+			r.ServeHTTP(recorder, c.Request)
+
+			resp := recorder.Result()
+			require.NoError(t, resp.Body.Close())
+			assert.Equal(t, tt.expectedCode, resp.StatusCode)
+		})
+	}
 }

@@ -40,10 +40,7 @@ jobs:
       - name: 🏗️ Build
         run: make build
 
-      - name: 🧪 Test
-        run: make test
-
-      - name: 👮‍ Check Code Coverage
+      - name: 👮‍ Run Tests and Check Code Coverage
         run: |
           make ci-coverage
 

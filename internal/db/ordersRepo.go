@@ -26,6 +26,8 @@ var (
 	ErrPOIDNotFound          = errors.New("purchase order doesn't exist with given id")
 	ErrFailedToCreateOrder   = errors.New("failed to create order")
 	ErrUnexpectedDeleteOrder = errors.New("unexpected error occurred while deleting order")
+	ErrUnexpectedGetOrder    = errors.New("unexpected error occurred while fetching order")
+	ErrInvalidID             = errors.New("failed to assert inserted ID as ObjectID")
 )
 
 // OrdersDataService  - Added for tests/mock.
@@ -64,8 +66,12 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 		o.logger.Error().Err(err).Msg("error occurred while creating order")
 		return "", ErrFailedToCreateOrder
 	}
-	o.logger.Info().Str("orderId", result.InsertedID.(primitive.ObjectID).Hex()).Msg("created new order")
-	return result.InsertedID.(primitive.ObjectID).Hex(), nil
+	insertedID, ok := result.InsertedID.(primitive.ObjectID)
+	if !ok {
+		return "", ErrInvalidID
+	}
+	o.logger.Info().Str("orderId", insertedID.Hex()).Msg("created new order")
+	return insertedID.Hex(), nil
 }
 
 func (o *OrdersRepo) Update(ctx context.Context, po *data.Order) error {
@@ -130,7 +136,7 @@ func (o *OrdersRepo) GetByID(ctx context.Context, oID primitive.ObjectID) (*data
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrPOIDNotFound
 		}
-		return nil, err
+		return nil, ErrUnexpectedGetOrder
 	}
 
 	return &result, nil
