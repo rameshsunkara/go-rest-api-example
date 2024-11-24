@@ -259,7 +259,7 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 		{
 			name:    "Not Found",
 			orderID: primitive.NewObjectID().Hex(),
-			mockGetByIDFunc: func(_ context.Context, oID primitive.ObjectID) (*data.Order, error) {
+			mockGetByIDFunc: func(_ context.Context, _ primitive.ObjectID) (*data.Order, error) {
 				return nil, errors.New("not found")
 			},
 			expectedCode: http.StatusInternalServerError,
