@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
@@ -16,6 +17,12 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
+
+func TestNewOrderDataService(t *testing.T) {
+	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	ds := db.NewOrdersRepo(&mocks.MockMongoDataBase{}, lgr)
+	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
+}
 
 func TestOrdersRepo_Create(t *testing.T) {
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
