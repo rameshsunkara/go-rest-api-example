@@ -19,7 +19,7 @@ func (m *MockOrdersDataService) Create(ctx context.Context, purchaseOrder *data.
 	return m.CreateFunc(ctx, purchaseOrder)
 }
 
-func (m *MockOrdersDataService) Update(ctx context.Context, purchaseOrder *data.Order) error {
+func (m *MockOrdersDataService) Update(_ context.Context, _ *data.Order) error {
 	return nil
 }
 
