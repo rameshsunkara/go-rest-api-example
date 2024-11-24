@@ -268,6 +268,18 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 				Message:        "fill this in with a meaningful error message",
 			},
 		},
+		{
+			name:    "Zero Order Cannot be fetched",
+			orderID: primitive.NilObjectID.Hex(),
+			mockGetByIDFunc: func(_ context.Context, _ primitive.ObjectID) (*data.Order, error) {
+				return nil, errors.New("not found")
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedError: &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				Message:        "invalid order ID",
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -329,6 +341,18 @@ func TestOrdersHandler_Delete(t *testing.T) {
 			expectedError: &external.APIError{
 				HTTPStatusCode: http.StatusInternalServerError,
 				Message:        "fill this in with a meaningful error message",
+			},
+		},
+		{
+			name:    "Zero Order Cannot be Deleted",
+			orderID: primitive.NilObjectID.Hex(),
+			mockDeleteFunc: func(_ context.Context, _ primitive.ObjectID) error {
+				return errors.New("not found")
+			},
+			expectedCode: http.StatusBadRequest,
+			expectedError: &external.APIError{
+				HTTPStatusCode: http.StatusBadRequest,
+				Message:        "invalid order ID",
 			},
 		},
 	}
