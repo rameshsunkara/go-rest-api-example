@@ -20,17 +20,8 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-func UnMarshalOrderData(d []byte) (*data.Order, error) {
-	var r data.Order
-	err := json.Unmarshal(d, &r)
-	if err != nil {
-		return nil, err
-	}
-
-	return &r, nil
-}
 
 func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
 	var r []data.Order
@@ -243,6 +234,126 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 				err := json.Unmarshal(recorder.Body.Bytes(), &respOrders)
 				require.NoError(t, err)
 				assert.Len(t, respOrders, tt.expectedLength)
+			}
+		})
+	}
+}
+
+func TestOrdersHandler_GetByID(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name            string
+		orderID         string
+		mockGetByIDFunc func(ctx context.Context, oID primitive.ObjectID) (*data.Order, error)
+		expectedCode    int
+		expectedError   *external.APIError
+	}{
+		{
+			name:    "Success",
+			orderID: primitive.NewObjectID().Hex(),
+			mockGetByIDFunc: func(_ context.Context, oID primitive.ObjectID) (*data.Order, error) {
+				return &data.Order{ID: oID, Status: data.OrderPending}, nil
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:    "Not Found",
+			orderID: primitive.NewObjectID().Hex(),
+			mockGetByIDFunc: func(_ context.Context, oID primitive.ObjectID) (*data.Order, error) {
+				return nil, errors.New("not found")
+			},
+			expectedCode: http.StatusInternalServerError,
+			expectedError: &external.APIError{
+				HTTPStatusCode: http.StatusInternalServerError,
+				Message:        "fill this in with a meaningful error message",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+			c, r, recorder := setupTestContext()
+			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+				GetByIDFunc: tt.mockGetByIDFunc,
+			}, lgr)
+			r.GET("/orders/:id", handler.GetByID)
+
+			c.Request, _ = http.NewRequest(http.MethodGet, "/orders/"+tt.orderID, nil)
+			r.ServeHTTP(recorder, c.Request)
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+
+			if tt.expectedError != nil {
+				var apiErr external.APIError
+				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
+				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
+			} else {
+				var responseOrder external.Order
+				err := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
+				require.NoError(t, err)
+				assert.Equal(t, tt.orderID, responseOrder.ID)
+			}
+		})
+	}
+}
+
+func TestOrdersHandler_Delete(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name           string
+		orderID        string
+		mockDeleteFunc func(ctx context.Context, id primitive.ObjectID) error
+		expectedCode   int
+		expectedError  *external.APIError
+	}{
+		{
+			name:    "Success",
+			orderID: primitive.NewObjectID().Hex(),
+			mockDeleteFunc: func(_ context.Context, _ primitive.ObjectID) error {
+				return nil
+			},
+			expectedCode: http.StatusNoContent,
+		},
+		{
+			name:    "Not Found",
+			orderID: primitive.NewObjectID().Hex(),
+			mockDeleteFunc: func(_ context.Context, _ primitive.ObjectID) error {
+				return errors.New("not found")
+			},
+			expectedCode: http.StatusInternalServerError,
+			expectedError: &external.APIError{
+				HTTPStatusCode: http.StatusInternalServerError,
+				Message:        "fill this in with a meaningful error message",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+			c, r, recorder := setupTestContext()
+			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+				DeleteByIDFunc: tt.mockDeleteFunc,
+			}, lgr)
+			r.DELETE("/orders/:id", handler.DeleteByID)
+
+			c.Request, _ = http.NewRequest(http.MethodDelete, "/orders/"+tt.orderID, nil)
+			r.ServeHTTP(recorder, c.Request)
+
+			assert.Equal(t, tt.expectedCode, recorder.Code)
+
+			if tt.expectedError != nil {
+				var apiErr external.APIError
+				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
+				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			}
 		})
 	}
