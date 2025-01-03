@@ -18,8 +18,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/gabriel-vasile/mimetype v1.4.7 h1:SKFKl7kD0RiPdbht0s7hFtjl489WcQ1VyPW8ZzUMYCA=
 github.com/gabriel-vasile/mimetype v1.4.7/go.mod h1:GDlAgAyIRT27BhFl53XNAFtfjzOkLaF35JdEG0P7LtU=
-github.com/gin-contrib/gzip v1.0.1 h1:HQ8ENHODeLY7a4g1Au/46Z92bdGFl74OhxcZble9WJE=
-github.com/gin-contrib/gzip v1.0.1/go.mod h1:njt428fdUNRvjuJf16tZMYZ2Yl+WQB53X5wmhDwXvC4=
+github.com/gin-contrib/gzip v1.1.0 h1:kVw7Nr9M+Z6Ch4qo7aGMbiqxDeyQFru+07MgAcUF62M=
+github.com/gin-contrib/gzip v1.1.0/go.mod h1:iHJXCup4CWiKyPUEl+GwkHjchl+YyYuMKbOCiXujPIA=
 github.com/gin-contrib/pprof v1.5.2 h1:Kcq5W2bA2PBcVtF0MqkQjpvCpwJr+pd7zxcQh2csg7E=
 github.com/gin-contrib/pprof v1.5.2/go.mod h1:a1W4CDXwAPm2zql2AKdnT7OVCJdV/oFPhJXVOrDs5Ns=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
