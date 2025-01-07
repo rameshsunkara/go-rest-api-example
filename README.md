@@ -5,7 +5,9 @@
 
 # REST API microservice in Go
 
-![Go%20REST%20Api](./go-rest-api.svg)
+<div style="text-align: center;">
+  <img src="go-rest-api.svg" alt="Go REST Api" width="400" />
+</div>
 
 ## [Why this ?](#why-this--1)
 
