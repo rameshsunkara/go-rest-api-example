@@ -5,7 +5,7 @@
 
 # REST API microservice in Go
 
-![go-rest-api.svg](Go REST Api)
+![Go%20REST%20Api](./go-rest-api.svg)
 
 ## [Why this ?](#why-this--1)
 
