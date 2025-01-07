@@ -5,6 +5,8 @@
 
 # REST API microservice in Go
 
+![go-rest-api.svg](Go REST Api)
+
 ## [Why this ?](#why-this--1)
 
 ## Offered Features
