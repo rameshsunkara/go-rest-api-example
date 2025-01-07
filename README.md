@@ -5,6 +5,10 @@
 
 # REST API microservice in Go
 
+<div style="text-align: center;">
+  <img src="go-rest-api.svg" alt="Go REST Api" width="500" />
+</div>
+
 ## [Why this ?](#why-this--1)
 
 ## Offered Features
