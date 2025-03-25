@@ -20,7 +20,7 @@ func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 	d, dErr := db.NewMongoManager(creds, nil, testLgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
-	assert.EqualValues(t, db.ErrInvalidConnURL, dErr)
+	assert.Equal(t, db.ErrInvalidConnURL, dErr)
 }
 
 func TestNewMongoManager_InvalidClient(t *testing.T) {
@@ -31,7 +31,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 	d, dErr := db.NewMongoManager(creds, nil, testLgr)
 	assert.Nil(t, d)
 	require.Error(t, dErr)
-	assert.EqualValues(t, db.ErrConnectionEstablish, dErr)
+	assert.Equal(t, db.ErrConnectionEstablish, dErr)
 }
 
 func TestFillConnectionOpts(t *testing.T) {

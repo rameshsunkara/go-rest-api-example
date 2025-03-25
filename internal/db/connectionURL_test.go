@@ -51,7 +51,7 @@ func TestMongoDBCredentialFromSideCar(t *testing.T) {
 	for i, tc := range testCases {
 		t.Setenv("MongoVaultSideCar", tc.Input)
 		result, err := db.MongoDBCredentialFromSideCar(os.Getenv("MongoVaultSideCar"))
-		if !assert.EqualValues(t, tc.ExpectedOut, result) || !errors.Is(err, tc.ExpectedErr) {
+		if !assert.Equal(t, tc.ExpectedOut, result) || !errors.Is(err, tc.ExpectedErr) {
 			t.Errorf("MongoDBCredentialFromSideCar: Test Case: %d:%s failed: expected %v, %v; got %v, %v",
 				i+1, tc.Description, tc.ExpectedOut, tc.ExpectedErr, result, err)
 		}
