@@ -26,6 +26,6 @@ coverage:
         threshold: 5%
         ignore:
         - "^docs.*"
-        - "*_mock.go"
+        - "*/**/*_mock.go"
 github_checks:
   annotations: true
