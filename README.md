@@ -73,6 +73,7 @@ go-rest-api-example/
 - [Docker Compose](https://docs.docker.com/compose/install/)
 - Make
 - [golangci-lint](https://golangci-lint.run/welcome/install/#local-installation)
+- [docker-buildx](https://docs.docker.com/buildx/working-with-buildx/)
 
 ### Frequently used commands
       start                          Start all necessary services and API server
