@@ -135,13 +135,22 @@ clean: docker-clean ## Clean all Docker resources
 .PHONY: docker-build
 docker-build: ## Build the Docker image
 	$(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
-	DOCKER_BUILDKIT=1 docker-buildx build --output=type=docker --tag $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .
+	@if [ "$$(uname)" = "Darwin" ]; then \
+		DOCKER_BUILDKIT=1 docker-buildx build --output=type=docker --tag $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .; \
+	else \
+		DOCKER_BUILDKIT=1 docker buildx build --output=type=docker --tag $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .; \
+	fi
 
 ## Build the Docker image without cache
 .PHONY: docker-build-debug
 docker-build-debug: ## Build the Docker image without cache
-	$(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
-	DOCKER_BUILDKIT=1 docker buildx build --no-cache --progress=plain --build-arg port=$(port) --tag $(DOCKER_IMAGE_NAME) --output=type=docker .
+	 $(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
+	 @if [ "$$(uname)" = "Darwin" ]; then \
+	  DOCKER_BUILDKIT=1 docker-buildx build --no-cache --progress=plain --build-arg port=$(port) --tag $(DOCKER_IMAGE_NAME) --output=type=docker .; \
+	 else \
+	  DOCKER_BUILDKIT=1 docker buildx build --no-cache --progress=plain --build-arg port=$(port) --tag $(DOCKER_IMAGE_NAME) --output=type=docker .; \
+	 fi
+
 
 ## Run the Docker container
 .PHONY: docker-run
