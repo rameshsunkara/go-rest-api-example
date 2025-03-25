@@ -5,7 +5,7 @@ comment:
   layout: " diff, flags, files"
 coverage:
   precision: 2
-  range: "70...100"
+  range: "70...80"
   round: down
   status:
     changes: false
@@ -26,6 +26,6 @@ coverage:
         threshold: 5%
         ignore:
         - "^docs.*"
-        - "*/**/*_mock.go"
+        - "**/*_mock.go"
 github_checks:
   annotations: true
