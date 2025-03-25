@@ -18,5 +18,5 @@ RUN --mount=type=cache,target=/root/.cache/go-build \
 
 # Stage 2: Create a minimal final image
 FROM gcr.io/distroless/static-debian12:nonroot
-COPY --from=builder /go-rest-api-example /app/go-rest-api-example
+COPY --from=builder /app/go-rest-api-example /app/go-rest-api-example
 ENTRYPOINT ["/app/go-rest-api-example"]
