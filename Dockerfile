@@ -1,20 +1,23 @@
-FROM golang:1.22 as builder
+# syntax=docker/dockerfile:1.4  # Enable BuildKit features
+
+# Stage 1: Build the Go binary
+FROM golang:1.24 AS builder
 LABEL stage=builder
-WORKDIR /usr/src/app
 
-# pre-copy/cache go.mod for pre-downloading dependencies 
-# and only redownloading them in subsequent builds if they change
+# Set working directory
+WORKDIR /app
+
+# Install dependencies (using cache for Go modules)
 COPY go.mod go.sum ./
-RUN go mod download && go mod verify
+RUN --mount=type=cache,target=/go/pkg/mod go mod download && go mod verify
 
-# copy source files and build the binary
+# Copy source files and build the binary (using cache for build artifacts)
+# Since the working directory is set as app, the executable generated will be named as app too
 COPY . .
-RUN make build
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    make build
 
-
-FROM scratch
-WORKDIR /app/
-ARG port
-COPY --from=builder /usr/src/app/app .
-ENTRYPOINT ["./app"]
-EXPOSE $port
+# Stage 2: Create a minimal final image
+FROM gcr.io/distroless/static-debian12:nonroot
+COPY --from=builder /app/app /app
+ENTRYPOINT ["/app"]
