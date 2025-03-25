@@ -135,7 +135,7 @@ clean: docker-clean ## Clean all Docker resources
 .PHONY: docker-build
 docker-build: ## Build the Docker image
 	$(info ---> Building Docker Image: $(DOCKER_IMAGE_NAME))
-	DOCKER_BUILDKIT=1 docker buildx build --output=type=docker --tag $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .
+	DOCKER_BUILDKIT=1 docker-buildx build --output=type=docker --tag $(DOCKER_IMAGE_NAME) --build-arg port=$(port) .
 
 ## Build the Docker image without cache
 .PHONY: docker-build-debug
