@@ -2,7 +2,7 @@ codecov:
   require_ci_to_pass: true
 comment:
   behavior: default
-  layout: " diff, flags, files"
+  layout: "diff, flags, files"
 coverage:
   precision: 2
   range: "70...80"
@@ -16,16 +16,16 @@ coverage:
       default:
         base: auto
         branches:
-        - ^main$
-        - ^v2$
+          - ^main$
+          - ^v2$
         if_ci_failed: error
         only_pulls: false
         paths:
-        - ^internal.*
+          - ^internal.*
         target: auto
         threshold: 5%
-        ignore:
-        - "^docs.*"
-        - "**/*_mock.go"
+  ignore:
+    - "^docs.*"
+    - "**/*_mock.go"
 github_checks:
   annotations: true
