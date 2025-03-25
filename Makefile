@@ -29,6 +29,7 @@ PROJECT_NAME := $(shell basename "$(PWD)" | tr '[:upper:]' '[:lower:]')
 VERSION ?= $(shell git rev-parse --short HEAD)
 LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 
+DOCKER_WORKDIR := /app
 DOCKER_IMAGE_NAME := $(PROJECT_NAME):$(VERSION)
 DOCKER_CONTAINER_NAME := $(PROJECT_NAME)-$(VERSION)
 MODULE := $(shell go list -m)
@@ -38,7 +39,7 @@ TEST_COVERAGE_THRESHOLD := 80
 testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '{print $$3}')
 
 # Helper variables
-GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME)
+GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(DOCKER_WORKDIR)/$(PROJECT_NAME)
 GO_TEST_CMD := go test ./... -v -coverprofile=coverage.out -covermode=count -parallel=$(cpu_cores)
 
 ## Start all necessary services and API server
