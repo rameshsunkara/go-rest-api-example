@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod download && go mod verify
 # Copy source files and build the binary (using cache for build artifacts)
 COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go-rest-api-example ./cmd/main.go
+    make build
 
 # Stage 2: Create a minimal final image
 FROM gcr.io/distroless/static-debian11
