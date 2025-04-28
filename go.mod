@@ -6,7 +6,7 @@ require (
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/pprof v1.5.3
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-faker/faker/v4 v4.6.0
+	github.com/go-faker/faker/v4 v4.6.1
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/client_golang v1.21.1
 	github.com/rameshsunkara/deferrun v1.0.2
