@@ -64,7 +64,27 @@ go-rest-api-example/
 ├── docker-compose.yaml
 └── OpenApi-v1.postman_collection.json
 ```
+## Control Flow
 
+```mermaid
+flowchart LR
+   Request e1@==> Server
+   e1@{ animate: true }
+   Server e2@==> Router
+   e2@{ animate: true }
+   M@{ shape: processes, label: "Middlewares" }
+   Router e3@==> M
+   e3@{ animate: true }
+   C@{ shape: processes, label: "Handlers" }
+   M e4@==> C
+   e4@{ animate: true }
+   R@{ shape: processes, label: "Repos(DAO)" }
+   C e5@==> R
+   e5@{ animate: true }
+   id1[(Database)]
+   R e6@==> id1
+   e6@{ animate: true }
+```
 ## QuickStart
 
 ### Pre-requisites
