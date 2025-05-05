@@ -85,6 +85,14 @@ flowchart LR
    R e6@==> id1
    e6@{ animate: true }
 ```
+
+1. **Request**: Server receives the incoming request.
+2. **Server**: Server processes the request and forwards it to the router.
+3. **Router**: Router directs the request to the appropriate middleware(s).
+4. **Middlewares**: The middlewares handle various tasks such as logging, authentication, security headers, tracing etc.,
+5. **Handlers**: The request is passed to the appropriate handler, which validates the request and forwards it to the repository layer.
+6. **Repos(DAO)**: The repository layer communicates with the database to perform CRUD operations.
+
 ## QuickStart
 
 ### Pre-requisites
