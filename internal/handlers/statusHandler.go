@@ -4,8 +4,7 @@ import (
 	"net/http"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-
-	"github.com/rs/zerolog/log"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,11 +26,13 @@ type StatusResponse struct {
 
 type StatusController struct {
 	dbMgr db.MongoManager
+	lgr   *logger.AppLogger
 }
 
-func NewStatusController(m db.MongoManager) *StatusController {
+func NewStatusController(lgr *logger.AppLogger, m db.MongoManager) *StatusController {
 	return &StatusController{
 		dbMgr: m,
+		lgr:   lgr,
 	}
 }
 
@@ -44,7 +45,7 @@ func (s *StatusController) CheckStatus(c *gin.Context) {
 		stat = UP
 		code = http.StatusOK
 	} else {
-		log.Error().Msg("unable to connect to DB")
+		s.lgr.Error().Msg("unable to ping DB")
 		stat = DOWN
 		code = http.StatusFailedDependency
 	}

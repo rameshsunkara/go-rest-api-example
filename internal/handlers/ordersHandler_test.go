@@ -23,6 +23,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var lgr *logger.AppLogger
+
+func TestMain(m *testing.M) {
+	gin.SetMode(gin.TestMode)
+	lgr = logger.Setup(models.ServiceEnv{Name: "test"})
+	os.Exit(m.Run())
+}
+
 func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
 	var r []data.Order
 	err := json.Unmarshal(d, &r)
@@ -35,7 +43,6 @@ func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
 
 func setupTestContext() (*gin.Context, *gin.Engine, *httptest.ResponseRecorder) {
 	recorder := httptest.NewRecorder()
-	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(recorder)
 	return c, r, recorder
 }
@@ -220,7 +227,6 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
 				GetAllFunc: tt.mockGetAllFunc,

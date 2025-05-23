@@ -52,8 +52,9 @@ func TestStatusHandler(t *testing.T) {
 
 			// Test Setup
 			c, _, recorder := setupTestContext()
-			mocks.PingFunc = tt.mockPingFunc
-			s := handlers.NewStatusController(&mocks.MockMongoMgr{})
+			s := handlers.NewStatusController(lgr, &mocks.MockMongoMgr{
+				PingFunc: tt.mockPingFunc,
+			})
 
 			// Call actual function
 			s.CheckStatus(c)

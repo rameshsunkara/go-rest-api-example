@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
@@ -17,11 +18,14 @@ const (
 
 type SeedHandler struct {
 	oDataSvc db.OrdersDataService
+	lgr      *logger.AppLogger
 }
 
-func NewDataSeedHandler(svc db.OrdersDataService) *SeedHandler {
+func NewDataSeedHandler(logger *logger.AppLogger, svc db.OrdersDataService) *SeedHandler {
+	
 	sc := &SeedHandler{
 		oDataSvc: svc,
+		lgr:      logger,
 	}
 	return sc
 }

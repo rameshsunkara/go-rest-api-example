@@ -41,7 +41,7 @@ func TestDataSeedHandler(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
 			c, r, recorder := setupTestContext()
-			sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
+			sd := handlers.NewDataSeedHandler(lgr, &mocks.MockOrdersDataService{
 				CreateFunc: tt.mockCreateFunc,
 			})
 			r.POST("/seed", sd.SeedDB)

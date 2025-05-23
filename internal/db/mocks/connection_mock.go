@@ -6,14 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var (
+type MockMongoMgr struct {
 	PingFunc func() error
-)
-
-type MockMongoMgr struct{}
+}
 
 func (m *MockMongoMgr) Ping() error {
-	return PingFunc()
+	return m.PingFunc()
 }
 
 func (m *MockMongoMgr) Database() db.MongoDatabase {

@@ -51,7 +51,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 	internalAPIGrp.Use(middleware.AuthMiddleware())
 	pprof.RouteRegister(internalAPIGrp, "pprof")
 	router.GET("/metrics", gin.WrapH(promhttp.Handler())) // /metrics
-	status := handlers.NewStatusController(dbMgr)
+	status := handlers.NewStatusController(lgr, dbMgr)
 	router.GET("/status", status.CheckStatus) // /status
 
 	// Dependencies for handlers
@@ -60,7 +60,7 @@ func WebRouter(svcEnv models.ServiceEnv, dbMgr db.MongoManager, lgr *logger.AppL
 
 	// This is a dev mode only route to seed the local db
 	if util.IsDevMode(svcEnv.Name) {
-		seed := handlers.NewDataSeedHandler(orders)
+		seed := handlers.NewDataSeedHandler(lgr, orders)
 		internalAPIGrp.POST("/seed-local-db", seed.SeedDB) // /seedDB
 	}
 
