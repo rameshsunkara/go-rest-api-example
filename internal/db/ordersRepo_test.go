@@ -18,6 +18,7 @@ import (
 )
 
 func TestNewOrdersRepo(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		lgr     *logger.AppLogger
@@ -51,14 +52,14 @@ func TestNewOrdersRepo(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			repo, err := db.NewOrdersRepo(tt.lgr, tt.db)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, repo)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, repo)
 			}
 		})

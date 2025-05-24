@@ -16,6 +16,7 @@ import (
 )
 
 func TestNewDataSeedHandler(t *testing.T) {
+	t.Parallel()
 	mockSvc := &mocks.MockOrdersDataService{}
 	tests := []struct {
 		name    string
@@ -50,14 +51,14 @@ func TestNewDataSeedHandler(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			h, err := handlers.NewDataSeedHandler(tt.lgr, tt.svc)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 				assert.Nil(t, h)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.NotNil(t, h)
 			}
 		})
