@@ -75,9 +75,9 @@ func TestValidate(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			err := tc.testFunc()
-			require.Error(t, err)
-			assert.Equal(t, tc.wantErr, err)
+			tFuncErr := tc.testFunc()
+			require.Error(t, tFuncErr)
+			assert.Equal(t, tc.wantErr, tFuncErr)
 		})
 	}
 }
