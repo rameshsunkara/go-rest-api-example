@@ -13,12 +13,16 @@ import (
 )
 
 func TestListOfRoutes(t *testing.T) {
-	svcInfo := models.ServiceEnv{
+	svcInfo := &models.ServiceEnv{
 		Name: "test",
 		Port: "8080",
 	}
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, lgr)
+	lgr := logger.Setup("info", "test")
+	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
+	if err != nil {
+		t.Errorf("failed to create WebRouter")
+		return
+	}
 	list := router.Routes()
 	mode := gin.Mode()
 
@@ -26,7 +30,7 @@ func TestListOfRoutes(t *testing.T) {
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodGet,
-		Path:   "/status",
+		Path:   "/healthz",
 	})
 
 	assertRouteNotPresent(t, list, gin.RouteInfo{
@@ -56,12 +60,16 @@ func TestListOfRoutes(t *testing.T) {
 }
 
 func TestModeSpecificRoutes(t *testing.T) {
-	svcInfo := models.ServiceEnv{
+	svcInfo := &models.ServiceEnv{
 		Name: "dev",
 		Port: "8080",
 	}
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
-	router := server.WebRouter(svcInfo, &mocks.MockMongoMgr{}, lgr)
+	lgr := logger.Setup("info", "test")
+	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
+	if err != nil {
+		t.Errorf("failed to create WebRouter")
+		return
+	}
 	list := router.Routes()
 	mode := gin.Mode()
 

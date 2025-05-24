@@ -9,12 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestQueryParamsCheckMiddleware_ValidParams(t *testing.T) {
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	lgr := logger.Setup("info", "test")
 	resp := httptest.NewRecorder()
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)
@@ -37,7 +36,7 @@ func TestQueryParamsCheckMiddleware_ValidParams(t *testing.T) {
 }
 
 func TestQueryParamsCheckMiddleware_InvalidParams(t *testing.T) {
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	lgr := logger.Setup("info", "test")
 	resp := httptest.NewRecorder()
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)
@@ -59,7 +58,7 @@ func TestQueryParamsCheckMiddleware_InvalidParams(t *testing.T) {
 }
 
 func TestQueryParamsCheckMiddleware_UnregisteredPath(t *testing.T) {
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
+	lgr := logger.Setup("info", "test")
 	resp := httptest.NewRecorder()
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)

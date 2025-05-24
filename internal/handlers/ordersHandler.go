@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	errors2 "errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -14,60 +15,44 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rs/zerolog"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
-	OrderIDPath = "id" // Request path variable
-	MaxPageSize = 100  // Maximum number of records that can be fetched in a single request
+	OrderIDPath = "id"
+	MaxPageSize = 100
 )
 
+// OrdersHandler handles order-related HTTP requests.
 type OrdersHandler struct {
 	oDataSvc db.OrdersDataService
 	logger   *logger.AppLogger
 }
 
-func NewOrdersHandler(dSvc db.OrdersDataService, lgr *logger.AppLogger) *OrdersHandler {
-	o := &OrdersHandler{
-		oDataSvc: dSvc,
-		logger:   lgr,
+// NewOrdersHandler creates a new OrdersHandler.
+func NewOrdersHandler(lgr *logger.AppLogger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
+	if lgr == nil || dSvc == nil {
+		return nil, errors2.New("missing required parameters to create orders handler")
 	}
-	return o
+	return &OrdersHandler{oDataSvc: dSvc, logger: lgr}, nil
 }
 
+// Create handles POST /orders.
 func (o *OrdersHandler) Create(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
-	// Validate  inputs : fail fast order
-	// Parse request body
 	var orderInput external.OrderInput
 	if err := c.ShouldBindJSON(&orderInput); err != nil {
-		apiErr := &external.APIError{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorCode:      errors.OrderCreateInvalidInput,
-			Message:        "Invalid order request body",
-			DebugID:        requestID,
-		}
-		lgr.Error().
-			Err(err).
-			Int("HttpStatusCode", apiErr.HTTPStatusCode).
-			Str("ErrorCode", apiErr.ErrorCode).
-			Msg(apiErr.Message)
-		c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
+		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderCreateInvalidInput,
+			"Invalid order request body", requestID, err)
 		return
 	}
 
-	// Convert ProductInput to Product
-	var products []data.Product
-	for _, productInput := range orderInput.Products {
-		product := data.Product{
-			Name:     productInput.Name,
-			Price:    productInput.Price,
-			Quantity: productInput.Quantity,
-		}
-		products = append(products, product)
+	products := make([]data.Product, len(orderInput.Products))
+	for i, p := range orderInput.Products {
+		products[i] = data.Product{Name: p.Name, Price: p.Price, Quantity: p.Quantity}
 	}
 
-	// Create new Order object
 	order := data.Order{
 		Version:     1,
 		CreatedAt:   time.Now(),
@@ -78,39 +63,29 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 		Status:      data.OrderPending,
 	}
 
-	if id, err := o.oDataSvc.Create(c, &order); err == nil {
-		// Return success response
-		extOrder := external.Order{
-			ID:          id,
-			CreatedAt:   util.FormatTimeToISO(order.CreatedAt),
-			UpdatedAt:   util.FormatTimeToISO(order.UpdatedAt),
-			Products:    order.Products,
-			User:        order.User,
-			TotalAmount: order.TotalAmount,
-			Status:      order.Status,
-			Version:     order.Version,
-		}
-		c.JSON(http.StatusCreated, extOrder)
+	id, err := o.oDataSvc.Create(c, &order)
+	if err != nil {
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderCreateServerError,
+			errors.UnexpectedErrorMessage, requestID, err)
 		return
 	}
 
-	apiErr := &external.APIError{
-		HTTPStatusCode: http.StatusInternalServerError,
-		ErrorCode:      errors.OrderCreateServerError,
-		Message:        errors.UnexpectedErrorMessage,
-		DebugID:        requestID,
+	extOrder := external.Order{
+		ID:          id,
+		CreatedAt:   util.FormatTimeToISO(order.CreatedAt),
+		UpdatedAt:   util.FormatTimeToISO(order.UpdatedAt),
+		Products:    order.Products,
+		User:        order.User,
+		TotalAmount: order.TotalAmount,
+		Status:      order.Status,
+		Version:     order.Version,
 	}
-	lgr.Error().
-		Int("HttpStatusCode", apiErr.HTTPStatusCode).
-		Str("ErrorCode", apiErr.ErrorCode).
-		Msg(apiErr.Message)
-	c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
+	c.JSON(http.StatusCreated, extOrder)
 }
 
+// GetAll handles GET /orders.
 func (o *OrdersHandler) GetAll(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
-	// Validate  inputs : fail fast order
-	// Parse query params
 	limit, apiErr := o.parseLimitQueryParam(c)
 	if apiErr != nil {
 		c.AbortWithStatusJSON(apiErr.HTTPStatusCode, apiErr)
@@ -118,125 +93,85 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 	}
 
 	orders, err := o.oDataSvc.GetAll(c, limit)
-	var extOrders []external.Order
-	if orders != nil {
-		extOrders = make([]external.Order, len(*orders))
-		for i, o := range *orders {
-			extOrders[i] = external.Order{
-				ID:          o.ID.Hex(),
-				Version:     o.Version,
-				Status:      o.Status,
-				TotalAmount: o.TotalAmount,
-				User:        o.User,
-				CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
-				UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
-				Products:    o.Products,
-			}
-		}
+	if err != nil {
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError,
+			errors.UnexpectedErrorMessage, requestID, err)
+		return
 	}
 
-	if err != nil {
-		aErr := &external.APIError{
-			HTTPStatusCode: http.StatusInternalServerError,
-			ErrorCode:      errors.OrdersGetServerError,
-			Message:        errors.UnexpectedErrorMessage,
-			DebugID:        requestID,
-		}
-		lgr.Error().
-			Int("HttpStatusCode", aErr.HTTPStatusCode).
-			Str("ErrorCode", aErr.ErrorCode).
-			Msg(aErr.Message)
-		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
-		return
+	extOrders := make([]external.Order, 0, len(*orders))
+	for _, o := range *orders {
+		extOrders = append(extOrders, external.Order{
+			ID:          o.ID.Hex(),
+			Version:     o.Version,
+			Status:      o.Status,
+			TotalAmount: o.TotalAmount,
+			User:        o.User,
+			CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
+			UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
+			Products:    o.Products,
+		})
 	}
 	c.JSON(http.StatusOK, extOrders)
 }
 
+// GetByID handles GET /orders/:id.
 func (o *OrdersHandler) GetByID(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
 	id := c.Param(OrderIDPath)
 	oID, err := primitive.ObjectIDFromHex(id)
-	if oID.IsZero() || err != nil {
-		aErr := &external.APIError{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorCode:      "",
-			Message:        "invalid order ID",
-			DebugID:        requestID,
-		}
-		lgr.Error().
-			Int("HttpStatusCode", aErr.HTTPStatusCode).
-			Str("ErrorCode", aErr.ErrorCode).
-			Msg(aErr.Message)
-		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+	if err != nil || oID.IsZero() {
+		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderGetInvalidParams, "invalid order ID", requestID, err)
 		return
 	}
 	order, err := o.oDataSvc.GetByID(c, oID)
 	if err != nil {
-		aErr := &external.APIError{
-			HTTPStatusCode: http.StatusInternalServerError,
-			ErrorCode:      "",
-			Message:        "fill this in with a meaningful error message",
-			DebugID:        requestID,
+		if errors2.Is(err, db.ErrUnexpectedGetOrder) {
+			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderGetNotFound,
+				"order not found", requestID, err)
+			return
 		}
-		lgr.Error().
-			Int("HttpStatusCode", aErr.HTTPStatusCode).
-			Str("ErrorCode", aErr.ErrorCode).
-			Msg(aErr.Message)
-		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError,
+			"failed to fetch order", requestID, err)
 		return
 	}
 	c.JSON(http.StatusOK, order)
 }
 
+// DeleteByID handles DELETE /orders/:id.
 func (o *OrdersHandler) DeleteByID(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
 	id := c.Param(OrderIDPath)
 	oID, err := primitive.ObjectIDFromHex(id)
-	if oID.IsZero() || err != nil {
-		aErr := &external.APIError{
-			HTTPStatusCode: http.StatusBadRequest,
-			ErrorCode:      "",
-			Message:        "invalid order ID",
-			DebugID:        requestID,
-		}
-		lgr.Error().
-			Int("HttpStatusCode", aErr.HTTPStatusCode).
-			Str("ErrorCode", aErr.ErrorCode).
-			Msg(aErr.Message)
-		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+	if err != nil || oID.IsZero() {
+		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderDeleteInvalidID, "invalid order ID", requestID, err)
 		return
 	}
-	dErr := o.oDataSvc.DeleteByID(c, oID)
-	if dErr != nil {
-		aErr := &external.APIError{
-			HTTPStatusCode: http.StatusInternalServerError,
-			ErrorCode:      "",
-			Message:        "fill this in with a meaningful error message",
-			DebugID:        requestID,
+	if dbErr := o.oDataSvc.DeleteByID(c, oID); dbErr != nil {
+		if errors2.Is(dbErr, db.ErrPOIDNotFound) {
+			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderDeleteNotFound,
+				"could not delete order", requestID, dbErr)
+			return
 		}
-		lgr.Error().
-			Int("HttpStatusCode", aErr.HTTPStatusCode).
-			Str("ErrorCode", aErr.ErrorCode).
-			Msg(aErr.Message)
-		c.AbortWithStatusJSON(aErr.HTTPStatusCode, aErr)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderDeleteServerError,
+			"could not delete order", requestID, dbErr)
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+	c.Status(http.StatusNoContent)
 }
 
+// parseLimitQueryParam parses and validates the "limit" query parameter.
 func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.APIError) {
 	lgr, requestID := o.logger.WithReqID(c)
 	l := db.DefaultPageSize
 	if input, exists := c.GetQuery("limit"); exists && input != "" {
-		var err error
-		l, err = strconv.Atoi(input)
-		if err != nil {
+		val, err := strconv.Atoi(input)
+		if err != nil || val < 1 || val > MaxPageSize {
 			apiErr := &external.APIError{
 				HTTPStatusCode: http.StatusBadRequest,
 				ErrorCode:      "",
-				Message: fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
-					MaxPageSize),
-				DebugID: requestID,
+				Message:        fmt.Sprintf("Integer value within 1 and %d is expected for limit query param", MaxPageSize),
+				DebugID:        requestID,
 			}
 			lgr.Error().
 				Int("HttpStatusCode", apiErr.HTTPStatusCode).
@@ -244,20 +179,29 @@ func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.A
 				Msg(apiErr.Message)
 			return 0, apiErr
 		}
-		if l < 1 || l > MaxPageSize {
-			apiErr := &external.APIError{
-				HTTPStatusCode: http.StatusBadRequest,
-				ErrorCode:      "",
-				Message: fmt.Sprintf("Integer value within 1 and %d is expected for limit query param",
-					MaxPageSize),
-				DebugID: requestID,
-			}
-			lgr.Error().
-				Int("HttpStatusCode", apiErr.HTTPStatusCode).
-				Str("ErrorCode", apiErr.ErrorCode).
-				Msg(apiErr.Message)
-			return 0, apiErr
-		}
+		l = val
 	}
 	return int64(l), nil
+}
+
+// abortWithAPIError logs and aborts the request with a standardized API error response.
+func (o *OrdersHandler) abortWithAPIError(
+	c *gin.Context,
+	lgr zerolog.Logger,
+	status int,
+	errorCode, message, debugID string,
+	err error,
+) {
+	apiErr := &external.APIError{
+		HTTPStatusCode: status,
+		ErrorCode:      errorCode,
+		Message:        message,
+		DebugID:        debugID,
+	}
+	event := lgr.Error().Int("HttpStatusCode", status).Str("ErrorCode", errorCode)
+	if err != nil {
+		event = event.Err(err)
+	}
+	event.Msg(message)
+	c.AbortWithStatusJSON(status, apiErr)
 }

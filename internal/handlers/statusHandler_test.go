@@ -1,48 +1,88 @@
 package handlers_test
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"testing"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func UnMarshalStatusResponse(resp *http.Response) (handlers.ServiceStatus, error) {
-	body, _ := io.ReadAll(resp.Body)
-	var statusResponse handlers.ServiceStatus
-	err := json.Unmarshal(body, &statusResponse)
-	return statusResponse, err
+func TestNewStatusHandler(t *testing.T) {
+	t.Parallel()
+	mockMgr := &mocks.MockMongoMgr{}
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		mgr     db.MongoManager
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     lgr,
+			mgr:     mockMgr,
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			mgr:     mockMgr,
+			wantErr: true,
+		},
+		{
+			name:    "nil manager",
+			lgr:     lgr,
+			mgr:     nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and manager",
+			lgr:     nil,
+			mgr:     nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, err := handlers.NewStatusHandler(tt.lgr, tt.mgr)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Nil(t, h)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, h)
+			}
+		})
+	}
 }
 
 func TestStatusHandler(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name           string
-		mockPingFunc   func() error
-		expectedStatus handlers.ServiceStatus
-		expectedCode   int
+		name         string
+		mockPingFunc func() error
+		expectedCode int
 	}{
 		{
 			name: "StatusSuccess",
 			mockPingFunc: func() error {
 				return nil
 			},
-			expectedStatus: handlers.UP,
-			expectedCode:   http.StatusOK,
+			expectedCode: http.StatusNoContent,
 		},
 		{
 			name: "StatusDown",
 			mockPingFunc: func() error {
 				return errors.New("DB Connection Failed")
 			},
-			expectedStatus: handlers.DOWN,
-			expectedCode:   http.StatusFailedDependency,
+			expectedCode: http.StatusFailedDependency,
 		},
 	}
 
@@ -52,20 +92,19 @@ func TestStatusHandler(t *testing.T) {
 
 			// Test Setup
 			c, _, recorder := setupTestContext()
-			mocks.PingFunc = tt.mockPingFunc
-			s := handlers.NewStatusController(&mocks.MockMongoMgr{})
+			s, err := handlers.NewStatusHandler(lgr, &mocks.MockMongoMgr{
+				PingFunc: tt.mockPingFunc,
+			})
 
 			// Call actual function
 			s.CheckStatus(c)
 
 			// Parse results
 			resp := recorder.Result()
-			statusResponse, err := UnMarshalStatusResponse(resp)
-			require.NoError(t, err)
 
 			// Check results
 			assert.Equal(t, tt.expectedCode, resp.StatusCode)
-			assert.Equal(t, tt.expectedStatus, statusResponse)
+			require.NoError(t, err)
 		})
 	}
 }

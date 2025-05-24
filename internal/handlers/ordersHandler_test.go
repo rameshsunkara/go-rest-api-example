@@ -11,17 +11,25 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	errors2 "github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+var lgr *logger.AppLogger
+
+func TestMain(m *testing.M) {
+	gin.SetMode(gin.TestMode)
+	lgr = logger.Setup("debug", "test")
+	os.Exit(m.Run())
+}
 
 func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
 	var r []data.Order
@@ -35,9 +43,58 @@ func UnMarshalOrdersData(d []byte) (*[]data.Order, error) {
 
 func setupTestContext() (*gin.Context, *gin.Engine, *httptest.ResponseRecorder) {
 	recorder := httptest.NewRecorder()
-	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(recorder)
 	return c, r, recorder
+}
+
+func TestNewOrdersHandler(t *testing.T) {
+	t.Parallel()
+	mockSvc := &mocks.MockOrdersDataService{}
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		svc     db.OrdersDataService
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     lgr,
+			svc:     mockSvc,
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			svc:     mockSvc,
+			wantErr: true,
+		},
+		{
+			name:    "nil service",
+			lgr:     lgr,
+			svc:     nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and service",
+			lgr:     nil,
+			svc:     nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, err := handlers.NewOrdersHandler(tt.lgr, tt.svc)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Nil(t, h)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, h)
+			}
+		})
+	}
 }
 
 func TestOrdersHandler_Create(t *testing.T) {
@@ -114,11 +171,14 @@ func TestOrdersHandler_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				CreateFunc: tt.mockCreateFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.POST("/orders", handler.Create)
 
 			body, _ := json.Marshal(tt.input)
@@ -129,15 +189,15 @@ func TestOrdersHandler_Create(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.ErrorCode, apiErr.ErrorCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var responseOrder external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, int64(1), responseOrder.Version)
 				assert.NotNil(t, responseOrder.CreatedAt)
 				assert.NotNil(t, responseOrder.UpdatedAt)
@@ -220,11 +280,14 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				GetAllFunc: tt.mockGetAllFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.GET("/orders", handler.GetAll)
 
 			c.Request, _ = http.NewRequest(http.MethodGet, "/orders", nil)
@@ -238,14 +301,14 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var respOrders []external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &respOrders)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &respOrders)
+				require.NoError(t, respBodyErr)
 				assert.Len(t, respOrders, tt.expectedLength)
 			}
 		})
@@ -278,7 +341,7 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 			expectedCode: http.StatusInternalServerError,
 			expectedError: &external.APIError{
 				HTTPStatusCode: http.StatusInternalServerError,
-				Message:        "fill this in with a meaningful error message",
+				Message:        "failed to fetch order",
 			},
 		},
 		{
@@ -299,11 +362,14 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				GetByIDFunc: tt.mockGetByIDFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.GET("/orders/:id", handler.GetByID)
 
 			c.Request, _ = http.NewRequest(http.MethodGet, "/orders/"+tt.orderID, nil)
@@ -313,14 +379,14 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var responseOrder external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.orderID, responseOrder.ID)
 			}
 		})
@@ -353,7 +419,7 @@ func TestOrdersHandler_Delete(t *testing.T) {
 			expectedCode: http.StatusInternalServerError,
 			expectedError: &external.APIError{
 				HTTPStatusCode: http.StatusInternalServerError,
-				Message:        "fill this in with a meaningful error message",
+				Message:        "could not delete order",
 			},
 		},
 		{
@@ -373,11 +439,14 @@ func TestOrdersHandler_Delete(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				DeleteByIDFunc: tt.mockDeleteFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.DELETE("/orders/:id", handler.DeleteByID)
 
 			c.Request, _ = http.NewRequest(http.MethodDelete, "/orders/"+tt.orderID, nil)
@@ -387,8 +456,8 @@ func TestOrdersHandler_Delete(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			}

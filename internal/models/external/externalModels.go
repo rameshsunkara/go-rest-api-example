@@ -1,3 +1,4 @@
+// Package external - contains externally exposed models
 package external
 
 import (

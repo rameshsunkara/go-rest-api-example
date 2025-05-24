@@ -6,12 +6,64 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNewDataSeedHandler(t *testing.T) {
+	t.Parallel()
+	mockSvc := &mocks.MockOrdersDataService{}
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		svc     db.OrdersDataService
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     lgr,
+			svc:     mockSvc,
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			svc:     mockSvc,
+			wantErr: true,
+		},
+		{
+			name:    "nil service",
+			lgr:     lgr,
+			svc:     nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and service",
+			lgr:     nil,
+			svc:     nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, err := handlers.NewDataSeedHandler(tt.lgr, tt.svc)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Nil(t, h)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, h)
+			}
+		})
+	}
+}
 
 func TestDataSeedHandler(t *testing.T) {
 	t.Parallel()
@@ -41,9 +93,13 @@ func TestDataSeedHandler(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
 			c, r, recorder := setupTestContext()
-			sd := handlers.NewDataSeedHandler(&mocks.MockOrdersDataService{
+			sd, err := handlers.NewDataSeedHandler(lgr, &mocks.MockOrdersDataService{
 				CreateFunc: tt.mockCreateFunc,
 			})
+			if err != nil {
+				t.Errorf("failed to create dataseed handler")
+				return
+			}
 			r.POST("/seed", sd.SeedDB)
 
 			c.Request, _ = http.NewRequest(http.MethodPost, "/seed", nil)

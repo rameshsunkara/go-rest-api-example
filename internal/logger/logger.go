@@ -3,11 +3,11 @@ package logger
 import (
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/pkgerrors"
@@ -23,15 +23,15 @@ type AppLogger struct {
 	zLogger zerolog.Logger
 }
 
-func Setup(env models.ServiceEnv) *AppLogger {
+func Setup(logLevel, envName string) *AppLogger {
 	setupOnce.Do(func() {
 		appLogger = &AppLogger{}
-		lvl := ZerologLevel(env.LogLevel)
+		lvl := parseZerologLevel(logLevel)
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		zerolog.TimeFieldFormat = time.RFC3339Nano
 		var logDest io.Writer
 		logDest = os.Stdout
-		if util.IsDevMode(env.Name) {
+		if util.IsDevMode(envName) {
 			logDest = zerolog.ConsoleWriter{Out: logDest}
 		}
 		appLogger.zLogger = zerolog.New(logDest).With().Caller().Timestamp().Logger().Level(lvl)
@@ -70,8 +70,9 @@ func (l *AppLogger) Debug() *zerolog.Event {
 	return l.zLogger.Debug()
 }
 
-func ZerologLevel(level string) zerolog.Level {
-	switch level {
+// parseZerologLevel parses a string log level to zerolog.Level.
+func parseZerologLevel(level string) zerolog.Level {
+	switch strings.ToLower(level) {
 	case "debug":
 		return zerolog.DebugLevel
 	case "info":

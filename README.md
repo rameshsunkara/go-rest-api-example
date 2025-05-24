@@ -6,7 +6,7 @@
 # REST API microservice in Go
 
 <div style="text-align: center;">
-  <img src="go-rest-api.svg" alt="Go REST Api" width="500" />
+  <img src="go-rest-api.svg" alt="Go REST Api" width="400" />
 </div>
 
 ## [Why this ?](#why-this--1)
@@ -29,18 +29,21 @@
 
 ### Go Application Features:
 1. **Configuration Management**: via Environment Variables
-2. **Dockerized Environment**: Facilitates service deployment.
-3. **Makefile**: Automates common tasks for developers.
-4. **Git Action**: Automates build processes, runs tests, and generates code coverage.
-5. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
-6. **Secrets Loading Mechanism from Sidecar**
-7. **Support for Multiple Databases**: Enables connections to various database systems.
-8. **Best Practices for MongoDB Connection**
-9. **Effective Mocking Practices for Unit Test Patterns**
-10. **Seed Data**: for Local Development
-11. **Standardized Filename Conventions**: Enhances code readability.
-12. **Multi-Stage Docker Build**: Accelerates build processes.
-13. **Versioning** Utilizing Git Commit History
+2. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
+3. **Secrets Loading Mechanism from Sidecar**
+4. **Support for Multiple Databases**: Enables connections to various database systems.
+5. **Best Practices for MongoDB Connection**
+6. **Effective Mocking Practices for Unit Test Patterns**
+7. **Seed Data**: for Local Development
+8. **Standardized Filename Conventions**: Enhances code readability.
+9. **Versioning** Using Git Commit History
+10. **Tests**: Tests are executed in parallel across available CPU cores and use atomic mode to detect race conditions.
+
+### Tooling
+1. **Dockerized Environment**: Facilitates service deployment using DOCKER_BUILDKIT.
+2. **Makefile**: Automates common tasks for developers.
+3. **GitHub Actions**: Automates building, testing, code coverage reporting, and enforces the required test coverage threshold.
+4. **Multi-Stage Docker Build**: Accelerates build processes.
 
 ## Folder Structure
 
@@ -147,12 +150,11 @@ flowchart LR
 -  Add DB Migration Support
 -  Add more environmental profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
 -  Implement all OWASP security checks specified in the API Spec
--  Improve error codes and messages
 -  Add git hooks for pre-commit and pre-push
 
 ## Good to have
 
--  Improve data model and add more fields
+-  Improve the data model and add more fields
 -  Deploy to cloud
 -  Implement Update Operations mentioned in the API Spec
 
@@ -168,16 +170,22 @@ flowchart LR
 - Please create issues with any problem you noticed
 - Please suggest any improvements
 
-## Why this ?
+## Why this?
 
 
 I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
 
-After years of developing Full Stack applications utilizing ReactJS and JVM-based languages, I observed that existing boilerplate's tended to be either excessive or insufficient for my needs. Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. While similarities with popular Go boilerplate templates may be evident, I have customized this repository to better align with my preferences and accumulated experiences. (My apologies if I inadvertently overlooked crediting any existing templates.)
+After years of developing Full Stack applications using ReactJS and JVM-based languages, I observed that existing 
+boilerplates tended to be either excessive or insufficient for my needs. 
+Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. 
+While similarities with popular Go boilerplate templates may be evident, 
+I have customized this repository to better align with my preferences and accumulated experiences. 
+(My apologies if I inadvertently overlooked crediting any existing templates.)
 
-I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
+I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, 
+and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
 
-## What this is not ?
+### What this is not?
 
 - This isn't a complete solution for all your needs. It's more like a basic template to kickstart your project.
 - This isn't the best place to begin if you want to make an online store. What I've provided is just a simple tool for managing data through an API.

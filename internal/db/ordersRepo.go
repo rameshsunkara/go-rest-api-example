@@ -30,7 +30,7 @@ var (
 	ErrInvalidID             = errors.New("failed to assert inserted ID as ObjectID")
 )
 
-// OrdersDataService  - Added for tests/mock.
+// OrdersDataService defines the interface for order data operations.
 type OrdersDataService interface {
 	Create(ctx context.Context, purchaseOrder *data.Order) (string, error)
 	Update(ctx context.Context, purchaseOrder *data.Order) error
@@ -39,22 +39,26 @@ type OrdersDataService interface {
 	DeleteByID(ctx context.Context, id primitive.ObjectID) error
 }
 
-// OrdersRepo - Implements OrdersDataService.
+// OrdersRepo implements OrdersDataService using MongoDB.
 type OrdersRepo struct {
 	collection *mongo.Collection
 	logger     *logger.AppLogger
 }
 
-func NewOrdersRepo(db MongoDatabase, lgr *logger.AppLogger) *OrdersRepo {
-	iDBSvc := &OrdersRepo{
+// NewOrdersRepo creates a new OrdersRepo.
+func NewOrdersRepo(lgr *logger.AppLogger, db MongoDatabase) (*OrdersRepo, error) {
+	if lgr == nil || db == nil {
+		return nil, errors.New("missing required inputs to create OrdersRepo")
+	}
+	return &OrdersRepo{
 		collection: db.Collection(OrdersCollection),
 		logger:     lgr,
-	}
-	return iDBSvc
+	}, nil
 }
 
+// Create inserts a new order into the collection.
 func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error) {
-	if err := validate(o.collection); err != nil {
+	if err := validateCollection(o.collection); err != nil {
 		return "", err
 	}
 	if !po.ID.IsZero() {
@@ -63,7 +67,7 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 
 	result, err := o.collection.InsertOne(ctx, po)
 	if err != nil {
-		o.logger.Error().Err(err).Msg("error occurred while creating order")
+		o.logger.Error().Err(err).Msg("failed to create order")
 		return "", ErrFailedToCreateOrder
 	}
 	insertedID, ok := result.InsertedID.(primitive.ObjectID)
@@ -74,93 +78,87 @@ func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error)
 	return insertedID.Hex(), nil
 }
 
+// Update modifies an existing order.
 func (o *OrdersRepo) Update(ctx context.Context, po *data.Order) error {
-	if err := validate(o.collection); err != nil {
+	if err := validateCollection(o.collection); err != nil {
 		return err
 	}
-
 	oID, err := primitive.ObjectIDFromHex(po.ID.Hex())
-	if oID.IsZero() || err != nil {
+	if err != nil || oID.IsZero() {
 		return ErrInvalidPOIDUpdate
 	}
-
 	po.UpdatedAt = time.Now()
 
-	filter := bson.D{primitive.E{Key: "_id", Value: po.ID}}
-	update := bson.D{primitive.E{Key: "$set", Value: po}}
-	result, err := o.collection.UpdateOne(ctx, filter, update, nil)
-
+	filter := bson.D{{Key: "_id", Value: po.ID}}
+	update := bson.D{{Key: "$set", Value: po}}
+	result, err := o.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
-		o.logger.Error().Err(err).Msg("error occurred while updating order")
+		o.logger.Error().Err(err).Msg("failed to update order")
 		return ErrUnexpectedUpdateOrder
 	}
-
 	if result.MatchedCount == 0 {
-		o.logger.Info().Msg("order id given for updating the order is not found")
+		o.logger.Info().Msg("order id for update not found")
 		return ErrPOIDNotFound
 	}
-
 	return nil
 }
 
+// GetAll retrieves all orders up to the specified limit.
 func (o *OrdersRepo) GetAll(ctx context.Context, limit int64) (*[]data.Order, error) {
-	if vErr := validate(o.collection); vErr != nil {
-		return nil, vErr
-	}
-
-	filter := bson.M{}
-	findOptions := options.Find()
-	findOptions.SetLimit(limit)
-
-	cursor, err := o.collection.Find(ctx, filter, findOptions)
-	if err != nil {
+	if err := validateCollection(o.collection); err != nil {
 		return nil, err
+	}
+	findOptions := options.Find().SetLimit(limit)
+	cursor, err := o.collection.Find(ctx, bson.M{}, findOptions)
+	if err != nil {
+		o.logger.Error().Err(err).Msg("failed to find orders")
+		return nil, ErrUnexpectedGetOrder
 	}
 	var results []data.Order
 	if err = cursor.All(ctx, &results); err != nil {
-		return nil, err
+		o.logger.Error().Err(err).Msg("failed to decode orders")
+		return nil, ErrUnexpectedGetOrder
 	}
-
 	return &results, nil
 }
 
+// GetByID retrieves an order by its ObjectID.
 func (o *OrdersRepo) GetByID(ctx context.Context, oID primitive.ObjectID) (*data.Order, error) {
-	if err := validate(o.collection); err != nil {
+	if err := validateCollection(o.collection); err != nil {
 		return nil, err
 	}
-
-	filter := bson.D{primitive.E{Key: "_id", Value: oID}}
+	filter := bson.D{{Key: "_id", Value: oID}}
 	var result data.Order
 	err := o.collection.FindOne(ctx, filter).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, ErrPOIDNotFound
 		}
+		o.logger.Error().Err(err).Msg("failed to get order by id")
 		return nil, ErrUnexpectedGetOrder
 	}
-
 	return &result, nil
 }
 
+// DeleteByID removes an order by its ObjectID.
 func (o *OrdersRepo) DeleteByID(ctx context.Context, id primitive.ObjectID) error {
-	if err := validate(o.collection); err != nil {
+	if err := validateCollection(o.collection); err != nil {
 		return err
 	}
-
-	filter := bson.D{primitive.E{Key: "_id", Value: id}}
-
+	filter := bson.D{{Key: "_id", Value: id}}
 	res, err := o.collection.DeleteOne(ctx, filter)
 	if err != nil {
+		o.logger.Error().Err(err).Msg("failed to delete order")
 		return ErrUnexpectedDeleteOrder
 	}
-
 	if res.DeletedCount == 0 {
 		return ErrPOIDNotFound
 	}
 	return nil
 }
 
-func validate(collection *mongo.Collection) error {
+// validateCollection checks if the collection is initialized.
+func validateCollection(collection *mongo.Collection) error {
 	if collection == nil {
 		return ErrInvalidInitialization
 	}

@@ -39,7 +39,7 @@ testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '
 
 # Helper variables
 GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME)
-GO_TEST_CMD := go test ./... -v -coverprofile=coverage.out -covermode=count -parallel=$(cpu_cores)
+GO_TEST_CMD := go test -race ./... -v -coverprofile=coverage.out -covermode=atomic -parallel=$(cpu_cores)
 
 ## Start all necessary services and API server
 .PHONY: start
