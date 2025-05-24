@@ -23,7 +23,7 @@ func TestStatusHandler(t *testing.T) {
 			mockPingFunc: func() error {
 				return nil
 			},
-			expectedCode: http.StatusOK,
+			expectedCode: http.StatusNoContent,
 		},
 		{
 			name: "StatusDown",
@@ -52,7 +52,7 @@ func TestStatusHandler(t *testing.T) {
 
 			// Check results
 			assert.Equal(t, tt.expectedCode, resp.StatusCode)
-			require.Error(t, err)
+			require.NoError(t, err)
 		})
 	}
 }

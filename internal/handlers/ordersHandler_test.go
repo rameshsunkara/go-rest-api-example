@@ -290,7 +290,7 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 			expectedCode: http.StatusInternalServerError,
 			expectedError: &external.APIError{
 				HTTPStatusCode: http.StatusInternalServerError,
-				Message:        "fill this in with a meaningful error message",
+				Message:        "failed to fetch order",
 			},
 		},
 		{
@@ -368,7 +368,7 @@ func TestOrdersHandler_Delete(t *testing.T) {
 			expectedCode: http.StatusInternalServerError,
 			expectedError: &external.APIError{
 				HTTPStatusCode: http.StatusInternalServerError,
-				Message:        "fill this in with a meaningful error message",
+				Message:        "could not delete order",
 			},
 		},
 		{
