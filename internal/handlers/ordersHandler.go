@@ -43,7 +43,8 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 	lgr, requestID := o.logger.WithReqID(c)
 	var orderInput external.OrderInput
 	if err := c.ShouldBindJSON(&orderInput); err != nil {
-		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderCreateInvalidInput, "Invalid order request body", requestID, err)
+		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderCreateInvalidInput,
+			"Invalid order request body", requestID, err)
 		return
 	}
 
@@ -64,7 +65,8 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 
 	id, err := o.oDataSvc.Create(c, &order)
 	if err != nil {
-		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderCreateServerError, errors.UnexpectedErrorMessage, requestID, err)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderCreateServerError,
+			errors.UnexpectedErrorMessage, requestID, err)
 		return
 	}
 
@@ -92,7 +94,8 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 
 	orders, err := o.oDataSvc.GetAll(c, limit)
 	if err != nil {
-		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError, errors.UnexpectedErrorMessage, requestID, err)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError,
+			errors.UnexpectedErrorMessage, requestID, err)
 		return
 	}
 
@@ -124,10 +127,12 @@ func (o *OrdersHandler) GetByID(c *gin.Context) {
 	order, err := o.oDataSvc.GetByID(c, oID)
 	if err != nil {
 		if errors2.Is(err, db.ErrUnexpectedGetOrder) {
-			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderGetNotFound, "order not found", requestID, err)
+			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderGetNotFound,
+				"order not found", requestID, err)
 			return
 		}
-		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError, "failed to fetch order", requestID, err)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrdersGetServerError,
+			"failed to fetch order", requestID, err)
 		return
 	}
 	c.JSON(http.StatusOK, order)
@@ -144,10 +149,12 @@ func (o *OrdersHandler) DeleteByID(c *gin.Context) {
 	}
 	if err := o.oDataSvc.DeleteByID(c, oID); err != nil {
 		if errors2.Is(err, db.ErrPOIDNotFound) {
-			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderDeleteNotFound, "could not delete order", requestID, err)
+			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderDeleteNotFound,
+				"could not delete order", requestID, err)
 			return
 		}
-		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderDeleteServerError, "could not delete order", requestID, err)
+		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderDeleteServerError,
+			"could not delete order", requestID, err)
 		return
 	}
 	c.Status(http.StatusNoContent)

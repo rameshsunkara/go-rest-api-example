@@ -24,6 +24,10 @@ func Start(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManag
 	var r *gin.Engine
 	startOnce.Do(func() {
 		r, err = WebRouter(svcEnv, lgr, dbMgr)
+		lgr.Info().Msg("Registered routes")
+		for _, item := range r.Routes() {
+			lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
+		}
 		if err != nil {
 			return
 		}
@@ -89,13 +93,5 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 	ordersGroup.GET("/:id", ordersHandler.GetByID)
 	ordersGroup.POST("", ordersHandler.Create)
 	ordersGroup.DELETE("/:id", ordersHandler.DeleteByID)
-
-	lgr.Info().Msg("Registered routes")
-	for _, item := range router.Routes() {
-		lgr.Info().
-			Str("method", item.Method).
-			Str("path", item.Path).
-			Send()
-	}
 	return router, nil
 }
