@@ -147,14 +147,14 @@ func (o *OrdersHandler) DeleteByID(c *gin.Context) {
 		o.abortWithAPIError(c, lgr, http.StatusBadRequest, errors.OrderDeleteInvalidID, "invalid order ID", requestID, err)
 		return
 	}
-	if err := o.oDataSvc.DeleteByID(c, oID); err != nil {
-		if errors2.Is(err, db.ErrPOIDNotFound) {
+	if dbErr := o.oDataSvc.DeleteByID(c, oID); dbErr != nil {
+		if errors2.Is(dbErr, db.ErrPOIDNotFound) {
 			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderDeleteNotFound,
-				"could not delete order", requestID, err)
+				"could not delete order", requestID, dbErr)
 			return
 		}
 		o.abortWithAPIError(c, lgr, http.StatusInternalServerError, errors.OrderDeleteServerError,
-			"could not delete order", requestID, err)
+			"could not delete order", requestID, dbErr)
 		return
 	}
 	c.Status(http.StatusNoContent)
