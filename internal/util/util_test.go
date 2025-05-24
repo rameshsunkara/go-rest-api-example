@@ -22,11 +22,11 @@ func TestFormatTimeToISO(t *testing.T) {
 func TestCurrentISOTime(t *testing.T) {
 	got := util.CurrentISOTime()
 	parsedTime, err := time.Parse(time.RFC3339, got)
-	z, offset := parsedTime.Zone()
-
 	if err != nil {
-		t.Error("Recieved time string is not good format")
+		t.Error("Received time string is not good format")
+		return
 	}
+	z, offset := parsedTime.Zone()
 	assert.Equal(t, "UTC", z)
 	assert.Equal(t, 0, offset)
 }

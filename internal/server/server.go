@@ -51,7 +51,7 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 	router.Use(middleware.RequestLogMiddleware(lgr))
 
 	internalAPIGrp := router.Group("/internal")
-	internalAPIGrp.Use(middleware.AuthMiddleware()) // use special auth middleware to handle internal employees
+	internalAPIGrp.Use(middleware.InternalAuthMiddleware()) // use special auth middleware to handle internal employees
 	pprof.RouteRegister(internalAPIGrp, "pprof")
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
@@ -78,7 +78,7 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 
 	// Routes - Ecommerce
 	externalAPIGrp := router.Group("/ecommerce/v1")
-	externalAPIGrp.Use(middleware.AuthMiddleware()) // replace it with public auth verifier
+	externalAPIGrp.Use(middleware.AuthMiddleware())
 	externalAPIGrp.Use(middleware.QueryParamsCheckMiddleware(lgr))
 	ordersGroup := externalAPIGrp.Group("orders")
 	ordersHandler, ordersHandlerErr := handlers.NewOrdersHandler(lgr, ordersRepo)

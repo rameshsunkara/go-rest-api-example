@@ -8,6 +8,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 )
 
+// ReqIDMiddleware injects a request ID into the context and response header, creates one if it is not present already.
 func ReqIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		reqID := c.Request.Header.Get(util.RequestIdentifier)

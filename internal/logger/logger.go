@@ -3,6 +3,7 @@ package logger
 import (
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -25,7 +26,7 @@ type AppLogger struct {
 func Setup(logLevel, envName string) *AppLogger {
 	setupOnce.Do(func() {
 		appLogger = &AppLogger{}
-		lvl := ZerologLevel(logLevel)
+		lvl := parseZerologLevel(logLevel)
 		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 		zerolog.TimeFieldFormat = time.RFC3339Nano
 		var logDest io.Writer
@@ -69,8 +70,9 @@ func (l *AppLogger) Debug() *zerolog.Event {
 	return l.zLogger.Debug()
 }
 
-func ZerologLevel(level string) zerolog.Level {
-	switch level {
+// parseZerologLevel parses a string log level to zerolog.Level.
+func parseZerologLevel(level string) zerolog.Level {
+	switch strings.ToLower(level) {
 	case "debug":
 		return zerolog.DebugLevel
 	case "info":
