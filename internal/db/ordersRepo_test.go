@@ -7,6 +7,7 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
@@ -16,10 +17,52 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
-func TestNewOrderDataService(t *testing.T) {
-	ds, err := db.NewOrdersRepo(testLgr, &mocks.MockMongoDataBase{})
-	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
-	require.NoError(t, err)
+func TestNewOrdersRepo(t *testing.T) {
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		db      db.MongoDatabase
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     testLgr,
+			db:      &mocks.MockMongoDataBase{},
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			db:      &mocks.MockMongoDataBase{},
+			wantErr: true,
+		},
+		{
+			name:    "nil db",
+			lgr:     testLgr,
+			db:      nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and db",
+			lgr:     nil,
+			db:      nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			repo, err := db.NewOrdersRepo(tt.lgr, tt.db)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, repo)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, repo)
+			}
+		})
+	}
 }
 
 func TestValidate(t *testing.T) {

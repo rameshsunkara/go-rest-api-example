@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	errors2 "github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
@@ -44,6 +45,57 @@ func setupTestContext() (*gin.Context, *gin.Engine, *httptest.ResponseRecorder) 
 	recorder := httptest.NewRecorder()
 	c, r := gin.CreateTestContext(recorder)
 	return c, r, recorder
+}
+
+func TestNewOrdersHandler(t *testing.T) {
+	t.Parallel()
+	mockSvc := &mocks.MockOrdersDataService{}
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		svc     db.OrdersDataService
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     lgr,
+			svc:     mockSvc,
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			svc:     mockSvc,
+			wantErr: true,
+		},
+		{
+			name:    "nil service",
+			lgr:     lgr,
+			svc:     nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and service",
+			lgr:     nil,
+			svc:     nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, err := handlers.NewOrdersHandler(tt.lgr, tt.svc)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, h)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, h)
+			}
+		})
+	}
 }
 
 func TestOrdersHandler_Create(t *testing.T) {

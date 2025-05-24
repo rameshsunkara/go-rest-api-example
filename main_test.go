@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"testing"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -88,4 +91,22 @@ func TestMustEnvConfig_FailOnSideCar(t *testing.T) {
 		_, err := getEnvConfig()
 		require.Error(t, err)
 	})
+}
+
+func Test_exitCode(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, 0, exitCode(nil))
+	assert.Equal(t, 1, exitCode(errors.New("fail")))
+	assert.Equal(t, 0, exitCode(context.Canceled))
+}
+
+func Test_setupDB_fail(t *testing.T) {
+	t.Parallel()
+	lgr := logger.Setup("info", "test")
+	svcEnv := &models.ServiceEnv{
+		DBName:            "db",
+		MongoVaultSideCar: "/notfound",
+	}
+	_, err := setupDB(lgr, svcEnv)
+	require.Error(t, err)
 }

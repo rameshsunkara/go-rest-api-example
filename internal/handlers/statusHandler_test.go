@@ -5,11 +5,64 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
+	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNewStatusHandler(t *testing.T) {
+	t.Parallel()
+	mockMgr := &mocks.MockMongoMgr{}
+	tests := []struct {
+		name    string
+		lgr     *logger.AppLogger
+		mgr     db.MongoManager
+		wantErr bool
+	}{
+		{
+			name:    "success",
+			lgr:     lgr,
+			mgr:     mockMgr,
+			wantErr: false,
+		},
+		{
+			name:    "nil logger",
+			lgr:     nil,
+			mgr:     mockMgr,
+			wantErr: true,
+		},
+		{
+			name:    "nil manager",
+			lgr:     lgr,
+			mgr:     nil,
+			wantErr: true,
+		},
+		{
+			name:    "nil logger and manager",
+			lgr:     nil,
+			mgr:     nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			h, err := handlers.NewStatusHandler(tt.lgr, tt.mgr)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Nil(t, h)
+			} else {
+				require.NoError(t, err)
+				assert.NotNil(t, h)
+			}
+		})
+	}
+}
 
 func TestStatusHandler(t *testing.T) {
 	t.Parallel()
