@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -21,13 +22,14 @@ type SeedHandler struct {
 	lgr      *logger.AppLogger
 }
 
-func NewDataSeedHandler(logger *logger.AppLogger, svc db.OrdersDataService) *SeedHandler {
-	
-	sc := &SeedHandler{
-		oDataSvc: svc,
-		lgr:      logger,
+func NewDataSeedHandler(lgr *logger.AppLogger, svc db.OrdersDataService) (*SeedHandler, error) {
+	if lgr == nil || svc == nil {
+		return nil, errors.New("failed to create local DB seed handler")
 	}
-	return sc
+	return &SeedHandler{
+		oDataSvc: svc,
+		lgr:      lgr,
+	}, nil
 }
 
 func (s *SeedHandler) SeedDB(c *gin.Context) {

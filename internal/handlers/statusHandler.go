@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
@@ -9,47 +10,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type ServiceStatus string
-
-const (
-	UP   ServiceStatus = "ok"
-	DOWN ServiceStatus = "down"
-)
-
-type StatusResponse struct {
-	Status      ServiceStatus
-	ServiceName string
-	UpTime      string
-	Environment string
-	Version     string
-}
-
-type StatusController struct {
+type StatusHandler struct {
 	dbMgr db.MongoManager
 	lgr   *logger.AppLogger
 }
 
-func NewStatusController(lgr *logger.AppLogger, m db.MongoManager) *StatusController {
-	return &StatusController{
+func NewStatusHandler(lgr *logger.AppLogger, m db.MongoManager) (*StatusHandler, error) {
+	if lgr == nil || m == nil {
+		return nil, errors.New("missing required inputs to create status handler")
+	}
+	return &StatusHandler{
 		dbMgr: m,
 		lgr:   lgr,
-	}
+	}, nil
 }
 
-// CheckStatus - Checks the health of all the dependencies of the service to ensure complete serviceability.
-func (s *StatusController) CheckStatus(c *gin.Context) {
-	var stat ServiceStatus
+// CheckStatus checks the health of all service dependencies to ensure full serviceability.
+func (s *StatusHandler) CheckStatus(c *gin.Context) {
 	var code int
 
 	if err := s.dbMgr.Ping(); err == nil {
-		stat = UP
-		code = http.StatusOK
+		code = http.StatusNoContent
 	} else {
-		s.lgr.Error().Msg("unable to ping DB")
-		stat = DOWN
+		s.lgr.Error().Msg("failed to ping DB")
 		code = http.StatusFailedDependency
 	}
 
+	// Check status of any other dependencies you may have here
+
 	// send response
-	c.JSON(code, stat)
+	c.JSON(code, nil)
+	return
 }

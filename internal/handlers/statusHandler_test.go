@@ -1,9 +1,7 @@
 package handlers_test
 
 import (
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"testing"
 
@@ -13,36 +11,26 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func UnMarshalStatusResponse(resp *http.Response) (handlers.ServiceStatus, error) {
-	body, _ := io.ReadAll(resp.Body)
-	var statusResponse handlers.ServiceStatus
-	err := json.Unmarshal(body, &statusResponse)
-	return statusResponse, err
-}
-
 func TestStatusHandler(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
-		name           string
-		mockPingFunc   func() error
-		expectedStatus handlers.ServiceStatus
-		expectedCode   int
+		name         string
+		mockPingFunc func() error
+		expectedCode int
 	}{
 		{
 			name: "StatusSuccess",
 			mockPingFunc: func() error {
 				return nil
 			},
-			expectedStatus: handlers.UP,
-			expectedCode:   http.StatusOK,
+			expectedCode: http.StatusOK,
 		},
 		{
 			name: "StatusDown",
 			mockPingFunc: func() error {
 				return errors.New("DB Connection Failed")
 			},
-			expectedStatus: handlers.DOWN,
-			expectedCode:   http.StatusFailedDependency,
+			expectedCode: http.StatusFailedDependency,
 		},
 	}
 
@@ -52,7 +40,7 @@ func TestStatusHandler(t *testing.T) {
 
 			// Test Setup
 			c, _, recorder := setupTestContext()
-			s := handlers.NewStatusController(lgr, &mocks.MockMongoMgr{
+			s, err := handlers.NewStatusHandler(lgr, &mocks.MockMongoMgr{
 				PingFunc: tt.mockPingFunc,
 			})
 
@@ -61,12 +49,10 @@ func TestStatusHandler(t *testing.T) {
 
 			// Parse results
 			resp := recorder.Result()
-			statusResponse, err := UnMarshalStatusResponse(resp)
-			require.NoError(t, err)
 
 			// Check results
 			assert.Equal(t, tt.expectedCode, resp.StatusCode)
-			assert.Equal(t, tt.expectedStatus, statusResponse)
+			require.Error(t, err)
 		})
 	}
 }

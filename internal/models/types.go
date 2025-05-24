@@ -1,12 +1,5 @@
 package models
 
-type ServiceInfo struct {
-	Name        string // name of the service
-	UpTime      string // time when the service started
-	Environment string // environment details where the service is running
-	Version     string // version of the service
-}
-
 type ServiceEnv struct {
 	Name              string // name of environment where this service is running
 	Port              string // port on which this service runs, defaults to DefaultPort

@@ -45,12 +45,14 @@ type OrdersRepo struct {
 	logger     *logger.AppLogger
 }
 
-func NewOrdersRepo(db MongoDatabase, lgr *logger.AppLogger) *OrdersRepo {
-	iDBSvc := &OrdersRepo{
+func NewOrdersRepo(lgr *logger.AppLogger, db MongoDatabase) (*OrdersRepo, error) {
+	if lgr == nil || db == nil {
+		return nil, errors.New("missing required inputs to create OrdersRepo")
+	}
+	return &OrdersRepo{
 		collection: db.Collection(OrdersCollection),
 		logger:     lgr,
-	}
-	return iDBSvc
+	}, nil
 }
 
 func (o *OrdersRepo) Create(ctx context.Context, po *data.Order) (string, error) {

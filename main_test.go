@@ -5,15 +5,24 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func resetEnv(t *testing.T) {
+	t.Setenv("environment", "")
+	t.Setenv("port", "")
+	t.Setenv("dbName", "")
+	t.Setenv("MongoVaultSideCar", "")
+	t.Setenv("logLevel", "")
+	t.Setenv("printDBQueries", "")
+}
 
 func TestMustEnvConfig(t *testing.T) {
 	t.Run("MissingEnvVariables", func(t *testing.T) {
 		resetEnv(t)
-		// Call MustEnvConfig and expect panic
-		assert.Panics(t, func() {
-			_ = MustEnvConfig()
-		}, "MustEnvConfig did not panic with missing environment variables")
+		// Call getEnvConfig and expect panic
+		_, err := getEnvConfig()
+		require.Error(t, err)
 	})
 
 	t.Run("ValidEnvVariables", func(t *testing.T) {
@@ -25,8 +34,8 @@ func TestMustEnvConfig(t *testing.T) {
 		t.Setenv("MongoVaultSideCar", "/path/to/mongo/sidecar")
 		t.Setenv("logLevel", "debug")
 
-		// Call MustEnvConfig and verify returned configurations
-		expectedConfig := models.ServiceEnv{
+		// Call getEnvConfig and verify returned configurations
+		expectedConfig := &models.ServiceEnv{
 			Name:              "test",
 			Port:              "8080",
 			PrintQueries:      false, // default value
@@ -36,9 +45,10 @@ func TestMustEnvConfig(t *testing.T) {
 			LogLevel:          "debug",
 		}
 
-		actualConfig := MustEnvConfig()
+		actualConfig, err := getEnvConfig()
 		assert.Equal(t, expectedConfig, actualConfig,
-			"MustEnvConfig did not return expected configurations")
+			"getEnvConfig did not return expected configurations")
+		require.NoError(t, err)
 	})
 }
 
@@ -50,8 +60,8 @@ func TestMustEnvConfig_Defaults(t *testing.T) {
 		t.Setenv("dbName", "testDB")
 		t.Setenv("MongoVaultSideCar", "/path/to/mongo/sidecar")
 
-		// Call MustEnvConfig and verify returned configurations
-		expectedConfig := models.ServiceEnv{
+		// Call getEnvConfig and verify returned configurations
+		expectedConfig := &models.ServiceEnv{
 			Name:              "test",
 			Port:              defaultPort,
 			PrintQueries:      false, // default value
@@ -61,9 +71,10 @@ func TestMustEnvConfig_Defaults(t *testing.T) {
 			LogLevel:          "info",
 		}
 
-		actualConfig := MustEnvConfig()
+		actualConfig, err := getEnvConfig()
 		assert.Equal(t, expectedConfig, actualConfig,
-			"Default values are not set correctly in MustEnvConfig")
+			"Default values are not set correctly in getEnvConfig")
+		require.NoError(t, err)
 	})
 }
 
@@ -74,17 +85,7 @@ func TestMustEnvConfig_FailOnSideCar(t *testing.T) {
 		t.Setenv("environment", "test")
 		t.Setenv("dbName", "testDB")
 
-		assert.Panics(t, func() {
-			_ = MustEnvConfig()
-		}, "MustEnvConfig did not panic with missing environment variables")
+		_, err := getEnvConfig()
+		require.Error(t, err)
 	})
-}
-
-func resetEnv(t *testing.T) {
-	t.Setenv("environment", "")
-	t.Setenv("port", "")
-	t.Setenv("dbName", "")
-	t.Setenv("MongoVaultSideCar", "")
-	t.Setenv("logLevel", "")
-	t.Setenv("printDBQueries", "")
 }

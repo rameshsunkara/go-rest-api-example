@@ -27,12 +27,14 @@ type OrdersHandler struct {
 	logger   *logger.AppLogger
 }
 
-func NewOrdersHandler(dSvc db.OrdersDataService, lgr *logger.AppLogger) *OrdersHandler {
-	o := &OrdersHandler{
+func NewOrdersHandler(lgr *logger.AppLogger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
+	if lgr == nil || dSvc == nil {
+		return nil, fmt.Errorf("missing required parameters to create orders handler")
+	}
+	return &OrdersHandler{
 		oDataSvc: dSvc,
 		logger:   lgr,
-	}
-	return o
+	}, nil
 }
 
 func (o *OrdersHandler) Create(c *gin.Context) {

@@ -12,7 +12,7 @@ func RequestLogMiddleware(lgr *logger.AppLogger) gin.HandlerFunc {
 		l, _ := lgr.WithReqID(c)
 		start := time.Now()
 		c.Next()
-		// consider adding more request identifiers such as userId etc.,
+		// consider adding more request identifiers such as userId, etc.,
 		l.Info().
 			Str("method", c.Request.Method).
 			Str("url", c.Request.URL.String()).

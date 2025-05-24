@@ -15,7 +15,6 @@ import (
 	errors2 "github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +26,7 @@ var lgr *logger.AppLogger
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
-	lgr = logger.Setup(models.ServiceEnv{Name: "test"})
+	lgr = logger.Setup("debug", "test")
 	os.Exit(m.Run())
 }
 
@@ -121,7 +120,6 @@ func TestOrdersHandler_Create(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
 				CreateFunc: tt.mockCreateFunc,
@@ -305,7 +303,6 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
 				GetByIDFunc: tt.mockGetByIDFunc,
@@ -379,7 +376,6 @@ func TestOrdersHandler_Delete(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 			c, r, recorder := setupTestContext()
 			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
 				DeleteByIDFunc: tt.mockDeleteFunc,
