@@ -7,8 +7,6 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
@@ -19,14 +17,15 @@ import (
 )
 
 func TestNewOrderDataService(t *testing.T) {
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
-	ds := db.NewOrdersRepo(&mocks.MockMongoDataBase{}, lgr)
+	ds, err := db.NewOrdersRepo(testLgr, &mocks.MockMongoDataBase{})
 	assert.Implements(t, (*db.OrdersDataService)(nil), ds)
+	require.NoError(t, err)
 }
 
 func TestValidate(t *testing.T) {
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
-	ds := db.NewOrdersRepo(&mocks.MockMongoDataBase{}, lgr)
+	t.Parallel()
+	ds, err := db.NewOrdersRepo(testLgr, &mocks.MockMongoDataBase{})
+	require.NoError(t, err)
 
 	testCases := []struct {
 		name     string
@@ -75,6 +74,7 @@ func TestValidate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			err := tc.testFunc()
 			require.Error(t, err)
 			assert.Equal(t, tc.wantErr, err)
@@ -83,9 +83,8 @@ func TestValidate(t *testing.T) {
 }
 
 func TestOrdersRepo_Create(t *testing.T) {
+	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 
 	tests := []struct {
 		name    string
@@ -138,7 +137,11 @@ func TestOrdersRepo_Create(t *testing.T) {
 	for _, tt := range tests {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			tt.mock(mt)
-			repo := db.NewOrdersRepo(mt.DB, lgr)
+			repo, err := db.NewOrdersRepo(testLgr, mt.DB)
+			if err != nil {
+				t.Errorf("failed to create repo")
+				return
+			}
 			resultID, err := repo.Create(context.TODO(), tt.order)
 			if tt.wantErr != nil {
 				require.Error(t, err)
@@ -152,9 +155,8 @@ func TestOrdersRepo_Create(t *testing.T) {
 }
 
 func TestOrdersRepo_Update(t *testing.T) {
+	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 
 	tests := []struct {
 		name    string
@@ -234,7 +236,11 @@ func TestOrdersRepo_Update(t *testing.T) {
 	for _, tt := range tests {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			tt.mock(mt)
-			repo := db.NewOrdersRepo(mt.DB, lgr)
+			repo, repoErr := db.NewOrdersRepo(testLgr, mt.DB)
+			if repoErr != nil {
+				t.Errorf("failed to create repo")
+				return
+			}
 			err := repo.Update(context.TODO(), tt.order)
 			if tt.wantErr != nil {
 				require.Error(t, err)
@@ -247,9 +253,9 @@ func TestOrdersRepo_Update(t *testing.T) {
 }
 
 func TestOrdersRepo_GetByID(t *testing.T) {
+	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	testOID := primitive.NewObjectID()
 	tests := []struct {
 		name    string
@@ -289,7 +295,11 @@ func TestOrdersRepo_GetByID(t *testing.T) {
 	for _, tt := range tests {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			tt.mock(mt)
-			repo := db.NewOrdersRepo(mt.DB, lgr)
+			repo, repoErr := db.NewOrdersRepo(testLgr, mt.DB)
+			if repoErr != nil {
+				t.Errorf("failed to create repo")
+				return
+			}
 			result, err := repo.GetByID(context.TODO(), tt.orderID)
 			if tt.wantErr != nil {
 				require.Error(t, err)
@@ -304,9 +314,8 @@ func TestOrdersRepo_GetByID(t *testing.T) {
 }
 
 func TestOrdersRepo_DeleteByID(t *testing.T) {
+	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
-
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 
 	tests := []struct {
 		name    string
@@ -343,7 +352,11 @@ func TestOrdersRepo_DeleteByID(t *testing.T) {
 	for _, tt := range tests {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			tt.mock(mt)
-			repo := db.NewOrdersRepo(mt.DB, lgr)
+			repo, repoErr := db.NewOrdersRepo(testLgr, mt.DB)
+			if repoErr != nil {
+				t.Errorf("failed to create repo")
+				return
+			}
 			err := repo.DeleteByID(context.TODO(), tt.orderID)
 			if tt.wantErr != nil {
 				require.Error(t, err)
@@ -356,9 +369,9 @@ func TestOrdersRepo_DeleteByID(t *testing.T) {
 }
 
 func TestOrdersRepo_GetAll(t *testing.T) {
+	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
-	lgr := logger.Setup(models.ServiceEnv{Name: "test"})
 	oCollName := "ordersdb.orders"
 	tests := []struct {
 		name    string
@@ -396,7 +409,11 @@ func TestOrdersRepo_GetAll(t *testing.T) {
 	for _, tt := range tests {
 		mt.Run(tt.name, func(mt *mtest.T) {
 			tt.mock(mt)
-			repo := db.NewOrdersRepo(mt.DB, lgr)
+			repo, repoErr := db.NewOrdersRepo(testLgr, mt.DB)
+			if repoErr != nil {
+				t.Errorf("failed to create repo")
+				return
+			}
 			results, err := repo.GetAll(context.TODO(), tt.limit)
 			if tt.wantErr != nil {
 				require.Error(t, err)

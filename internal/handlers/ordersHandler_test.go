@@ -121,9 +121,13 @@ func TestOrdersHandler_Create(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				CreateFunc: tt.mockCreateFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.POST("/orders", handler.Create)
 
 			body, _ := json.Marshal(tt.input)
@@ -226,9 +230,13 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 			t.Parallel() // mark the test as capable of running in parallel
 
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				GetAllFunc: tt.mockGetAllFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.GET("/orders", handler.GetAll)
 
 			c.Request, _ = http.NewRequest(http.MethodGet, "/orders", nil)
@@ -304,9 +312,13 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 			t.Parallel()
 
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				GetByIDFunc: tt.mockGetByIDFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.GET("/orders/:id", handler.GetByID)
 
 			c.Request, _ = http.NewRequest(http.MethodGet, "/orders/"+tt.orderID, nil)
@@ -377,9 +389,13 @@ func TestOrdersHandler_Delete(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			c, r, recorder := setupTestContext()
-			handler := handlers.NewOrdersHandler(&mocks.MockOrdersDataService{
+			handler, err := handlers.NewOrdersHandler(lgr, &mocks.MockOrdersDataService{
 				DeleteByIDFunc: tt.mockDeleteFunc,
-			}, lgr)
+			})
+			if err != nil {
+				t.Errorf("failed to create orders handler")
+				return
+			}
 			r.DELETE("/orders/:id", handler.DeleteByID)
 
 			c.Request, _ = http.NewRequest(http.MethodDelete, "/orders/"+tt.orderID, nil)

@@ -14,6 +14,7 @@ var (
 )
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {
+	t.Parallel()
 	creds := &db.MongoDBCredentials{}
 
 	d, dErr := db.NewMongoManager(creds, nil, testLgr)
@@ -23,6 +24,7 @@ func TestNewMongoManager_InvalidConnURL(t *testing.T) {
 }
 
 func TestNewMongoManager_InvalidClient(t *testing.T) {
+	t.Parallel()
 	creds := &db.MongoDBCredentials{
 		Hostname: "non-existent-hostname",
 	}
@@ -34,6 +36,7 @@ func TestNewMongoManager_InvalidClient(t *testing.T) {
 }
 
 func TestFillConnectionOpts(t *testing.T) {
+	t.Parallel()
 	testCases := []struct {
 		description string
 		input       *db.ConnectionOpts
@@ -82,7 +85,10 @@ func TestFillConnectionOpts(t *testing.T) {
 	}
 
 	for i, tc := range testCases {
-		actual := db.FillConnectionOpts(tc.input)
-		assert.Equal(t, tc.output, *actual, "test case %d:%s failed", i, tc.description)
+		t.Run(tc.description, func(t *testing.T) {
+			t.Parallel()
+			actual := db.FillConnectionOpts(tc.input)
+			assert.Equal(t, tc.output, *actual, "test case %d:%s failed", i, tc.description)
+		})
 	}
 }

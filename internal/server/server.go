@@ -59,7 +59,7 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 	if sHandlerErr != nil {
 		return nil, sHandlerErr
 	}
-	router.GET("/status", status.CheckStatus)
+	router.GET("/healthz", status.CheckStatus)
 
 	d := dbMgr.Database()
 	ordersRepo, ordersRepoErr := db.NewOrdersRepo(lgr, d)

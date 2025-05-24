@@ -36,9 +36,8 @@ func (s *StatusHandler) CheckStatus(c *gin.Context) {
 		code = http.StatusFailedDependency
 	}
 
-	// Check status of any other dependencies you may have here
+	// Check the status of any other dependencies you may have here
 
 	// send response
 	c.JSON(code, nil)
-	return
 }

@@ -30,7 +30,7 @@ func TestListOfRoutes(t *testing.T) {
 
 	assertRoutePresent(t, list, gin.RouteInfo{
 		Method: http.MethodGet,
-		Path:   "/status",
+		Path:   "/healthz",
 	})
 
 	assertRouteNotPresent(t, list, gin.RouteInfo{
