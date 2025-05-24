@@ -35,24 +35,24 @@ func TestValidate(t *testing.T) {
 		{
 			name: "Create with invalid initialization",
 			testFunc: func() error {
-				_, err := ds.Create(context.Background(), &data.Order{})
-				return err
+				_, cErr := ds.Create(context.Background(), &data.Order{})
+				return cErr
 			},
 			wantErr: db.ErrInvalidInitialization,
 		},
 		{
 			name: "GetAll with invalid initialization",
 			testFunc: func() error {
-				_, err := ds.GetAll(context.Background(), 10)
-				return err
+				_, gErr := ds.GetAll(context.Background(), 10)
+				return gErr
 			},
 			wantErr: db.ErrInvalidInitialization,
 		},
 		{
 			name: "GetByID with invalid initialization",
 			testFunc: func() error {
-				_, err := ds.GetByID(context.Background(), primitive.NewObjectID())
-				return err
+				_, gErr := ds.GetByID(context.Background(), primitive.NewObjectID())
+				return gErr
 			},
 			wantErr: db.ErrInvalidInitialization,
 		},
