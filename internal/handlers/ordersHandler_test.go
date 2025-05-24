@@ -138,15 +138,15 @@ func TestOrdersHandler_Create(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.ErrorCode, apiErr.ErrorCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var responseOrder external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, int64(1), responseOrder.Version)
 				assert.NotNil(t, responseOrder.CreatedAt)
 				assert.NotNil(t, responseOrder.UpdatedAt)
@@ -250,14 +250,14 @@ func TestOrdersHandler_GetAll(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var respOrders []external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &respOrders)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &respOrders)
+				require.NoError(t, respBodyErr)
 				assert.Len(t, respOrders, tt.expectedLength)
 			}
 		})
@@ -328,14 +328,14 @@ func TestOrdersHandler_GetByID(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			} else {
 				var responseOrder external.Order
-				err := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &responseOrder)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.orderID, responseOrder.ID)
 			}
 		})
@@ -405,8 +405,8 @@ func TestOrdersHandler_Delete(t *testing.T) {
 
 			if tt.expectedError != nil {
 				var apiErr external.APIError
-				err := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
-				require.NoError(t, err)
+				respBodyErr := json.Unmarshal(recorder.Body.Bytes(), &apiErr)
+				require.NoError(t, respBodyErr)
 				assert.Equal(t, tt.expectedError.HTTPStatusCode, apiErr.HTTPStatusCode)
 				assert.Equal(t, tt.expectedError.Message, apiErr.Message)
 			}
