@@ -29,19 +29,21 @@
 
 ### Go Application Features:
 1. **Configuration Management**: via Environment Variables
-2. **Dockerized Environment**: Facilitates service deployment.
-3. **Makefile**: Automates common tasks for developers.
-4. **Git Action**: Automates build processes, runs tests, and generates code coverage.
-5. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
-6. **Secrets Loading Mechanism from Sidecar**
-7. **Support for Multiple Databases**: Enables connections to various database systems.
-8. **Best Practices for MongoDB Connection**
-9. **Effective Mocking Practices for Unit Test Patterns**
-10. **Seed Data**: for Local Development
-11. **Standardized Filename Conventions**: Enhances code readability.
-12. **Multi-Stage Docker Build**: Accelerates build processes.
-13. **Versioning** Using Git Commit History
-14. **Tests**: Tests are executed in parallel across available CPU cores and use atomic mode to detect race conditions.
+2. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
+3. **Secrets Loading Mechanism from Sidecar**
+4. **Support for Multiple Databases**: Enables connections to various database systems.
+5. **Best Practices for MongoDB Connection**
+6. **Effective Mocking Practices for Unit Test Patterns**
+7. **Seed Data**: for Local Development
+8. **Standardized Filename Conventions**: Enhances code readability.
+9. **Versioning** Using Git Commit History
+10. **Tests**: Tests are executed in parallel across available CPU cores and use atomic mode to detect race conditions.
+
+### Tooling
+1. **Dockerized Environment**: Facilitates service deployment using DOCKER_BUILDKIT.
+2. **Makefile**: Automates common tasks for developers.
+3. **Git Action**: Automates build processes, runs tests, and generates code coverage.
+4. **Multi-Stage Docker Build**: Accelerates build processes.
 
 ## Folder Structure
 
