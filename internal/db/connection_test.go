@@ -5,13 +5,12 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 var (
-	testLgr = logger.Setup(models.ServiceEnv{Name: "test"})
+	testLgr = logger.Setup("info", "test")
 )
 
 func TestNewMongoManager_InvalidConnURL(t *testing.T) {

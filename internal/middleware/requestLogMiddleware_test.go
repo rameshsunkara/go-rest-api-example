@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 )
 
 func TestRequestLogMiddleware(_ *testing.T) {
@@ -31,7 +30,8 @@ func TestRequestLogMiddleware(_ *testing.T) {
 	resp := httptest.NewRecorder()
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)
-	r.Use(middleware.RequestLogMiddleware(logger.Setup(models.ServiceEnv{})))
+	lgr := logger.Setup("info", "test")
+	r.Use(middleware.RequestLogMiddleware(lgr))
 
 	for _, tc := range testCases {
 		r.GET(tc.InputReqPath, func(ctx *gin.Context) {
