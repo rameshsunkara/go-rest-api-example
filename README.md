@@ -42,7 +42,7 @@
 ### Tooling
 1. **Dockerized Environment**: Facilitates service deployment using DOCKER_BUILDKIT.
 2. **Makefile**: Automates common tasks for developers.
-3. **Git Action**: Automates build processes, runs tests, and generates code coverage.
+3. **GitHub Actions**: Automates building, testing, code coverage reporting, and enforces the required test coverage threshold.
 4. **Multi-Stage Docker Build**: Accelerates build processes.
 
 ## Folder Structure
