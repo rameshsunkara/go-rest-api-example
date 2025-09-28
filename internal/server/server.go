@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,7 +26,7 @@ type Server struct {
 }
 
 // Start manages the HTTP server lifecycle with graceful shutdown
-// This function blocks until the server shuts down or an error occurs
+// This function blocks until the server shuts down or an error occurs.
 func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
 	router, err := WebRouter(svcEnv, lgr, dbMgr)
 	if err != nil {
@@ -56,7 +57,7 @@ func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logg
 	// Block and wait for either shutdown signal or server error
 	select {
 	case err := <-serverErrors:
-		if err != http.ErrServerClosed {
+		if !errors.Is(err, http.ErrServerClosed) {
 			return fmt.Errorf("server failed: %w", err)
 		}
 		return nil

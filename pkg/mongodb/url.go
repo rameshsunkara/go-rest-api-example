@@ -7,17 +7,18 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const (
-	// MongoScheme is the standard MongoDB connection scheme
+	// MongoScheme is the standard MongoDB connection scheme.
 	MongoScheme = "mongodb"
-	// MongoSRVScheme is the MongoDB SRV connection scheme used generally for cloud DBs
+	// MongoSRVScheme is the MongoDB SRV connection scheme used generally for cloud DBs.
 	MongoSRVScheme = "mongodb+srv"
-	// DefaultMongoDBSidecar is the default path to the MongoDB sidecar file
+	// DefaultMongoDBSidecar is the default path to the MongoDB sidecar file.
 	DefaultMongoDBSidecar string = "/secrets/db.json"
-	// DefaultWriteTimeoutMS is the default write timeout in milliseconds for replica set operations
+	// DefaultWriteTimeoutMS is the default write timeout in milliseconds for replica set operations.
 	DefaultWriteTimeoutMS = 5000
 )
 
@@ -104,7 +105,7 @@ func MaskConnectionURL(connectionURL string) string {
 	return u.String()
 }
 
-// MongoDBCredentialFromSideCar loads MongoDB credentials from a JSON sidecar file
+// MongoDBCredentialFromSideCar loads MongoDB credentials from a JSON sidecar file.
 func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoCredentials, error) {
 	if sideCarFile == "" {
 		sideCarFile = DefaultMongoDBSidecar
@@ -126,7 +127,7 @@ func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoCredentials, error)
 	return &mongoCredential, nil
 }
 
-// applyOptions applies the functional options to create MongoOptions with sensible defaults
+// applyOptions applies the functional options to create MongoOptions with sensible defaults.
 func applyOptions(opts ...Option) *MongoOptions {
 	// Start with sensible defaults
 	options := &MongoOptions{
@@ -159,7 +160,7 @@ func applyOptions(opts ...Option) *MongoOptions {
 	return options
 }
 
-// validateOptions validates the optional settings
+// validateOptions validates the optional settings.
 func validateOptions(opts *MongoOptions, hostsCount int) error {
 	if opts.UseSRV && hostsCount != 1 {
 		return ErrSRVRequiresOneHost
@@ -180,7 +181,7 @@ func validateOptions(opts *MongoOptions, hostsCount int) error {
 	return nil
 }
 
-// getScheme returns the appropriate URI scheme based on UseSRV
+// getScheme returns the appropriate URI scheme based on UseSRV.
 func getScheme(useSRV bool) string {
 	if useSRV {
 		return MongoSRVScheme
@@ -188,7 +189,7 @@ func getScheme(useSRV bool) string {
 	return MongoScheme
 }
 
-// getUserInfo returns user credentials for URL if provided
+// getUserInfo returns user credentials for URL if provided.
 func getUserInfo(username, password string) *url.Userinfo {
 	if password != "" {
 		return url.UserPassword(url.QueryEscape(username), url.QueryEscape(password))
@@ -196,7 +197,7 @@ func getUserInfo(username, password string) *url.Userinfo {
 	return url.User(url.QueryEscape(username))
 }
 
-// getDatabasePath returns the database path for the URI
+// getDatabasePath returns the database path for the URI.
 func getDatabasePath(database string) string {
 	if database != "" {
 		return "/" + database
@@ -205,7 +206,7 @@ func getDatabasePath(database string) string {
 }
 
 // getHost returns the host portion of the MongoDB URI
-// Hosts should be provided as comma-separated "hostname:port" format
+// Hosts should be provided as comma-separated "hostname:port" format.
 func getHost(hosts string, opts *MongoOptions) (string, error) {
 	if opts.UseSRV {
 		// SRV uses single host, no port (validation already done)
@@ -217,7 +218,7 @@ func getHost(hosts string, opts *MongoOptions) (string, error) {
 	return strings.ReplaceAll(hosts, " ", ""), nil
 }
 
-// getQueryString returns the query string for MongoDB URI
+// getQueryString returns the query string for MongoDB URI.
 func getQueryString(opts *MongoOptions) string {
 	q := url.Values{}
 
@@ -234,7 +235,7 @@ func getQueryString(opts *MongoOptions) string {
 		q.Set("w", opts.WriteConcern)
 	}
 	if opts.WTimeoutMS > 0 {
-		q.Set("wtimeoutMS", fmt.Sprintf("%d", opts.WTimeoutMS))
+		q.Set("wtimeoutMS", strconv.Itoa(opts.WTimeoutMS))
 	}
 	if opts.AuthSource != "" {
 		q.Set("authSource", opts.AuthSource)

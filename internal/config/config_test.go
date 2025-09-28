@@ -12,7 +12,7 @@ const (
 	testDBHosts     = "localhost:27017"
 )
 
-// resetEnv clears all environment variables used by config.Load()
+// resetEnv clears all environment variables used by config.Load().
 func resetEnv(t *testing.T) {
 	t.Helper()
 	envVars := []string{
@@ -24,7 +24,7 @@ func resetEnv(t *testing.T) {
 	}
 }
 
-// setMinimalRequiredEnv sets only the required environment variables
+// setMinimalRequiredEnv sets only the required environment variables.
 func setMinimalRequiredEnv(t *testing.T) {
 	t.Helper()
 	t.Setenv("dbHosts", testDBHosts)

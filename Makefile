@@ -126,12 +126,12 @@ format: ## Format Go code
 ## Run the linter
 .PHONY: lint
 lint: ## Run the linter
-	$$(go env GOPATH)/bin/golangci-lint run
+	golangci-lint run
 
 ## Run the linter and fix issues
 .PHONY: lint-fix
 lint-fix: ## Run the linter and fix issues
-	$$(go env GOPATH)/bin/golangci-lint run --fix
+	golangci-lint run --fix
 
 ## Generate OWASP report
 .PHONY: owasp-report

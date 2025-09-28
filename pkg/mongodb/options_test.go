@@ -222,7 +222,7 @@ func TestOptions(t *testing.T) {
 	mongodb.WithReadPreference("")(opts)
 	mongodb.WithWriteTimeout(0)(opts)
 
-	assert.Equal(t, "", opts.ReplicaSet)
-	assert.Equal(t, "", opts.ReadPreference)
+	assert.Empty(t, opts.ReplicaSet)
+	assert.Empty(t, opts.ReadPreference)
 	assert.Equal(t, 0, opts.WTimeoutMS)
 }

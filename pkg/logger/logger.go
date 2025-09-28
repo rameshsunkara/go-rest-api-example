@@ -73,7 +73,7 @@ type zerologEvent struct {
 	event *zerolog.Event
 }
 
-// Implement Event interface
+// Implement Event interface.
 func (e *zerologEvent) Str(key, val string) Event {
 	return &zerologEvent{event: e.event.Str(key, val)}
 }

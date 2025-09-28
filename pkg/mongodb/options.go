@@ -1,6 +1,6 @@
 package mongodb
 
-// Valid MongoDB read preferences - controls WHERE to read from (server selection)
+// Valid MongoDB read preferences - controls WHERE to read from (server selection).
 var validReadPreferences = []string{
 	"primary",            // Read only from primary server
 	"primaryPreferred",   // Read from primary, fall back to secondary
@@ -9,7 +9,7 @@ var validReadPreferences = []string{
 	"nearest",            // Read from server with lowest latency
 }
 
-// Valid MongoDB read concern levels - controls CONSISTENCY of data returned
+// Valid MongoDB read concern levels - controls CONSISTENCY of data returned.
 var validReadConcerns = []string{
 	"local",        // Return local data (may not be majority acknowledged)
 	"available",    // Return immediately available data (fastest)
@@ -18,7 +18,7 @@ var validReadConcerns = []string{
 	"snapshot",     // Read from consistent snapshot (for transactions)
 }
 
-// Valid MongoDB write concern levels - controls ACKNOWLEDGMENT of write operations
+// Valid MongoDB write concern levels - controls ACKNOWLEDGMENT of write operations.
 var validWriteConcerns = []string{
 	"majority", // Wait for acknowledgment from majority of replica set
 	"0",        // No acknowledgment required (fire and forget)
@@ -27,42 +27,42 @@ var validWriteConcerns = []string{
 	"3",        // Wait for acknowledgment from primary + 2 secondaries
 }
 
-// WithSRV enables SRV connection mode
+// WithSRV enables SRV connection mode.
 func WithSRV() Option {
 	return func(opts *MongoOptions) {
 		opts.UseSRV = true
 	}
 }
 
-// WithReplicaSet sets the replica set name
+// WithReplicaSet sets the replica set name.
 func WithReplicaSet(replicaSet string) Option {
 	return func(opts *MongoOptions) {
 		opts.ReplicaSet = replicaSet
 	}
 }
 
-// WithReadPreference sets the read preference
+// WithReadPreference sets the read preference.
 func WithReadPreference(pref string) Option {
 	return func(opts *MongoOptions) {
 		opts.ReadPreference = pref
 	}
 }
 
-// WithReadConcern sets the read concern
+// WithReadConcern sets the read concern.
 func WithReadConcern(concern string) Option {
 	return func(opts *MongoOptions) {
 		opts.ReadConcern = concern
 	}
 }
 
-// WithWriteConcern sets the write concern
+// WithWriteConcern sets the write concern.
 func WithWriteConcern(concern string) Option {
 	return func(opts *MongoOptions) {
 		opts.WriteConcern = concern
 	}
 }
 
-// WithWriteTimeout sets the write timeout in milliseconds
+// WithWriteTimeout sets the write timeout in milliseconds.
 func WithWriteTimeout(timeoutMS int) Option {
 	return func(opts *MongoOptions) {
 		opts.WTimeoutMS = timeoutMS
@@ -70,21 +70,21 @@ func WithWriteTimeout(timeoutMS int) Option {
 }
 
 // WithAuthSource sets the authentication database
-// For root users created with MONGO_INITDB_ROOT_USERNAME, use "admin"
+// For root users created with MONGO_INITDB_ROOT_USERNAME, use "admin".
 func WithAuthSource(authSource string) Option {
 	return func(opts *MongoOptions) {
 		opts.AuthSource = authSource
 	}
 }
 
-// WithQueryLogging sets MongoDB query logging for debugging
+// WithQueryLogging sets MongoDB query logging for debugging.
 func WithQueryLogging(enabled bool) Option {
 	return func(opts *MongoOptions) {
 		opts.QueryLogging = enabled
 	}
 }
 
-// IsValidReadPreference checks if the read preference is valid
+// IsValidReadPreference checks if the read preference is valid.
 func IsValidReadPreference(pref string) bool {
 	for _, valid := range validReadPreferences {
 		if pref == valid {
@@ -94,7 +94,7 @@ func IsValidReadPreference(pref string) bool {
 	return false
 }
 
-// IsValidReadConcern checks if the read concern is valid
+// IsValidReadConcern checks if the read concern is valid.
 func IsValidReadConcern(concern string) bool {
 	for _, valid := range validReadConcerns {
 		if concern == valid {
@@ -104,7 +104,7 @@ func IsValidReadConcern(concern string) bool {
 	return false
 }
 
-// IsValidWriteConcern checks if the write concern is valid
+// IsValidWriteConcern checks if the write concern is valid.
 func IsValidWriteConcern(concern string) bool {
 	for _, valid := range validWriteConcerns {
 		if concern == valid {

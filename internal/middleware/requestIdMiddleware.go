@@ -7,11 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-// ContextKey is a type for context keys
+// ContextKey is a type for context keys.
 type ContextKey string
 
 const (
-	// RequestIdentifier is the header name for request ID
+	// RequestIdentifier is the header name for request ID.
 	RequestIdentifier = "X-Request-ID"
 )
 

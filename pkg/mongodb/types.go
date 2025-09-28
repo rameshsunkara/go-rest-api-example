@@ -8,12 +8,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// MongoDatabase defines the interface for MongoDB database operations
+// MongoDatabase defines the interface for MongoDB database operations.
 type MongoDatabase interface {
 	Collection(name string, opts ...*options.CollectionOptions) *mongo.Collection
 }
 
-// MongoManager defines the interface for MongoDB connection management
+// MongoManager defines the interface for MongoDB connection management.
 type MongoManager interface {
 	Database() MongoDatabase
 	DatabaseByName(name string) MongoDatabase
@@ -21,14 +21,14 @@ type MongoManager interface {
 	Disconnect() error
 }
 
-// MongoCredentials represents MongoDB authentication credentials
+// MongoCredentials represents MongoDB authentication credentials.
 type MongoCredentials struct {
 	Username string `json:"username,omitempty" log:"-"`
 	Password string `json:"password,omitempty" log:"-"`
 }
 
 // MongoOptions represents optional MongoDB connection settings
-// Note: Hosts should be provided in "hostname:port" format directly to the ConnectionURL function
+// Note: Hosts should be provided in "hostname:port" format directly to the ConnectionURL function.
 type MongoOptions struct {
 	UseSRV         bool   `json:"useSRV,omitempty"`         // Use SRV connection
 	ReplicaSet     string `json:"replicaSet,omitempty"`     // Replica set name

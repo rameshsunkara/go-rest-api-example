@@ -1,7 +1,6 @@
 package mongodb_test
 
 import (
-	"errors"
 	"testing"
 	"time"
 
@@ -175,7 +174,7 @@ func TestConnectionManagerErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.expectedText, tt.expectedErr.Error())
-			assert.True(t, errors.Is(tt.expectedErr, tt.expectedErr))
+			assert.ErrorIs(t, tt.expectedErr, tt.expectedErr)
 		})
 	}
 }

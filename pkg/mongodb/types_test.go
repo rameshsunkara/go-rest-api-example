@@ -11,8 +11,8 @@ func TestMongoCredentialsEmpty(t *testing.T) {
 	t.Parallel()
 	creds := mongodb.MongoCredentials{}
 
-	assert.Equal(t, "", creds.Username)
-	assert.Equal(t, "", creds.Password)
+	assert.Empty(t, creds.Username)
+	assert.Empty(t, creds.Password)
 }
 
 func TestMongoCredentialsFilled(t *testing.T) {
