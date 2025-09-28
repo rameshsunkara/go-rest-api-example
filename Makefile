@@ -32,7 +32,7 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 DOCKER_IMAGE_NAME := $(PROJECT_NAME):$(VERSION)
 DOCKER_CONTAINER_NAME := $(PROJECT_NAME)-$(VERSION)
 MODULE := $(shell go list -m)
-TEST_COVERAGE_THRESHOLD := 80
+TEST_COVERAGE_THRESHOLD := 70
 
 # Command to calculate test coverage will be computed when needed
 

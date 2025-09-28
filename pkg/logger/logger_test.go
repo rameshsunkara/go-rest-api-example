@@ -3,6 +3,7 @@ package logger_test
 import (
 	"bytes"
 	"errors"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
@@ -116,12 +117,12 @@ func TestWithReqIDBasic(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest("GET", "/test", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
 
 	loggerWithReqID, reqID := log.WithReqID(c)
 	assert.NotNil(t, loggerWithReqID)
 	// Without proper context setup, reqID will be empty, but method doesn't panic
-	assert.Equal(t, "", reqID)
+	assert.Empty(t, reqID)
 }
 
 func TestWithReqIDCustomBasic(t *testing.T) {
@@ -132,10 +133,10 @@ func TestWithReqIDCustomBasic(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request = httptest.NewRequest("GET", "/test", nil)
+	c.Request = httptest.NewRequest(http.MethodGet, "/test", nil)
 
 	loggerWithReqID, reqID := log.WithReqIDCustom(c, "Custom-ID")
 	assert.NotNil(t, loggerWithReqID)
 	// Without proper context setup, reqID will be empty, but method doesn't panic
-	assert.Equal(t, "", reqID)
+	assert.Empty(t, reqID)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/config"
@@ -62,5 +61,5 @@ func TestSetupDBSuccess(t *testing.T) {
 	require.Error(t, err)
 
 	// Ensure error is about connection, not credential loading
-	assert.True(t, strings.Contains(err.Error(), "unable to initialize DB connection"))
+	assert.Contains(t, err.Error(), "unable to initialize DB connection")
 }
