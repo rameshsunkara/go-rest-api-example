@@ -8,37 +8,49 @@
   <img src="go-rest-api.svg" alt="Go REST Api" width="400" />
 </div>
 
-## [Why this ?](#why-this--1)
+## [Why this?](#why-this)
 
 ## Offered Features
 
 ### API Features
 
 1. **OWASP Compliant Open API 3 Specification**: Refer to [OpenApi-v1.yaml](./OpenApi-v1.yaml) for details.
-2. **Middleware for**:
-   - **Logging**: Facilitates debugging and monitoring processes.
-   - **Authentication**: Provides a placeholder for diverse authentication mechanisms.
-   - **Tracing by Request ID**: Assists in debugging procedures.
-   - **Panic Recovery**: Ensures service continuity by managing unexpected errors.
-   - **Common Security Headers**: Safeguards the service against potential vulnerabilities.
-   - **Query Parameters Validation**: Enhances service security by validating query parameters.
-3. **Standardized Error Handling**: All errors are managed and returned in a uniform format.
-4. **Versioning**
-5. **Model Management**:
-   - Internally used data models differ from those exposed to clients, ensuring separation and security.
+2. **Production-Ready Health Checks**:
+   - `/healthz` endpoint with proper HTTP status codes (204/424)
+   - Database connectivity validation
+   - Dependency health monitoring
+3. **Comprehensive Middleware Stack**:
+   - **Request Logging**: Structured logging with request correlation
+   - **Authentication**: Multi-tier auth (external/internal APIs)
+   - **Request ID Tracing**: End-to-end request tracking
+   - **Panic Recovery**: Graceful error handling and recovery
+   - **Security Headers**: OWASP-compliant security header injection
+   - **Query Validation**: Input validation and sanitization
+   - **Compression**: Automatic response compression (gzip)
+4. **Standardized Error Handling**: Consistent error response format across all endpoints
+5. **API Versioning**: URL-based versioning with backward compatibility
+6. **Internal vs External APIs**: Separate authentication and access controls
+7. **Model Separation**: Clear distinction between internal and external data representations
 
 ### Go Application Features
 
-1. **Configuration Management**: via Environment Variables
-2. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
-3. **Secrets Loading Mechanism from Sidecar**
-4. **Support for Multiple Databases**: Enables connections to various database systems.
-5. **Best Practices for MongoDB Connection**
-6. **Effective Mocking Practices for Unit Test Patterns**
-7. **Seed Data**: for Local Development
-8. **Standardized Filename Conventions**: Enhances code readability.
-9. **Versioning** Using Git Commit History
-10. **Tests**: Tests are executed in parallel across available CPU cores and use atomic mode to detect race conditions.
+1. **Configuration Management**: Environment-based configuration with validation
+2. **Graceful Shutdown**: Proper signal handling with resource cleanup and connection draining
+3. **Production-Ready MongoDB Integration**:
+   - Connection pooling and health checks
+   - Functional options pattern for flexible configuration
+   - SRV and replica set support
+   - Credential management via sidecar files
+   - Query logging for debugging
+4. **Comprehensive Health Checks**: `/healthz` endpoint with database connectivity validation
+5. **Structured Logging**: Zero-allocation JSON logging with request tracing
+6. **Secrets Management**: Secure credential loading from sidecar files
+7. **Effective Mocking**: Interface-based design enabling comprehensive unit testing
+8. **Database Indexing**: Automatic index creation for optimal query performance
+9. **Idiomatic Go Architecture**: Clean separation of concerns with dependency injection
+10. **Parallel Testing**: Race condition detection with atomic coverage reporting
+11. **Context-Aware Operations**: Proper context propagation for cancellation and timeouts
+12. **Resource Management**: Automatic cleanup of connections and resources
 
 ### Tooling
 
@@ -49,24 +61,27 @@
 
 ## Folder Structure
 
-```
+```text
 go-rest-api-example/
 ├── main.go
-├── internal/
-│   ├── db
-│   ├── errors
-│   ├── handlers
-│   ├── logger
-│   ├── middleware
-│   ├── models
-│   ├── server
-│   ├── util
-│   └── mockData
-├── localDevelopment/
-├── Makefile
-├── Dockerfile
-├── OpenApi-vi.yaml
-├── docker-compose.yaml
+├── internal/           # Private application code
+│   ├── config/         # Configuration management
+│   ├── db/             # Database repositories and data access
+│   ├── errors/         # Application error definitions
+│   ├── handlers/       # HTTP request handlers
+│   ├── middleware/     # HTTP middleware components
+│   ├── models/         # Domain models and data structures
+│   ├── server/         # HTTP server setup and lifecycle
+│   ├── util/           # Internal utilities
+│   └── mockData/       # Test and development data
+├── pkg/                # Public packages (can be imported)
+│   ├── logger/         # Structured logging utilities
+│   └── mongodb/        # MongoDB connection management
+├── localDevelopment/   # Local dev setup (DB init scripts, etc.)
+├── Makefile           # Development automation
+├── Dockerfile         # Container image definition
+├── docker-compose.yaml # Local development services
+├── OpenApi-v1.yaml    # API specification
 └── OpenApi-v1.postman_collection.json
 ```
 
@@ -111,38 +126,51 @@ flowchart LR
 
 ### Frequently used commands
 
-      start                          Start all necessary services and API server
-      run                            Run the API server
-      setup                          Start only dependencies
-      test                           Run tests with coverage
+```makefile
+start                          Start all necessary services and API server
+run                            Run the API server
+setup                          Start only dependencies
+test                           Run tests with coverage
+```
 
 ### Development commands
 
-      lint                           Run the linter
-      lint-fix                       Run the linter and fix issues
-      clean                          Clean all Docker resources
-      coverage                       Generate and display the code coverage report
-      go-work                        Generate Go work file
-      owasp-report                   Generate OWASP report
-      tidy                           Tidy Go modules
+```makefile
+lint                           Run the linter
+lint-fix                       Run the linter and fix issues
+clean                          Clean all Docker resources (keeps database data)
+clean-all                      Clean all Docker resources including volumes (removes database data)
+clean-volumes                  Remove only the docker-compose volumes (database data)
+coverage                       Generate and display the code coverage report
+go-work                        Generate Go work file
+owasp-report                   Generate OWASP report
+tidy                           Tidy Go modules
+```
 
 ### CI commands
 
-      build                          Build the API server binary
-      ci-coverage                    Check if test coverage meets the threshold
-      format                         Format Go code
-      version                        Display the current version of the API server
+```makefile
+build                          Build the API server binary
+ci-coverage                    Check if test coverage meets the threshold
+format                         Format Go code
+version                        Display the current version of the API server
+```
 
 ### Docker commands
 
-      docker-build                   Build the Docker image
-      docker-build-debug             Build the Docker image without cache
-      docker-clean                   Clean all Docker resources
-      docker-clean-build-images      Remove build images
-      docker-remove                  Remove Docker images and containers
-      docker-run                     Run the Docker container
-      docker-start                   Build and run the Docker container
-      docker-stop                    Stop the Docker container
+```makefile
+docker-build                   Build the Docker image
+docker-build-debug             Build the Docker image without cache
+docker-clean                   Clean all Docker resources
+docker-clean-build-images      Remove build images
+docker-compose-up              Start docker-compose services
+docker-compose-down            Stop docker-compose services
+docker-compose-down-volumes    Stop docker-compose services and remove volumes
+docker-remove                  Remove Docker images and containers
+docker-run                     Run the Docker container
+docker-start                   Build and run the Docker container
+docker-stop                    Stop the Docker container
+```
 
 ## Tools
 
@@ -153,16 +181,28 @@ flowchart LR
 
 ## TODO
 
-- Add more and clear documentation about the features this offers and how to replace tools
-- Add DB Migration Support
-- Implement all OWASP security checks specified in the API Spec
+- Add comprehensive API documentation with examples
+- Implement database migration system
+- Add distributed tracing (OpenTelemetry integration)
+- Implement circuit breaker pattern for external dependencies
+- Add metrics collection and Prometheus integration
+- Implement rate limiting middleware
+- Add comprehensive integration tests
 - Add git hooks for pre-commit and pre-push
+- Implement all remaining OWASP security checks
+- Add Kubernetes deployment manifests
 
 ## Good to have
 
-- Improve the data model and add more fields
-- Deploy to cloud
-- Implement Update Operations mentioned in the API Spec
+- **Enhanced Data Models**: Add validation, relationships, and business logic
+- **Cloud Deployment**: Kubernetes manifests and Helm charts
+- **Advanced Monitoring**: APM integration, alerting, and dashboards
+- **Caching Layer**: Redis integration for performance optimization
+- **Event Sourcing**: Event-driven architecture with message queues
+- **Multi-database Support**: PostgreSQL, CockroachDB adapters
+- **Advanced Security**: JWT tokens, OAuth2, RBAC implementation
+- **Performance Testing**: Load testing scenarios and benchmarks
+- **Documentation**: Auto-generated API docs and architectural decision records
 
 ## References
 
@@ -180,14 +220,14 @@ flowchart LR
 
 I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
 
-After years of developing Full Stack applications using ReactJS and JVM-based languages, I observed that existing 
-boilerplates tended to be either excessive or insufficient for my needs. 
-Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go. 
-While similarities with popular Go boilerplate templates may be evident, 
-I have customized this repository to better align with my preferences and accumulated experiences. 
+After years of developing Full Stack applications using ReactJS and JVM-based languages, I observed that existing
+boilerplates tended to be either excessive or insufficient for my needs.
+Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go.
+While similarities with popular Go boilerplate templates may be evident,
+I have customized this repository to better align with my preferences and accumulated experiences.
 (My apologies if I inadvertently overlooked crediting any existing templates.)
 
-I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging, 
+I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging,
 and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
 
 ### What this is not?
