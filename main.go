@@ -12,7 +12,7 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"github.com/rs/zerolog"
@@ -42,7 +42,7 @@ func run() error {
 
 	// setup : service logger
 	var logWriter io.Writer = os.Stdout
-	if util.IsDevMode(svcEnv.Environment) {
+	if utilities.IsDevMode(svcEnv.Environment) {
 		logWriter = zerolog.ConsoleWriter{Out: os.Stdout}
 	}
 	lgr := logger.New(svcEnv.LogLevel, logWriter)

@@ -9,7 +9,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
@@ -149,7 +149,7 @@ func TestOrdersRepoCreate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
@@ -173,7 +173,7 @@ func TestOrdersRepoCreate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))
@@ -222,7 +222,7 @@ func TestOrdersRepoUpdate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse(bson.E{Key: "n", Value: 1}))
@@ -239,7 +239,7 @@ func TestOrdersRepoUpdate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
@@ -255,7 +255,7 @@ func TestOrdersRepoUpdate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateSuccessResponse())
@@ -272,7 +272,7 @@ func TestOrdersRepoUpdate(t *testing.T) {
 				Products:    []data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}},
 				User:        "test@example.com",
 				Status:      data.OrderPending,
-				TotalAmount: util.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
+				TotalAmount: utilities.CalculateTotalAmount([]data.Product{{Name: "Product 1", Price: 10.0, Quantity: 2}}),
 			},
 			mock: func(mt *mtest.T) {
 				mt.AddMockResponses(mtest.CreateWriteErrorsResponse(mtest.WriteError{Code: 11000}))

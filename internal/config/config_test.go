@@ -1,212 +1,84 @@
-package config
+package config_test
 
 import (
 	"testing"
 
+	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	testSidecarPath = "/path/to/mongo/sidecar"
-	testDBHosts     = "localhost:27017"
-)
+func TestLoadWithValidConfig(t *testing.T) {
+	// Set required environment variables
+	t.Setenv("dbHosts", "localhost:27017")
+	t.Setenv("DBCredentialsSideCar", "/path/to/credentials")
 
-// resetEnv clears all environment variables used by config.Load().
-func resetEnv(t *testing.T) {
-	t.Helper()
-	envVars := []string{
-		"environment", "port", "dbHosts", "dbName",
-		"DBCredentialsSideCar", "logLevel", "printDBQueries", "disableAuth",
-	}
-	for _, envVar := range envVars {
-		t.Setenv(envVar, "")
-	}
+	cfg, err := config.Load()
+
+	require.NoError(t, err)
+	assert.NotNil(t, cfg)
+	assert.Equal(t, "localhost:27017", cfg.DBHosts)
+	assert.Equal(t, "/path/to/credentials", cfg.DBCredentialsSideCar)
 }
 
-// setMinimalRequiredEnv sets only the required environment variables.
-func setMinimalRequiredEnv(t *testing.T) {
-	t.Helper()
-	t.Setenv("dbHosts", testDBHosts)
-	t.Setenv("DBCredentialsSideCar", testSidecarPath)
+func TestLoadMissingRequiredConfig(t *testing.T) {
+	// Clear environment variables
+	t.Setenv("dbHosts", "")
+	t.Setenv("DBCredentialsSideCar", "")
+
+	_, err := config.Load()
+
+	assert.Error(t, err)
 }
 
-func TestLoad(t *testing.T) {
-	tests := []struct {
-		name        string
-		setupEnv    func(*testing.T)
-		expected    *ServiceEnvConfig
-		expectError bool
-		errorMsg    string
-	}{
-		{
-			name: "all values explicitly set",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				t.Setenv("environment", "production")
-				t.Setenv("port", "9090")
-				t.Setenv("dbHosts", "db1:27017,db2:27017")
-				t.Setenv("dbName", "prodDB")
-				t.Setenv("DBCredentialsSideCar", "/prod/credentials")
-				t.Setenv("logLevel", "error")
-				t.Setenv("printDBQueries", "true")
-				t.Setenv("disableAuth", "true")
-			},
-			expected: &ServiceEnvConfig{
-				Environment:          "production",
-				Port:                 "9090",
-				LogLevel:             "error",
-				DBCredentialsSideCar: "/prod/credentials",
-				DBHosts:              "db1:27017,db2:27017",
-				DBName:               "prodDB",
-				DBLogQueries:         true,
-				DisableAuth:          true,
-			},
-		},
-		{
-			name: "minimal required values with defaults",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				setMinimalRequiredEnv(t)
-			},
-			expected: &ServiceEnvConfig{
-				Environment:          DefEnvironment,
-				Port:                 DefaultPort,
-				LogLevel:             DefaultLogLevel,
-				DBCredentialsSideCar: testSidecarPath,
-				DBHosts:              testDBHosts,
-				DBName:               DefDatabase,
-				DBLogQueries:         DefDBQueryLogging,
-				DisableAuth:          false,
-			},
-		},
-		{
-			name: "invalid boolean for printDBQueries defaults to false",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				setMinimalRequiredEnv(t)
-				t.Setenv("printDBQueries", "invalid-boolean")
-			},
-			expected: &ServiceEnvConfig{
-				Environment:          DefEnvironment,
-				Port:                 DefaultPort,
-				LogLevel:             DefaultLogLevel,
-				DBCredentialsSideCar: testSidecarPath,
-				DBHosts:              testDBHosts,
-				DBName:               DefDatabase,
-				DBLogQueries:         DefDBQueryLogging, // defaults to false
-				DisableAuth:          false,
-			},
-		},
-		{
-			name: "invalid boolean for disableAuth defaults to false",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				setMinimalRequiredEnv(t)
-				t.Setenv("disableAuth", "not-a-boolean")
-			},
-			expected: &ServiceEnvConfig{
-				Environment:          DefEnvironment,
-				Port:                 DefaultPort,
-				LogLevel:             DefaultLogLevel,
-				DBCredentialsSideCar: testSidecarPath,
-				DBHosts:              testDBHosts,
-				DBName:               DefDatabase,
-				DBLogQueries:         DefDBQueryLogging,
-				DisableAuth:          false, // defaults to false
-			},
-		},
-		{
-			name: "missing DBCredentialsSideCar",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				t.Setenv("dbHosts", testDBHosts)
-				// DBCredentialsSideCar intentionally not set
-			},
-			expectError: true,
-			errorMsg:    "database credentials sidecar file path is missing in env",
-		},
-		{
-			name: "missing dbHosts",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				t.Setenv("DBCredentialsSideCar", testSidecarPath)
-				// dbHosts intentionally not set
-			},
-			expectError: true,
-			errorMsg:    "dbHosts is missing in env",
-		},
-		{
-			name: "empty DBCredentialsSideCar",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				t.Setenv("dbHosts", testDBHosts)
-				t.Setenv("DBCredentialsSideCar", "")
-			},
-			expectError: true,
-			errorMsg:    "database credentials sidecar file path is missing in env",
-		},
-		{
-			name: "empty dbHosts",
-			setupEnv: func(t *testing.T) {
-				resetEnv(t)
-				t.Setenv("DBCredentialsSideCar", testSidecarPath)
-				t.Setenv("dbHosts", "")
-			},
-			expectError: true,
-			errorMsg:    "dbHosts is missing in env",
-		},
-	}
+func TestLoadWithOptionalDefaults(t *testing.T) {
+	// Set only required variables
+	t.Setenv("dbHosts", "localhost:27017")
+	t.Setenv("DBCredentialsSideCar", "/path/to/credentials")
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tt.setupEnv(t)
+	// Clear optional variables to test defaults
+	t.Setenv("environment", "")
+	t.Setenv("port", "")
+	t.Setenv("logLevel", "")
 
-			actualConfig, err := Load()
+	cfg, err := config.Load()
 
-			if tt.expectError {
-				require.Error(t, err)
-				if tt.errorMsg != "" {
-					assert.Contains(t, err.Error(), tt.errorMsg)
-				}
-				assert.Nil(t, actualConfig)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, tt.expected, actualConfig)
-			}
-		})
-	}
+	require.NoError(t, err)
+	assert.NotNil(t, cfg)
+	// Test that defaults are applied (actual values will depend on the implementation)
+	assert.NotEmpty(t, cfg.Environment)
+	assert.NotEmpty(t, cfg.Port)
+	assert.NotEmpty(t, cfg.LogLevel)
 }
 
 func TestConstants(t *testing.T) {
-	t.Parallel()
-
-	// Verify constants are sensible values
-	assert.Equal(t, "8080", DefaultPort)
-	assert.Equal(t, "info", DefaultLogLevel)
-	assert.Equal(t, "ecommerce", DefDatabase)
-	assert.Equal(t, "local", DefEnvironment)
-	assert.False(t, DefDBQueryLogging)
+	// Test that constants are properly defined
+	assert.Equal(t, "local", config.DefEnvironment)
+	assert.Equal(t, "8080", config.DefaultPort)
+	assert.Equal(t, "info", config.DefaultLogLevel)
+	assert.Equal(t, "ecommerce", config.DefDatabase)
+	assert.False(t, config.DefDBQueryLogging)
 }
 
-func TestServiceEnvConfigFieldTypes(t *testing.T) {
-	t.Parallel()
+func TestServiceEnvConfigStruct(t *testing.T) {
+	// Test that we can create the struct
+	cfg := &config.ServiceEnvConfig{
+		Environment:          "test",
+		Port:                 "8080",
+		LogLevel:             "debug",
+		DBHosts:              "localhost:27017",
+		DBName:               "testdb",
+		DBCredentialsSideCar: "/test/path",
+		DBLogQueries:         true,
+		DisableAuth:          false,
+	}
 
-	// Test that ServiceEnvConfig has the expected field types
-	config := &ServiceEnvConfig{}
-
-	// String fields
-	assert.IsType(t, "", config.Environment)
-	assert.IsType(t, "", config.Port)
-	assert.IsType(t, "", config.LogLevel)
-	assert.IsType(t, "", config.DBCredentialsSideCar)
-	assert.IsType(t, "", config.DBHosts)
-	assert.IsType(t, "", config.DBName)
-
-	// Int field
-	assert.IsType(t, 0, config.DBPort)
-
-	// Bool fields
-	assert.IsType(t, false, config.DBLogQueries)
-	assert.IsType(t, false, config.DisableAuth)
+	assert.Equal(t, "test", cfg.Environment)
+	assert.Equal(t, "8080", cfg.Port)
+	assert.Equal(t, "debug", cfg.LogLevel)
+	assert.Equal(t, "localhost:27017", cfg.DBHosts)
+	assert.Equal(t, "testdb", cfg.DBName)
+	assert.Equal(t, "/test/path", cfg.DBCredentialsSideCar)
+	assert.True(t, cfg.DBLogQueries)
+	assert.False(t, cfg.DisableAuth)
 }

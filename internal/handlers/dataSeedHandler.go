@@ -9,7 +9,7 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
@@ -37,12 +37,12 @@ func (s *SeedHandler) SeedDB(c *gin.Context) {
 		products := []data.Product{
 			{
 				Name:      faker.Name(),
-				Price:     util.RandomPrice(),
+				Price:     utilities.RandomPrice(),
 				UpdatedAt: time.Now(),
 			},
 			{
 				Name:      faker.Name(),
-				Price:     util.RandomPrice(),
+				Price:     utilities.RandomPrice(),
 				UpdatedAt: time.Now(),
 			},
 		}
@@ -54,7 +54,7 @@ func (s *SeedHandler) SeedDB(c *gin.Context) {
 			Products:    products,
 			User:        faker.Email(),
 			Status:      data.OrderPending,
-			TotalAmount: util.CalculateTotalAmount(products),
+			TotalAmount: utilities.CalculateTotalAmount(products),
 		}
 
 		_, err := s.oDataSvc.Create(c, po)

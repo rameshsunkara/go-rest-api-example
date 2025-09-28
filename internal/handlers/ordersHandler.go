@@ -13,7 +13,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -58,7 +58,7 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 		UpdatedAt:   time.Now(),
 		Products:    products,
 		User:        faker.Email(), // TODO: Replace with actual user email from trusted source such as JWT token
-		TotalAmount: util.CalculateTotalAmount(products),
+		TotalAmount: utilities.CalculateTotalAmount(products),
 		Status:      data.OrderPending,
 	}
 
@@ -71,8 +71,8 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 
 	extOrder := external.Order{
 		ID:          id,
-		CreatedAt:   util.FormatTimeToISO(order.CreatedAt),
-		UpdatedAt:   util.FormatTimeToISO(order.UpdatedAt),
+		CreatedAt:   utilities.FormatTimeToISO(order.CreatedAt),
+		UpdatedAt:   utilities.FormatTimeToISO(order.UpdatedAt),
 		Products:    order.Products,
 		User:        order.User,
 		TotalAmount: order.TotalAmount,
@@ -106,8 +106,8 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 			Status:      o.Status,
 			TotalAmount: o.TotalAmount,
 			User:        o.User,
-			CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
-			UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
+			CreatedAt:   utilities.FormatTimeToISO(o.CreatedAt),
+			UpdatedAt:   utilities.FormatTimeToISO(o.UpdatedAt),
 			Products:    o.Products,
 		})
 	}

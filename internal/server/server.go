@@ -16,7 +16,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
@@ -86,7 +86,7 @@ func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logg
 
 func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {
 	ginMode := gin.ReleaseMode
-	if util.IsDevMode(svcEnv.Environment) {
+	if utilities.IsDevMode(svcEnv.Environment) {
 		ginMode = gin.DebugMode
 		gin.ForceConsoleColor()
 	}
@@ -120,7 +120,7 @@ func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb
 	}
 
 	// This is a dev mode only endpoint (route) to seed the local db
-	if util.IsDevMode(svcEnv.Environment) {
+	if utilities.IsDevMode(svcEnv.Environment) {
 		if seed, seedHandlerErr := handlers.NewDataSeedHandler(lgr, ordersRepo); seedHandlerErr != nil {
 			lgr.Error().Err(seedHandlerErr).Msg("seed-local-db endpoint will not be available")
 		} else {

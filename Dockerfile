@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4  # Enable BuildKit features
 
 # Stage 1: Build the Go binary
-FROM golang:1.25 AS builder
+FROM golang:1.24.3 AS builder
 LABEL stage=builder
 
 # Set working directory
