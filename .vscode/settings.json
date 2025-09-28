@@ -3,9 +3,12 @@
     "cSpell.words": [
         "bson",
         "BUILDKIT",
+        "Buildx",
         "Dockerized",
         "ecommerce",
         "errgroup",
+        "gofmt",
+        "golangci",
         "gonic",
         "healthz",
         "linearizable",
@@ -16,6 +19,7 @@
         "readpref",
         "stretchr",
         "strikememongo",
+        "unittests",
         "wtimeout",
         "zerolog"
     ]
