@@ -1,9 +1,7 @@
 package server
 
 import (
-	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
@@ -22,7 +20,7 @@ type Server struct {
 	Router *gin.Engine
 }
 
-// Start starts the HTTP server
+// Start starts the HTTP server and blocks until it shuts down
 func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
 	router, err := WebRouter(svcEnv, lgr, dbMgr)
 	if err != nil {
@@ -33,9 +31,8 @@ func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.Mon
 		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
 	}
 
-	port := ":" + svcEnv.Port
-	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
-	return http.ListenAndServe(port, router)
+	lgr.Info().Str("port", svcEnv.Port).Msg("Starting server")
+	return router.Run(":" + svcEnv.Port)
 }
 
 func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {

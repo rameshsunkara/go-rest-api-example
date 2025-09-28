@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -54,26 +55,55 @@ func run() error {
 		return dbErr
 	}
 
+	// setup : create router
+	router, routerErr := server.WebRouter(svcEnv, lgr, dbConnMgr)
+	if routerErr != nil {
+		return routerErr
+	}
+
+	// Log registered routes
+	lgr.Info().Msg("Registered routes")
+	for _, item := range router.Routes() {
+		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
+	}
+
+	// Create HTTP server
+	srv := &http.Server{
+		Addr:    ":" + svcEnv.Port,
+		Handler: router,
+	}
+
 	// Start http server in its own go routine
 	go func() {
-		errCh <- server.Start(svcEnv, lgr, dbConnMgr)
+		lgr.Info().
+			Str("name", serviceName).
+			Str("environment", svcEnv.Environment).
+			Str("started at", time.Now().UTC().Format(time.RFC3339)).
+			Msg("Starting the service")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errCh <- err
+		}
 	}()
-
-	lgr.Info().
-		Str("name", serviceName).
-		Str("environment", svcEnv.Environment).
-		Str("started at", time.Now().UTC().Format(time.RFC3339)).
-		Msg("Starting the service")
 
 	// Wait until termination or a critical error
 	select {
 	case <-ctx.Done():
 		lgr.Info().Msg("graceful shutdown signal received")
-		err := <-errCh // wait for go routines to exit
+
+		// Shutdown server gracefully with 5 second timeout
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			lgr.Error().Err(err).Msg("Server forced to shutdown")
+		} else {
+			lgr.Info().Msg("Server shutdown gracefully")
+		}
+
 		cleanup(lgr, dbConnMgr)
-		return err
+		return nil
 	case err := <-errCh:
-		lgr.Error().Err(err).Msg("something went wrong")
+		lgr.Error().Err(err).Msg("Server error occurred")
 		cleanup(lgr, dbConnMgr)
 		return err
 	}
@@ -99,6 +129,7 @@ func setupDB(lgr logger.Logger, svcEnv *config.ServiceEnvConfig) (*mongodb.Conne
 }
 
 func cleanup(lgr logger.Logger, dbConnMgr *mongodb.ConnectionManager) {
+	lgr.Info().Msg("Cleaning up resources")
 	if err := dbConnMgr.Disconnect(); err != nil {
 		lgr.Error().Err(err).Msg("failed to close DB connection, potential connection leak")
 		return
