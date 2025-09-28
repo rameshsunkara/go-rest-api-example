@@ -1,8 +1,26 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
     "cSpell.words": [
+        "bson",
+        "BUILDKIT",
+        "Buildx",
+        "Dockerized",
+        "ecommerce",
+        "errgroup",
+        "gofmt",
+        "golangci",
+        "gonic",
+        "healthz",
+        "linearizable",
+        "pkgerrors",
+        "POID",
+        "promhttp",
         "rameshsunkara",
+        "readpref",
+        "stretchr",
         "strikememongo",
+        "unittests",
+        "wtimeout",
         "zerolog"
     ]
 }

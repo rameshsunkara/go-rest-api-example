@@ -9,8 +9,8 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +20,7 @@ func TestNewDataSeedHandler(t *testing.T) {
 	mockSvc := &mocks.MockOrdersDataService{}
 	tests := []struct {
 		name    string
-		lgr     *logger.AppLogger
+		lgr     logger.Logger
 		svc     db.OrdersDataService
 		wantErr bool
 	}{

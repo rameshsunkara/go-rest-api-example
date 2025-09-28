@@ -15,19 +15,19 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	errors2 "github.com/rameshsunkara/go-rest-api-example/internal/errors"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var lgr *logger.AppLogger
+var lgr logger.Logger
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
-	lgr = logger.Setup("debug", "test")
+	lgr = logger.New("debug", os.Stdout)
 	os.Exit(m.Run())
 }
 
@@ -52,7 +52,7 @@ func TestNewOrdersHandler(t *testing.T) {
 	mockSvc := &mocks.MockOrdersDataService{}
 	tests := []struct {
 		name    string
-		lgr     *logger.AppLogger
+		lgr     logger.Logger
 		svc     db.OrdersDataService
 		wantErr bool
 	}{

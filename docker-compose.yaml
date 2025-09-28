@@ -5,12 +5,22 @@ services:
         image: mongodb/mongodb-community-server
         container_name: orders_db
         environment:
+            # Root admin user (for initial setup only)
             MONGO_INITDB_ROOT_USERNAME: admin
             MONGO_INITDB_ROOT_PASSWORD: badpassword
+            # Target database for initialization
+            MONGO_INITDB_DATABASE: ecommerce
         ports:
-            - "27017:27017"
+            - "27022:27017"
         volumes:
-              - data_store:/data/db
+            - data_store:/data/db
+            - ./localDevelopment/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+        healthcheck:
+            test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 30s
 
 volumes:
     data_store:

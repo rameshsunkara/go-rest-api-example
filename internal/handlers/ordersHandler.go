@@ -11,11 +11,10 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/errors"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
-	"github.com/rs/zerolog"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -27,11 +26,11 @@ const (
 // OrdersHandler handles order-related HTTP requests.
 type OrdersHandler struct {
 	oDataSvc db.OrdersDataService
-	logger   *logger.AppLogger
+	logger   logger.Logger
 }
 
 // NewOrdersHandler creates a new OrdersHandler.
-func NewOrdersHandler(lgr *logger.AppLogger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
+func NewOrdersHandler(lgr logger.Logger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
 	if lgr == nil || dSvc == nil {
 		return nil, errors2.New("missing required parameters to create orders handler")
 	}
@@ -59,7 +58,7 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 		UpdatedAt:   time.Now(),
 		Products:    products,
 		User:        faker.Email(), // TODO: Replace with actual user email from trusted source such as JWT token
-		TotalAmount: util.CalculateTotalAmount(products),
+		TotalAmount: utilities.CalculateTotalAmount(products),
 		Status:      data.OrderPending,
 	}
 
@@ -72,8 +71,8 @@ func (o *OrdersHandler) Create(c *gin.Context) {
 
 	extOrder := external.Order{
 		ID:          id,
-		CreatedAt:   util.FormatTimeToISO(order.CreatedAt),
-		UpdatedAt:   util.FormatTimeToISO(order.UpdatedAt),
+		CreatedAt:   utilities.FormatTimeToISO(order.CreatedAt),
+		UpdatedAt:   utilities.FormatTimeToISO(order.UpdatedAt),
 		Products:    order.Products,
 		User:        order.User,
 		TotalAmount: order.TotalAmount,
@@ -107,8 +106,8 @@ func (o *OrdersHandler) GetAll(c *gin.Context) {
 			Status:      o.Status,
 			TotalAmount: o.TotalAmount,
 			User:        o.User,
-			CreatedAt:   util.FormatTimeToISO(o.CreatedAt),
-			UpdatedAt:   util.FormatTimeToISO(o.UpdatedAt),
+			CreatedAt:   utilities.FormatTimeToISO(o.CreatedAt),
+			UpdatedAt:   utilities.FormatTimeToISO(o.UpdatedAt),
 			Products:    o.Products,
 		})
 	}
@@ -126,7 +125,7 @@ func (o *OrdersHandler) GetByID(c *gin.Context) {
 	}
 	order, err := o.oDataSvc.GetByID(c, oID)
 	if err != nil {
-		if errors2.Is(err, db.ErrUnexpectedGetOrder) {
+		if errors2.Is(err, db.ErrPOIDNotFound) {
 			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderGetNotFound,
 				"order not found", requestID, err)
 			return
@@ -187,7 +186,7 @@ func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.A
 // abortWithAPIError logs and aborts the request with a standardized API error response.
 func (o *OrdersHandler) abortWithAPIError(
 	c *gin.Context,
-	lgr zerolog.Logger,
+	lgr logger.Logger,
 	status int,
 	errorCode, message, debugID string,
 	err error,

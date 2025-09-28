@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,7 +38,7 @@ func TestReqIDMiddleware(t *testing.T) {
 	for _, tc := range testCases {
 		var hasCorrectReqID bool
 		r.GET(tc.InputReqPath, func(ctx *gin.Context) {
-			if rID := ctx.Request.Context().Value(util.ContextKey(util.RequestIdentifier)); rID != nil {
+			if rID := ctx.Request.Context().Value(middleware.ContextKey(middleware.RequestIdentifier)); rID != nil {
 				if rIDStr, ok := rID.(string); ok {
 					reqIDPassed := len(tc.InputReqID) > 0
 					if reqIDPassed && rID == tc.InputReqID || (!reqIDPassed && len(rIDStr) > 0) {
@@ -51,10 +50,10 @@ func TestReqIDMiddleware(t *testing.T) {
 		})
 
 		c.Request, _ = http.NewRequest(http.MethodGet, tc.InputReqPath, nil)
-		c.Request.Header.Set(util.RequestIdentifier, tc.InputReqID)
+		c.Request.Header.Set(middleware.RequestIdentifier, tc.InputReqID)
 		r.ServeHTTP(resp, c.Request)
 		// Check response header
-		assert.NotEmpty(t, resp.Header().Get(util.RequestIdentifier), tc.Description)
+		assert.NotEmpty(t, resp.Header().Get(middleware.RequestIdentifier), tc.Description)
 		// Check request id is set in context
 		assert.True(t, hasCorrectReqID, tc.Description)
 	}

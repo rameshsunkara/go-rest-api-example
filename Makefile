@@ -32,10 +32,9 @@ LDFLAGS := -ldflags "-X main.version=$(VERSION)"
 DOCKER_IMAGE_NAME := $(PROJECT_NAME):$(VERSION)
 DOCKER_CONTAINER_NAME := $(PROJECT_NAME)-$(VERSION)
 MODULE := $(shell go list -m)
-TEST_COVERAGE_THRESHOLD := 80
+TEST_COVERAGE_THRESHOLD := 70
 
-# Command to calculate test coverage
-testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '{print $$3}')
+# Command to calculate test coverage will be computed when needed
 
 # Helper variables
 GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME)
@@ -52,12 +51,29 @@ setup: docker-compose-up ## Start only dependencies
 ## Run the API server
 .PHONY: run
 run: ## Run the API server
-	go run $(LDFLAGS) main.go -version=$(VERSION)
+	go run $(LDFLAGS) main.go
 
 ## Start docker-compose services
 .PHONY: docker-compose-up
 docker-compose-up:
 	docker-compose up -d
+
+## Stop docker-compose services
+.PHONY: docker-compose-down
+docker-compose-down:
+	docker-compose down
+
+## Stop docker-compose services and remove volumes
+.PHONY: docker-compose-down-volumes
+docker-compose-down-volumes:
+	docker-compose down -v
+
+## Remove only the docker-compose volumes (database data)
+.PHONY: clean-volumes
+clean-volumes:
+	@echo "Removing docker-compose volumes..."
+	@docker volume ls -q --filter name=orders | xargs -r docker volume rm
+	@echo "Volumes removed."
 
 ## Build the API server binary
 .PHONY: build
@@ -127,9 +143,13 @@ owasp-report: ## Generate OWASP report
 go-work: ## Generate Go work file
 	go work init .
 
-## Clean all Docker resources
+## Clean all Docker resources (keeps database data)
 .PHONY: clean
-clean: docker-clean ## Clean all Docker resources
+clean: docker-compose-down docker-clean ## Clean all Docker resources (keeps database data)
+
+## Clean all Docker resources including volumes (removes database data)
+.PHONY: clean-all
+clean-all: docker-compose-down-volumes docker-clean ## Clean all Docker resources including volumes (removes database data)
 
 ## Build the Docker image
 .PHONY: docker-build

@@ -5,8 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,11 +43,11 @@ type OrdersDataService interface {
 // OrdersRepo implements OrdersDataService using MongoDB.
 type OrdersRepo struct {
 	collection *mongo.Collection
-	logger     *logger.AppLogger
+	logger     logger.Logger
 }
 
 // NewOrdersRepo creates a new OrdersRepo.
-func NewOrdersRepo(lgr *logger.AppLogger, db MongoDatabase) (*OrdersRepo, error) {
+func NewOrdersRepo(lgr logger.Logger, db mongodb.MongoDatabase) (*OrdersRepo, error) {
 	if lgr == nil || db == nil {
 		return nil, errors.New("missing required inputs to create OrdersRepo")
 	}

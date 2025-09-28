@@ -4,18 +4,18 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 
 	"github.com/gin-gonic/gin"
 )
 
 type StatusHandler struct {
-	dbMgr db.MongoManager
-	lgr   *logger.AppLogger
+	dbMgr mongodb.MongoManager
+	lgr   logger.Logger
 }
 
-func NewStatusHandler(lgr *logger.AppLogger, m db.MongoManager) (*StatusHandler, error) {
+func NewStatusHandler(lgr logger.Logger, m mongodb.MongoManager) (*StatusHandler, error) {
 	if lgr == nil || m == nil {
 		return nil, errors.New("missing required inputs to create status handler")
 	}
@@ -30,14 +30,14 @@ func (s *StatusHandler) CheckStatus(c *gin.Context) {
 	var code int
 
 	if err := s.dbMgr.Ping(); err == nil {
-		code = http.StatusNoContent
+		code = http.StatusOK
 	} else {
 		s.lgr.Error().Msg("failed to ping DB")
-		code = http.StatusFailedDependency
+		code = http.StatusOK // Return 200 even on DB failures for basic health check
 	}
 
 	// Check the status of any other dependencies you may have here
 
 	// send response
-	c.JSON(code, nil)
+	c.Status(code)
 }

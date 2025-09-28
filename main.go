@@ -4,26 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
+	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/rs/zerolog"
 )
 
 const (
-	serviceName     = "ecommerce-orders"
-	defaultPort     = "8080"
-	defaultLogLevel = "info"
+	serviceName = "ecommerce-orders"
 )
-
-// Passed while building from the make file.
-var version string
 
 func main() {
 	if err := run(); err != nil {
@@ -36,120 +33,68 @@ func main() {
 func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-	errCh := make(chan error, 1)
 
 	// setup : read environmental configurations
-	svcEnv, envErr := getEnvConfig()
+	svcEnv, envErr := config.Load()
 	if envErr != nil {
 		return envErr
 	}
 
 	// setup : service logger
-	lgr := logger.Setup(svcEnv.LogLevel, svcEnv.Name)
+	var logWriter io.Writer = os.Stdout
+	if utilities.IsDevMode(svcEnv.Environment) {
+		logWriter = zerolog.ConsoleWriter{Out: os.Stdout}
+	}
+	lgr := logger.New(svcEnv.LogLevel, logWriter)
 
 	// setup : database connection
-	dbConnMgr, dbErr := setupDB(lgr, svcEnv)
+	dbConnMgr, dbErr := setupDB(svcEnv)
 	if dbErr != nil {
 		return dbErr
 	}
 
-	// Start http server in its own go routine
-	go func() {
-		errCh <- server.Start(svcEnv, lgr, dbConnMgr)
-	}()
-
 	lgr.Info().
 		Str("name", serviceName).
-		Str("environment", svcEnv.Name).
+		Str("environment", svcEnv.Environment).
 		Str("started at", time.Now().UTC().Format(time.RFC3339)).
-		Str("version", version).
-		Msg("starting the service")
+		Msg("Starting the service")
 
-	// Wait until termination or a critical error
-	select {
-	case <-ctx.Done():
-		lgr.Info().Msg("graceful shutdown signal received")
-		err := <-errCh // wait for go routines to exit
-		cleanup(lgr, dbConnMgr)
-		return err
-	case err := <-errCh:
-		lgr.Error().Err(err).Msg("something went wrong")
-		cleanup(lgr, dbConnMgr)
-		return err
+	// Start server - this blocks until shutdown or error
+	err := server.Start(ctx, svcEnv, lgr, dbConnMgr)
+
+	// Cleanup after server stops
+	cleanup(lgr, dbConnMgr)
+
+	// Don't treat context cancellation as an error
+	if errors.Is(err, context.Canceled) {
+		lgr.Info().Msg("Graceful shutdown completed")
+		return nil
 	}
+
+	return err
 }
 
-// getEnvConfig reads all the environmental configurations and panics if something critical is missing.
-func getEnvConfig() (*models.ServiceEnv, error) {
-	envName := os.Getenv("environment")
-	if envName == "" {
-		envName = "local"
-	}
-
-	port := os.Getenv("port")
-	if port == "" {
-		port = defaultPort
-	}
-
-	dbName := os.Getenv("dbName")
-	if dbName == "" {
-		return nil, errors.New("dbName is missing in env")
-	}
-
-	// printDBQueries is optional, default is false, when set to true, it will print all the queries to the console.
-	printDBQueries, err := strconv.ParseBool(os.Getenv("printDBQueries"))
-	if err != nil {
-		printDBQueries = false
-	}
-
-	mongoSideCar := os.Getenv("MongoVaultSideCar")
-	if mongoSideCar == "" {
-		return nil, errors.New("mongo sidecar file path is missing in env")
-	}
-
-	// disableAuth is optional, default is false, when set to true, it will disable authentication.
-	// Added for development purpose, do not use in production.
-	disableAuth, authEnvErr := strconv.ParseBool(os.Getenv("disableAuth"))
-	if authEnvErr != nil {
-		// do not disable authentication by default, added this flexibility just for local development purpose
-		disableAuth = false
-	}
-
-	logLevel := os.Getenv("logLevel")
-	if logLevel == "" {
-		logLevel = defaultLogLevel
-	}
-
-	envConfigurations := &models.ServiceEnv{
-		Name:              envName,
-		Port:              port,
-		PrintQueries:      printDBQueries,
-		MongoVaultSideCar: mongoSideCar,
-		DisableAuth:       disableAuth,
-		DBName:            dbName,
-		LogLevel:          logLevel,
-	}
-
-	return envConfigurations, nil
-}
-
-func setupDB(lgr *logger.AppLogger, svcEnv *models.ServiceEnv) (*db.ConnectionManager, error) {
-	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
+func setupDB(svcEnv *config.ServiceEnvConfig) (*mongodb.ConnectionManager, error) {
+	dbCredentials, err := mongodb.CredentialFromSideCar(svcEnv.DBCredentialsSideCar)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch DB credentials : %w", err)
 	}
-	connOpts := &db.ConnectionOpts{
-		Database:     svcEnv.DBName,
-		PrintQueries: svcEnv.PrintQueries,
-	}
-	dbConnMgr, dbErr := db.NewMongoManager(dbCredentials, connOpts, lgr)
+
+	dbConnMgr, dbErr := mongodb.NewMongoManager(
+		svcEnv.DBHosts,
+		svcEnv.DBName,
+		dbCredentials,
+		mongodb.WithQueryLogging(svcEnv.DBLogQueries),
+		// mongodb.WithReplicaSet(svcEnv.ReplicaSet) added to demonstrate functional options
+	)
 	if dbErr != nil {
 		return nil, fmt.Errorf("unable to initialize DB connection: %w", dbErr)
 	}
 	return dbConnMgr, nil
 }
 
-func cleanup(lgr *logger.AppLogger, dbConnMgr *db.ConnectionManager) {
+func cleanup(lgr logger.Logger, dbConnMgr *mongodb.ConnectionManager) {
+	lgr.Info().Msg("Cleaning up resources")
 	if err := dbConnMgr.Disconnect(); err != nil {
 		lgr.Error().Err(err).Msg("failed to close DB connection, potential connection leak")
 		return

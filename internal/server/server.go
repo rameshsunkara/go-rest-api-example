@@ -1,44 +1,92 @@
 package server
 
 import (
+	"context"
+	"errors"
+	"fmt"
 	"io"
-	"sync"
+	"net/http"
+	"time"
 
 	"github.com/gin-contrib/gzip"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
-	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
 
-var startOnce sync.Once
+const (
+	shutdownTimeoutSeconds   = 5
+	readHeaderTimeoutSeconds = 60
+)
 
-func Start(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManager) error {
-	var err error
-	var r *gin.Engine
-	startOnce.Do(func() {
-		r, err = WebRouter(svcEnv, lgr, dbMgr)
-		lgr.Info().Msg("Registered routes")
-		for _, item := range r.Routes() {
-			lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
-		}
-		if err != nil {
-			return
-		}
-		err = r.Run(":" + svcEnv.Port)
-	})
-	return err
+type Server struct {
+	Router *gin.Engine
 }
 
-func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManager) (*gin.Engine, error) {
+// Start manages the HTTP server lifecycle with graceful shutdown
+// This function blocks until the server shuts down or an error occurs.
+func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
+	router, err := WebRouter(svcEnv, lgr, dbMgr)
+	if err != nil {
+		return err
+	}
+
+	// Log registered routes
+	lgr.Info().Msg("Registered routes")
+	for _, item := range router.Routes() {
+		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
+	}
+
+	// Create HTTP server
+	srv := &http.Server{
+		Addr:              ":" + svcEnv.Port,
+		Handler:           router,
+		ReadHeaderTimeout: readHeaderTimeoutSeconds * time.Second,
+	}
+
+	// Channel to capture server startup errors
+	serverErrors := make(chan error, 1)
+
+	// Start server in a single goroutine (managed by this function)
+	go func() {
+		lgr.Info().Str("port", svcEnv.Port).Msg("Starting server")
+		serverErrors <- srv.ListenAndServe()
+	}()
+
+	// Block and wait for either shutdown signal or server error
+	select {
+	case serverErr := <-serverErrors:
+		if !errors.Is(serverErr, http.ErrServerClosed) {
+			return fmt.Errorf("server failed: %w", serverErr)
+		}
+		return nil
+	case <-ctx.Done():
+		lgr.Info().Msg("Shutdown signal received, stopping server...")
+
+		// Graceful shutdown with timeout
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeoutSeconds*time.Second)
+		defer cancel()
+
+		if shutdownErr := srv.Shutdown(shutdownCtx); shutdownErr != nil {
+			lgr.Error().Err(shutdownErr).Msg("Server forced to shutdown")
+			return shutdownErr
+		}
+
+		lgr.Info().Msg("Server shutdown gracefully")
+		return nil
+	}
+}
+
+func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {
 	ginMode := gin.ReleaseMode
-	if util.IsDevMode(svcEnv.Name) {
+	if utilities.IsDevMode(svcEnv.Environment) {
 		ginMode = gin.DebugMode
 		gin.ForceConsoleColor()
 	}
@@ -72,7 +120,7 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 	}
 
 	// This is a dev mode only endpoint (route) to seed the local db
-	if util.IsDevMode(svcEnv.Name) {
+	if utilities.IsDevMode(svcEnv.Environment) {
 		if seed, seedHandlerErr := handlers.NewDataSeedHandler(lgr, ordersRepo); seedHandlerErr != nil {
 			lgr.Error().Err(seedHandlerErr).Msg("seed-local-db endpoint will not be available")
 		} else {
