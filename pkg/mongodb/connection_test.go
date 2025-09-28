@@ -125,13 +125,9 @@ func TestConnectionManagerStruct(t *testing.T) {
 			connMgr.DatabaseByName("test")
 		})
 	})
-
-	// Test removed: cannot access unexported fields from _test package
 }
 
 func TestConnectionManagerOptions(t *testing.T) {
-	// These tests are removed because they access unexported fields
-	// which is not possible from the _test package (which is correct behavior)
 	t.Run("basic functionality test", func(t *testing.T) {
 		connMgr := &mongodb.ConnectionManager{}
 		assert.NotNil(t, connMgr)
