@@ -149,7 +149,7 @@ func setupDB(lgr *logger.AppLogger, svcEnv *models.ServiceEnvConfig) (*db.Connec
 		dbCredentials,
 		lgr,
 		db.WithQueryLogging(svcEnv.DBLogQueries),
-		// Note: AuthSource defaults to the target database (ecommerce) for database-specific users
+		// db.WithReplicaSet(svcEnv.ReplicaSet) added to demonstrate functional options
 	)
 	if dbErr != nil {
 		return nil, fmt.Errorf("unable to initialize DB connection: %w", dbErr)

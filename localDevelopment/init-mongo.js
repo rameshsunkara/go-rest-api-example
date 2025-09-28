@@ -1,4 +1,3 @@
-// Production-ready MongoDB initialization script
 // This runs automatically when MongoDB container starts for the first time
 
 print('🚀 Initializing ecommerce database...');
