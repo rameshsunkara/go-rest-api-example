@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -34,7 +33,6 @@ func main() {
 func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-	errCh := make(chan error, 1)
 
 	// setup : read environmental configurations
 	svcEnv, envErr := config.Load()
@@ -55,58 +53,25 @@ func run() error {
 		return dbErr
 	}
 
-	// setup : create router
-	router, routerErr := server.WebRouter(svcEnv, lgr, dbConnMgr)
-	if routerErr != nil {
-		return routerErr
-	}
+	lgr.Info().
+		Str("name", serviceName).
+		Str("environment", svcEnv.Environment).
+		Str("started at", time.Now().UTC().Format(time.RFC3339)).
+		Msg("Starting the service")
 
-	// Log registered routes
-	lgr.Info().Msg("Registered routes")
-	for _, item := range router.Routes() {
-		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
-	}
+	// Start server - this blocks until shutdown or error
+	err := server.Start(ctx, svcEnv, lgr, dbConnMgr)
 
-	// Create HTTP server
-	srv := &http.Server{
-		Addr:    ":" + svcEnv.Port,
-		Handler: router,
-	}
+	// Cleanup after server stops
+	cleanup(lgr, dbConnMgr)
 
-	// Start http server in its own go routine
-	go func() {
-		lgr.Info().
-			Str("name", serviceName).
-			Str("environment", svcEnv.Environment).
-			Str("started at", time.Now().UTC().Format(time.RFC3339)).
-			Msg("Starting the service")
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			errCh <- err
-		}
-	}()
-
-	// Wait until termination or a critical error
-	select {
-	case <-ctx.Done():
-		lgr.Info().Msg("graceful shutdown signal received")
-
-		// Shutdown server gracefully with 5 second timeout
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			lgr.Error().Err(err).Msg("Server forced to shutdown")
-		} else {
-			lgr.Info().Msg("Server shutdown gracefully")
-		}
-
-		cleanup(lgr, dbConnMgr)
+	// Don't treat context cancellation as an error
+	if errors.Is(err, context.Canceled) {
+		lgr.Info().Msg("Graceful shutdown completed")
 		return nil
-	case err := <-errCh:
-		lgr.Error().Err(err).Msg("Server error occurred")
-		cleanup(lgr, dbConnMgr)
-		return err
 	}
+
+	return err
 }
 
 func setupDB(lgr logger.Logger, svcEnv *config.ServiceEnvConfig) (*mongodb.ConnectionManager, error) {

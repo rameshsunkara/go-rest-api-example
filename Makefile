@@ -34,8 +34,7 @@ DOCKER_CONTAINER_NAME := $(PROJECT_NAME)-$(VERSION)
 MODULE := $(shell go list -m)
 TEST_COVERAGE_THRESHOLD := 80
 
-# Command to calculate test coverage
-testCoverageCmd := $(shell go tool cover -func=coverage.out | grep total | awk '{print $$3}')
+# Command to calculate test coverage will be computed when needed
 
 # Helper variables
 GO_BUILD_CMD := CGO_ENABLED=0 go build $(LDFLAGS) -o $(PROJECT_NAME)

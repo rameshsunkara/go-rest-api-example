@@ -1,7 +1,11 @@
 package server
 
 import (
+	"context"
+	"fmt"
 	"io"
+	"net/http"
+	"time"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
@@ -20,19 +24,57 @@ type Server struct {
 	Router *gin.Engine
 }
 
-// Start starts the HTTP server and blocks until it shuts down
-func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
+// Start manages the HTTP server lifecycle with graceful shutdown
+// This function blocks until the server shuts down or an error occurs
+func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
 	router, err := WebRouter(svcEnv, lgr, dbMgr)
 	if err != nil {
 		return err
 	}
+
+	// Log registered routes
 	lgr.Info().Msg("Registered routes")
 	for _, item := range router.Routes() {
 		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
 	}
 
-	lgr.Info().Str("port", svcEnv.Port).Msg("Starting server")
-	return router.Run(":" + svcEnv.Port)
+	// Create HTTP server
+	srv := &http.Server{
+		Addr:    ":" + svcEnv.Port,
+		Handler: router,
+	}
+
+	// Channel to capture server startup errors
+	serverErrors := make(chan error, 1)
+
+	// Start server in a single goroutine (managed by this function)
+	go func() {
+		lgr.Info().Str("port", svcEnv.Port).Msg("Starting server")
+		serverErrors <- srv.ListenAndServe()
+	}()
+
+	// Block and wait for either shutdown signal or server error
+	select {
+	case err := <-serverErrors:
+		if err != http.ErrServerClosed {
+			return fmt.Errorf("server failed: %w", err)
+		}
+		return nil
+	case <-ctx.Done():
+		lgr.Info().Msg("Shutdown signal received, stopping server...")
+
+		// Graceful shutdown with 5 second timeout
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(shutdownCtx); err != nil {
+			lgr.Error().Err(err).Msg("Server forced to shutdown")
+			return err
+		}
+
+		lgr.Info().Msg("Server shutdown gracefully")
+		return nil
+	}
 }
 
 func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {

@@ -5,6 +5,7 @@
         "BUILDKIT",
         "Dockerized",
         "ecommerce",
+        "errgroup",
         "gonic",
         "healthz",
         "linearizable",
