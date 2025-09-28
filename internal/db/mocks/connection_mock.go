@@ -18,7 +18,7 @@ func (m *MockMongoMgr) Database() mongodb.MongoDatabase {
 	return &MockMongoDataBase{}
 }
 
-func (m *MockMongoMgr) DatabaseByName(name string) mongodb.MongoDatabase {
+func (m *MockMongoMgr) DatabaseByName(_ string) mongodb.MongoDatabase {
 	return &MockMongoDataBase{}
 }
 

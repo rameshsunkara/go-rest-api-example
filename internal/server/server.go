@@ -21,6 +21,11 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
 
+const (
+	shutdownTimeoutSeconds   = 5
+	readHeaderTimeoutSeconds = 60
+)
+
 type Server struct {
 	Router *gin.Engine
 }
@@ -41,8 +46,9 @@ func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logg
 
 	// Create HTTP server
 	srv := &http.Server{
-		Addr:    ":" + svcEnv.Port,
-		Handler: router,
+		Addr:              ":" + svcEnv.Port,
+		Handler:           router,
+		ReadHeaderTimeout: readHeaderTimeoutSeconds * time.Second,
 	}
 
 	// Channel to capture server startup errors
@@ -56,21 +62,21 @@ func Start(ctx context.Context, svcEnv *config.ServiceEnvConfig, lgr logger.Logg
 
 	// Block and wait for either shutdown signal or server error
 	select {
-	case err := <-serverErrors:
-		if !errors.Is(err, http.ErrServerClosed) {
-			return fmt.Errorf("server failed: %w", err)
+	case serverErr := <-serverErrors:
+		if !errors.Is(serverErr, http.ErrServerClosed) {
+			return fmt.Errorf("server failed: %w", serverErr)
 		}
 		return nil
 	case <-ctx.Done():
 		lgr.Info().Msg("Shutdown signal received, stopping server...")
 
-		// Graceful shutdown with 5 second timeout
-		shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		// Graceful shutdown with timeout
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeoutSeconds*time.Second)
 		defer cancel()
 
-		if err := srv.Shutdown(shutdownCtx); err != nil {
-			lgr.Error().Err(err).Msg("Server forced to shutdown")
-			return err
+		if shutdownErr := srv.Shutdown(shutdownCtx); shutdownErr != nil {
+			lgr.Error().Err(shutdownErr).Msg("Server forced to shutdown")
+			return shutdownErr
 		}
 
 		lgr.Info().Msg("Server shutdown gracefully")
