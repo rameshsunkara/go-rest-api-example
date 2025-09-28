@@ -3,7 +3,6 @@ package handlers_test
 import (
 	"errors"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
@@ -15,7 +14,6 @@ import (
 )
 
 func TestNewStatusHandler(t *testing.T) {
-	lgr := logger.New("debug", os.Stdout)
 	t.Parallel()
 	mockMgr := &mocks.MockMongoMgr{}
 	tests := []struct {

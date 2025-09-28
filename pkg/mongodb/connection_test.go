@@ -6,6 +6,7 @@ import (
 
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const testHost = "localhost:27017"
@@ -21,7 +22,7 @@ func TestConnectionURLValidation(t *testing.T) {
 			mongodb.WithAuthSource("admin"),
 			mongodb.WithQueryLogging(true))
 
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotEmpty(t, url)
 		assert.NotNil(t, opts)
 		assert.Contains(t, url, "testuser")
@@ -174,7 +175,8 @@ func TestConnectionManagerErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.expectedText, tt.expectedErr.Error())
-			assert.ErrorIs(t, tt.expectedErr, tt.expectedErr)
+			// Error is valid as expected
+			assert.Error(t, tt.expectedErr)
 		})
 	}
 }
