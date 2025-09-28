@@ -28,8 +28,8 @@ var validWriteConcerns = []string{
 }
 
 // MongoOptions represents optional MongoDB connection settings
+// Note: Hosts should be provided in "hostname:port" format directly to the ConnectionURL function
 type MongoOptions struct {
-	Port           int    `json:"port,omitempty"`           // Port for standard connections (default: 27017)
 	UseSRV         bool   `json:"useSRV,omitempty"`         // Use SRV connection
 	ReplicaSet     string `json:"replicaSet,omitempty"`     // Replica set name
 	ReadPreference string `json:"readPreference,omitempty"` // Read preference
@@ -43,13 +43,6 @@ type MongoOptions struct {
 // Option is a functional option for configuring MongoDB connection.
 // Use With* functions to create options (e.g., WithPort(27017), WithSRV(), etc.)
 type Option func(*MongoOptions)
-
-// WithPort sets the port for standard (non-SRV) connections
-func WithPort(port int) Option {
-	return func(opts *MongoOptions) {
-		opts.Port = port
-	}
-}
 
 // WithSRV enables SRV connection mode
 func WithSRV() Option {

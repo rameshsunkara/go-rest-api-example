@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
-	"strings"
 	"syscall"
 	"time"
 
@@ -144,17 +143,13 @@ func setupDB(lgr *logger.AppLogger, svcEnv *models.ServiceEnvConfig) (*db.Connec
 		return nil, fmt.Errorf("failed to fetch DB credentials : %w", err)
 	}
 
-	// Parse comma-separated hosts into slice
-	dbHosts := strings.Split(strings.ReplaceAll(svcEnv.DBHosts, " ", ""), ",")
-
 	dbConnMgr, dbErr := db.NewMongoManager(
-		dbHosts,
+		svcEnv.DBHosts,
 		svcEnv.DBName,
 		dbCredentials,
 		lgr,
 		db.WithQueryLogging(svcEnv.DBLogQueries),
-		db.WithPort(27022),         // using port 27022 to match docker-compose configuration
-		db.WithAuthSource("admin"), // authenticate against admin database for root credentials
+		// Note: AuthSource defaults to the target database (ecommerce) for database-specific users
 	)
 	if dbErr != nil {
 		return nil, fmt.Errorf("unable to initialize DB connection: %w", dbErr)

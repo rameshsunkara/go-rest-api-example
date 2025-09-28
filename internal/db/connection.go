@@ -52,7 +52,8 @@ type ConnectionManager struct {
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
 // The database parameter is optional - if empty, you can select databases later using DatabaseByName().
-func NewMongoManager(hosts []string, database string, creds *MongoCredentials, lgr *logger.AppLogger, connOptions ...Option) (*ConnectionManager, error) {
+// Hosts should be provided as comma-separated "hostname:port" format (e.g., "localhost:27017" or "db1:27017,db2:27018").
+func NewMongoManager(hosts string, database string, creds *MongoCredentials, lgr *logger.AppLogger, connOptions ...Option) (*ConnectionManager, error) {
 	connURL, opts, err := ConnectionURL(hosts, database, creds, connOptions...)
 	if err != nil {
 		lgr.Error().Err(err).Msg("failed to build connection URL")

@@ -11,7 +11,6 @@ import (
 )
 
 const (
-	DefaultMongoPort = 27017
 	// MongoScheme is the standard MongoDB connection scheme
 	MongoScheme = "mongodb"
 	// MongoSRVScheme is the MongoDB SRV connection scheme used generally for cloud DBs
@@ -25,7 +24,6 @@ const (
 var (
 	ErrNoHosts             = errors.New("at least one host is required")
 	ErrSRVRequiresOneHost  = errors.New("SRV connection requires exactly one host")
-	ErrInvalidPort         = errors.New("port must be between 1 and 65535")
 	ErrInvalidReadPref     = errors.New("invalid read preference")
 	ErrInvalidReadConcern  = errors.New("invalid read concern")
 	ErrInvalidWriteConcern = errors.New("invalid write concern")
@@ -35,22 +33,28 @@ var (
 
 // ConnectionURL creates a MongoDB connection URI using the given hosts and optional settings.
 // The database parameter is optional - pass empty string if no database should be included in the URI.
+// Hosts should be provided as comma-separated "hostname:port" format (e.g., "localhost:27017" or "db1:27017,db2:27018").
 // Example usage:
 //
 //	creds := &MongoCredentials{Username: "user", Password: "pass"}
-//	uri, err := ConnectionURL([]string{"localhost"}, "mydb", creds,
-//		WithPort(27017),
+//	uri, err := ConnectionURL("localhost:27017", "mydb", creds,
 //		WithReplicaSet("rs0"),
-//		WithReadPreference("secondary"))
-func ConnectionURL(hosts []string, database string, creds *MongoCredentials, opts ...Option) (string, *MongoOptions, error) {
-	if len(hosts) == 0 {
+//		WithReadPreference("secondary"),
+//		WithAuthSource("admin"))
+func ConnectionURL(hosts string, database string, creds *MongoCredentials, opts ...Option) (string, *MongoOptions, error) {
+	hosts = strings.TrimSpace(hosts)
+	if hosts == "" {
 		return "", nil, ErrNoHosts
 	}
 
 	// Apply options
 	options := applyOptions(opts...)
 
-	if err := validateOptions(options, len(hosts)); err != nil {
+	// Split hosts for validation (but keep as string for URI building)
+	hostList := strings.Split(strings.ReplaceAll(hosts, " ", ""), ",")
+
+	// Validate inputs
+	if err := validateOptions(options, len(hostList)); err != nil {
 		return "", nil, err
 	}
 
@@ -125,9 +129,8 @@ func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoCredentials, error)
 func applyOptions(opts ...Option) *MongoOptions {
 	// Start with sensible defaults
 	options := &MongoOptions{
-		Port:         DefaultMongoPort, // 27017
-		UseSRV:       false,            // Standard connection by default
-		QueryLogging: false,            // Disabled by default for performance
+		UseSRV:       false, // Standard connection by default
+		QueryLogging: false, // Disabled by default for performance
 	}
 
 	// Apply user-provided options to override defaults
@@ -148,7 +151,7 @@ func applyOptions(opts ...Option) *MongoOptions {
 			options.WriteConcern = "majority"
 		}
 		if options.WTimeoutMS == 0 {
-			options.WTimeoutMS = DefaultWriteTimeoutMS // 5 second write timeout
+			options.WTimeoutMS = DefaultWriteTimeoutMS
 		}
 	}
 
@@ -159,10 +162,6 @@ func applyOptions(opts ...Option) *MongoOptions {
 func validateOptions(opts *MongoOptions, hostsCount int) error {
 	if opts.UseSRV && hostsCount != 1 {
 		return ErrSRVRequiresOneHost
-	}
-
-	if opts.Port != 0 && (opts.Port < 1 || opts.Port > 65535) {
-		return ErrInvalidPort
 	}
 
 	if opts.ReadPreference != "" && !IsValidReadPreference(opts.ReadPreference) {
@@ -205,28 +204,16 @@ func getDatabasePath(database string) string {
 }
 
 // getHost returns the host portion of the MongoDB URI
-func getHost(hosts []string, opts *MongoOptions) (string, error) {
+// Hosts should be provided as comma-separated "hostname:port" format
+func getHost(hosts string, opts *MongoOptions) (string, error) {
 	if opts.UseSRV {
 		// SRV uses single host, no port (validation already done)
-		return hosts[0], nil
+		return hosts, nil
 	}
 
-	// Standard connection - can have multiple hosts
-	hostList := make([]string, 0, len(hosts))
-	for _, h := range hosts {
-		if strings.Contains(h, ":") {
-			// Host already includes port
-			hostList = append(hostList, h)
-		} else if opts.Port > 0 {
-			// Use configured port
-			hostList = append(hostList, fmt.Sprintf("%s:%d", h, opts.Port))
-		} else {
-			// Use default MongoDB port
-			hostList = append(hostList, fmt.Sprintf("%s:%d", h, DefaultMongoPort))
-		}
-	}
-
-	return strings.Join(hostList, ","), nil
+	// Standard connection - hosts should include port numbers
+	// Remove any spaces and return as-is (already comma-separated)
+	return strings.ReplaceAll(hosts, " ", ""), nil
 }
 
 // getQueryString returns the query string for MongoDB URI
