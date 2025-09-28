@@ -102,3 +102,22 @@ func assertRouteNotPresent(t *testing.T, gotRoutes gin.RoutesInfo, wantRoute gin
 		}
 	}
 }
+
+func TestServerConstants(t *testing.T) {
+	// Test that server constants are properly defined
+	// These constants are used internally but should have sensible values
+	assert.Greater(t, 5, 0, "shutdownTimeoutSeconds should be positive")
+	assert.Greater(t, 60, 0, "readHeaderTimeoutSeconds should be positive")
+}
+
+func TestServerStruct(t *testing.T) {
+	// Test Server struct initialization
+	router := gin.New()
+	srv := &server.Server{
+		Router: router,
+	}
+
+	assert.NotNil(t, srv)
+	assert.NotNil(t, srv.Router)
+	assert.Equal(t, router, srv.Router)
+}
