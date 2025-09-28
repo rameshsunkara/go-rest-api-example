@@ -63,7 +63,7 @@ func run() error {
 		Str("name", serviceName).
 		Str("environment", svcEnv.Environment).
 		Str("started at", time.Now().UTC().Format(time.RFC3339)).
-		Msg("starting the service")
+		Msg("Starting the service")
 
 	// Wait until termination or a critical error
 	select {

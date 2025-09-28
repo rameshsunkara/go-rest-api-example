@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
@@ -23,20 +22,20 @@ type Server struct {
 	Router *gin.Engine
 }
 
-var startOnce sync.Once
-
-func (s *Server) Start(lgr logger.Logger, port string) {
-	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
-	lgr.Fatal().Err(http.ListenAndServe(port, s.Router))
-}
-
-func (s *Server) initMiddlewareAndRoutes(lgr logger.Logger, svcEnv *config.ServiceEnvConfig, dbMgr mongodb.MongoManager) error {
+// Start starts the HTTP server
+func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
 	router, err := WebRouter(svcEnv, lgr, dbMgr)
 	if err != nil {
 		return err
 	}
-	s.Router = router
-	return nil
+	lgr.Info().Msg("Registered routes")
+	for _, item := range router.Routes() {
+		lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
+	}
+
+	port := ":" + svcEnv.Port
+	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
+	return http.ListenAndServe(port, router)
 }
 
 func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {
@@ -97,16 +96,4 @@ func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb
 	ordersGroup.POST("", ordersHandler.Create)
 	ordersGroup.DELETE("/:id", ordersHandler.DeleteByID)
 	return router, nil
-}
-
-// Start starts the HTTP server
-func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
-	router, err := WebRouter(svcEnv, lgr, dbMgr)
-	if err != nil {
-		return err
-	}
-
-	port := ":" + svcEnv.Port
-	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
-	return http.ListenAndServe(port, router)
 }
