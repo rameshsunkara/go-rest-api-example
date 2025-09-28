@@ -112,6 +112,22 @@ flowchart LR
 5. **Handlers**: The request is passed to the appropriate handler, which validates the request and forwards it to the repository layer.
 6. **Repos(DAO)**: The repository layer communicates with the database to perform CRUD operations.
 
+## Get Started
+
+```bash
+git clone https://github.com/rameshsunkara/go-rest-api-example.git
+cd go-rest-api-example
+make start
+```
+
+Your API is now running at `http://localhost:8080`
+
+Try it out:
+```bash
+curl http://localhost:8080/api/v1/healthz
+curl http://localhost:8080/api/v1/orders
+```
+
 ## QuickStart
 
 ### Pre-requisites
