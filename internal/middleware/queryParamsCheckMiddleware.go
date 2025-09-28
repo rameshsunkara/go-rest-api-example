@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
 var GetOrdersListReqParams = map[string]bool{
@@ -21,7 +21,7 @@ var AllowedQueryParams = map[string]map[string]bool{
 }
 
 // QueryParamsCheckMiddleware - Middleware to check for unsupported query parameters.
-func QueryParamsCheckMiddleware(lgr *logger.AppLogger) gin.HandlerFunc {
+func QueryParamsCheckMiddleware(lgr logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		l, requestID := lgr.WithReqID(c)
 		// Validate query params

@@ -1,4 +1,4 @@
-package db
+package mongodb
 
 import (
 	"encoding/json"
@@ -104,6 +104,7 @@ func MaskConnectionURL(connectionURL string) string {
 	return u.String()
 }
 
+// MongoDBCredentialFromSideCar loads MongoDB credentials from a JSON sidecar file
 func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoCredentials, error) {
 	if sideCarFile == "" {
 		sideCarFile = DefaultMongoDBSidecar

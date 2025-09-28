@@ -3,23 +3,25 @@ package handlers_test
 import (
 	"errors"
 	"net/http"
+	"os"
 	"testing"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewStatusHandler(t *testing.T) {
+	lgr := logger.New("debug", os.Stdout)
 	t.Parallel()
 	mockMgr := &mocks.MockMongoMgr{}
 	tests := []struct {
 		name    string
-		lgr     *logger.AppLogger
-		mgr     db.MongoManager
+		lgr     logger.Logger
+		mgr     mongodb.MongoManager
 		wantErr bool
 	}{
 		{

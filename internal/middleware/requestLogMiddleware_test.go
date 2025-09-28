@@ -3,11 +3,12 @@ package middleware_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
 func TestRequestLogMiddleware(_ *testing.T) {
@@ -30,7 +31,7 @@ func TestRequestLogMiddleware(_ *testing.T) {
 	resp := httptest.NewRecorder()
 	gin.SetMode(gin.TestMode)
 	c, r := gin.CreateTestContext(resp)
-	lgr := logger.Setup("info", "test")
+	lgr := logger.New("info", os.Stdout)
 	r.Use(middleware.RequestLogMiddleware(lgr))
 
 	for _, tc := range testCases {

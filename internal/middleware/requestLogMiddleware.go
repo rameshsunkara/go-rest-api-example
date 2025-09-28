@@ -4,10 +4,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
-func RequestLogMiddleware(lgr *logger.AppLogger) gin.HandlerFunc {
+func RequestLogMiddleware(lgr logger.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		l, _ := lgr.WithReqID(c)
 		start := time.Now()

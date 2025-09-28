@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,7 +14,11 @@ func (m *MockMongoMgr) Ping() error {
 	return m.PingFunc()
 }
 
-func (m *MockMongoMgr) Database() db.MongoDatabase {
+func (m *MockMongoMgr) Database() mongodb.MongoDatabase {
+	return &MockMongoDataBase{}
+}
+
+func (m *MockMongoMgr) DatabaseByName(name string) mongodb.MongoDatabase {
 	return &MockMongoDataBase{}
 }
 

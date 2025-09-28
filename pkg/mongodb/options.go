@@ -1,4 +1,4 @@
-package db
+package mongodb
 
 // Valid MongoDB read preferences - controls WHERE to read from (server selection)
 var validReadPreferences = []string{
@@ -26,23 +26,6 @@ var validWriteConcerns = []string{
 	"2",        // Wait for acknowledgment from primary + 1 secondary
 	"3",        // Wait for acknowledgment from primary + 2 secondaries
 }
-
-// MongoOptions represents optional MongoDB connection settings
-// Note: Hosts should be provided in "hostname:port" format directly to the ConnectionURL function
-type MongoOptions struct {
-	UseSRV         bool   `json:"useSRV,omitempty"`         // Use SRV connection
-	ReplicaSet     string `json:"replicaSet,omitempty"`     // Replica set name
-	ReadPreference string `json:"readPreference,omitempty"` // Read preference
-	ReadConcern    string `json:"readConcern,omitempty"`    // Read concern level
-	WriteConcern   string `json:"writeConcern,omitempty"`   // Write concern level
-	WTimeoutMS     int    `json:"wtimeoutMS,omitempty"`     // Write timeout in milliseconds
-	AuthSource     string `json:"authSource,omitempty"`     // Authentication database (default: admin for root users)
-	QueryLogging   bool   `json:"queryLogging,omitempty"`   // Enable MongoDB query logging
-}
-
-// Option is a functional option for configuring MongoDB connection.
-// Use With* functions to create options (e.g., WithPort(27017), WithSRV(), etc.)
-type Option func(*MongoOptions)
 
 // WithSRV enables SRV connection mode
 func WithSRV() Option {

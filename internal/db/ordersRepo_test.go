@@ -2,14 +2,16 @@ package db_test
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
@@ -17,12 +19,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/integration/mtest"
 )
 
+var testLgr = logger.New("debug", os.Stdout)
+
 func TestNewOrdersRepo(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
 		name    string
-		lgr     *logger.AppLogger
-		db      db.MongoDatabase
+		lgr     logger.Logger
+		db      mongodb.MongoDatabase
 		wantErr bool
 	}{
 		{
@@ -126,7 +130,7 @@ func TestValidate(t *testing.T) {
 	}
 }
 
-func TestOrdersRepo_Create(t *testing.T) {
+func TestOrdersRepoCreate(t *testing.T) {
 	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
@@ -198,7 +202,7 @@ func TestOrdersRepo_Create(t *testing.T) {
 	}
 }
 
-func TestOrdersRepo_Update(t *testing.T) {
+func TestOrdersRepoUpdate(t *testing.T) {
 	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
@@ -296,7 +300,7 @@ func TestOrdersRepo_Update(t *testing.T) {
 	}
 }
 
-func TestOrdersRepo_GetByID(t *testing.T) {
+func TestOrdersRepoGetByID(t *testing.T) {
 	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
@@ -357,7 +361,7 @@ func TestOrdersRepo_GetByID(t *testing.T) {
 	}
 }
 
-func TestOrdersRepo_DeleteByID(t *testing.T) {
+func TestOrdersRepoDeleteByID(t *testing.T) {
 	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 
@@ -412,7 +416,7 @@ func TestOrdersRepo_DeleteByID(t *testing.T) {
 	}
 }
 
-func TestOrdersRepo_GetAll(t *testing.T) {
+func TestOrdersRepoGetAll(t *testing.T) {
 	t.Parallel()
 	mt := mtest.New(t, mtest.NewOptions().ClientType(mtest.Mock))
 

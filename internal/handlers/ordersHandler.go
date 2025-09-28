@@ -11,11 +11,10 @@ import (
 	"github.com/go-faker/faker/v4"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/errors"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
 	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
-	"github.com/rs/zerolog"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -27,11 +26,11 @@ const (
 // OrdersHandler handles order-related HTTP requests.
 type OrdersHandler struct {
 	oDataSvc db.OrdersDataService
-	logger   *logger.AppLogger
+	logger   logger.Logger
 }
 
 // NewOrdersHandler creates a new OrdersHandler.
-func NewOrdersHandler(lgr *logger.AppLogger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
+func NewOrdersHandler(lgr logger.Logger, dSvc db.OrdersDataService) (*OrdersHandler, error) {
 	if lgr == nil || dSvc == nil {
 		return nil, errors2.New("missing required parameters to create orders handler")
 	}
@@ -187,7 +186,7 @@ func (o *OrdersHandler) parseLimitQueryParam(c *gin.Context) (int64, *external.A
 // abortWithAPIError logs and aborts the request with a standardized API error response.
 func (o *OrdersHandler) abortWithAPIError(
 	c *gin.Context,
-	lgr zerolog.Logger,
+	lgr logger.Logger,
 	status int,
 	errorCode, message, debugID string,
 	err error,

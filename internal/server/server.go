@@ -1,42 +1,45 @@
 package server
 
 import (
+	"fmt"
 	"io"
+	"net/http"
 	"sync"
 
 	"github.com/gin-contrib/gzip"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db"
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/util"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
+
+type Server struct {
+	Router *gin.Engine
+}
 
 var startOnce sync.Once
 
-func Start(svcEnv *models.ServiceEnvConfig, lgr *logger.AppLogger, dbMgr db.MongoManager) error {
-	var err error
-	var r *gin.Engine
-	startOnce.Do(func() {
-		r, err = WebRouter(svcEnv, lgr, dbMgr)
-		lgr.Info().Msg("Registered routes")
-		for _, item := range r.Routes() {
-			lgr.Info().Str("method", item.Method).Str("path", item.Path).Send()
-		}
-		if err != nil {
-			return
-		}
-		err = r.Run(":" + svcEnv.Port)
-	})
-	return err
+func (s *Server) Start(lgr logger.Logger, port string) {
+	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
+	lgr.Fatal().Err(http.ListenAndServe(port, s.Router))
 }
 
-func WebRouter(svcEnv *models.ServiceEnvConfig, lgr *logger.AppLogger, dbMgr db.MongoManager) (*gin.Engine, error) {
+func (s *Server) initMiddlewareAndRoutes(lgr logger.Logger, svcEnv *config.ServiceEnvConfig, dbMgr mongodb.MongoManager) error {
+	router, err := WebRouter(svcEnv, lgr, dbMgr)
+	if err != nil {
+		return err
+	}
+	s.Router = router
+	return nil
+}
+
+func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) (*gin.Engine, error) {
 	ginMode := gin.ReleaseMode
 	if util.IsDevMode(svcEnv.Environment) {
 		ginMode = gin.DebugMode
@@ -94,4 +97,16 @@ func WebRouter(svcEnv *models.ServiceEnvConfig, lgr *logger.AppLogger, dbMgr db.
 	ordersGroup.POST("", ordersHandler.Create)
 	ordersGroup.DELETE("/:id", ordersHandler.DeleteByID)
 	return router, nil
+}
+
+// Start starts the HTTP server
+func Start(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb.MongoManager) error {
+	router, err := WebRouter(svcEnv, lgr, dbMgr)
+	if err != nil {
+		return err
+	}
+
+	port := ":" + svcEnv.Port
+	lgr.Info().Msg(fmt.Sprintf("Starting server on port %s", port))
+	return http.ListenAndServe(port, router)
 }

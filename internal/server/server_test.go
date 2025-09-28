@@ -2,18 +2,19 @@ package server_test
 
 import (
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rameshsunkara/go-rest-api-example/internal/config"
 	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/logger"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models"
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestListOfRoutes(t *testing.T) {
-	svcInfo := &models.ServiceEnvConfig{
+	svcInfo := &config.ServiceEnvConfig{
 		Environment:          "test",
 		Port:                 "8080",
 		LogLevel:             "info",
@@ -21,7 +22,7 @@ func TestListOfRoutes(t *testing.T) {
 		DBHosts:              "localhost",
 		DBName:               "testDB",
 	}
-	lgr := logger.Setup("info", "test")
+	lgr := logger.New("info", os.Stdout)
 	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
 	if err != nil {
 		t.Errorf("failed to create WebRouter")
@@ -64,11 +65,11 @@ func TestListOfRoutes(t *testing.T) {
 }
 
 func TestModeSpecificRoutes(t *testing.T) {
-	svcInfo := &models.ServiceEnvConfig{
+	svcInfo := &config.ServiceEnvConfig{
 		Environment: "dev",
 		Port:        "8080",
 	}
-	lgr := logger.Setup("info", "test")
+	lgr := logger.New("info", os.Stdout)
 	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
 	if err != nil {
 		t.Errorf("failed to create WebRouter")
