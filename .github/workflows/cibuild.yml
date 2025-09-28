@@ -30,7 +30,7 @@ jobs:
       - name: 🛡️ Lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.0
+          version: v1.62.0
 
       - name: 🏗️ Build
         run: make build

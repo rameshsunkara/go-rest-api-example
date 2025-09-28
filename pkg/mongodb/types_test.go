@@ -8,6 +8,7 @@ import (
 )
 
 func TestMongoCredentialsEmpty(t *testing.T) {
+	t.Parallel()
 	creds := mongodb.MongoCredentials{}
 
 	assert.Equal(t, "", creds.Username)
@@ -15,6 +16,7 @@ func TestMongoCredentialsEmpty(t *testing.T) {
 }
 
 func TestMongoCredentialsFilled(t *testing.T) {
+	t.Parallel()
 	creds := mongodb.MongoCredentials{
 		Username: "testuser",
 		Password: "testpass",
@@ -25,6 +27,7 @@ func TestMongoCredentialsFilled(t *testing.T) {
 }
 
 func TestMongoOptions(t *testing.T) {
+	t.Parallel()
 	opts := mongodb.MongoOptions{
 		UseSRV:         true,
 		ReplicaSet:     "rs0",
@@ -47,6 +50,7 @@ func TestMongoOptions(t *testing.T) {
 }
 
 func TestConnectionManager(t *testing.T) {
+	t.Parallel()
 	connMgr := &mongodb.ConnectionManager{}
 	assert.NotNil(t, connMgr)
 	assert.Nil(t, connMgr.Database())

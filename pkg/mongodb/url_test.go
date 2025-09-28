@@ -9,6 +9,7 @@ import (
 )
 
 func TestConnectionURL(t *testing.T) {
+	t.Parallel()
 	creds := &mongodb.MongoCredentials{
 		Username: "testuser",
 		Password: "testpass",
@@ -22,6 +23,7 @@ func TestConnectionURL(t *testing.T) {
 }
 
 func TestMaskConnectionURL(t *testing.T) {
+	t.Parallel()
 	result := mongodb.MaskConnectionURL("mongodb://user:pass@localhost:27017/db")
 	assert.Equal(t, "mongodb://%2A%2A%2A:%2A%2A%2A@localhost:27017/db", result)
 }
