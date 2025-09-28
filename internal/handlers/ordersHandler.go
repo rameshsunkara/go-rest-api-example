@@ -125,7 +125,7 @@ func (o *OrdersHandler) GetByID(c *gin.Context) {
 	}
 	order, err := o.oDataSvc.GetByID(c, oID)
 	if err != nil {
-		if errors2.Is(err, db.ErrUnexpectedGetOrder) {
+		if errors2.Is(err, db.ErrPOIDNotFound) {
 			o.abortWithAPIError(c, lgr, http.StatusNotFound, errors.OrderGetNotFound,
 				"order not found", requestID, err)
 			return
