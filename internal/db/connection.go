@@ -22,8 +22,7 @@ var (
 )
 
 const (
-	DefConnectionTimeOut = 10 * time.Second
-	DefDatabase          = "ecommerce"
+	DefaultClientConnectTimeout = 10 * time.Second
 )
 
 type MongoDatabase interface {
@@ -36,10 +35,10 @@ type MongoManager interface {
 	Disconnect() error
 }
 
-type ConnectionOpts struct {
-	ConnectionTimeout time.Duration
-	PrintQueries      bool
-	Database          string
+// MongoCredentials represents MongoDB authentication credentials
+type MongoCredentials struct {
+	Username string `json:"username,omitempty" log:"-"`
+	Password string `json:"password,omitempty" log:"-"`
 }
 
 // ConnectionManager - Manages the connection to the underlying database.
@@ -47,27 +46,33 @@ type ConnectionManager struct {
 	connectionURL string
 	client        *mongo.Client
 	database      *mongo.Database
-	credentials   *MongoDBCredentials
 	logger        *logger.AppLogger
+	options       *MongoOptions
 }
 
 // NewMongoManager - Initializes DB connection and returns a Manager object which can be used to perform DB operations.
-func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *logger.AppLogger) (*ConnectionManager, error) {
-	connURL := MongoConnectionURL(mc)
-	lgr.Info().Str("connURL", MaskedMongoConnectionURL(mc)).Msg("connecting to DB")
-	if len(connURL) == 0 {
-		return nil, ErrInvalidConnURL
+// The database parameter is optional - if empty, you can select databases later using DatabaseByName().
+func NewMongoManager(hosts []string, database string, creds *MongoCredentials, lgr *logger.AppLogger, connOptions ...Option) (*ConnectionManager, error) {
+	connURL, opts, err := ConnectionURL(hosts, database, creds, connOptions...)
+	if err != nil {
+		lgr.Error().Err(err).Msg("failed to build connection URL")
+		return nil, err
 	}
+
+	lgr.Info().Str("connURL", MaskConnectionURL(connURL)).Msg("connecting to DB")
+
 	connMgr := &ConnectionManager{
-		credentials:   mc,
 		logger:        lgr,
 		connectionURL: connURL,
+		options:       opts,
 	}
-	connOpts := FillConnectionOpts(opts)
-	var err error
+
 	var c *mongo.Client
-	if c, err = connMgr.newClient(connOpts); err == nil {
-		db := c.Database(connOpts.Database)
+	if c, err = connMgr.newClient(); err == nil {
+		var db *mongo.Database
+		if database != "" {
+			db = c.Database(database)
+		}
 		connMgr.database = db
 		connMgr.client = c
 		// Verify connection
@@ -79,27 +84,10 @@ func NewMongoManager(mc *MongoDBCredentials, opts *ConnectionOpts, lgr *logger.A
 	return nil, err
 }
 
-func FillConnectionOpts(opts *ConnectionOpts) *ConnectionOpts {
-	if opts == nil {
-		return &ConnectionOpts{
-			PrintQueries:      false,
-			ConnectionTimeout: DefConnectionTimeOut,
-			Database:          DefDatabase,
-		}
-	}
-	if opts.ConnectionTimeout == 0 {
-		opts.ConnectionTimeout = DefConnectionTimeOut
-	}
-	if opts.Database == "" {
-		opts.Database = DefDatabase
-	}
-	return opts
-}
-
 // newClient - creates a new Mongo Client to connect DB.
-func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, error) {
+func (c *ConnectionManager) newClient() (*mongo.Client, error) {
 	var cmdMonitor *event.CommandMonitor
-	if connOpts.PrintQueries {
+	if c.options.QueryLogging {
 		cmdMonitor = &event.CommandMonitor{
 			Started: func(_ context.Context, evt *event.CommandStartedEvent) {
 				c.logger.Info().Str("dbQuery", evt.Command.String()).Send()
@@ -107,7 +95,7 @@ func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, 
 		}
 	}
 	clientOptions := options.Client().ApplyURI(c.connectionURL).SetMonitor(cmdMonitor)
-	ctx, cancel := context.WithTimeout(context.Background(), connOpts.ConnectionTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), DefaultClientConnectTimeout)
 	defer cancel()
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
@@ -119,8 +107,15 @@ func (c *ConnectionManager) newClient(connOpts *ConnectionOpts) (*mongo.Client, 
 }
 
 // Database - Returns configured database instance.
+// If no database was specified during connection, this will return nil.
+// Use DatabaseByName() to get a specific database at runtime.
 func (c *ConnectionManager) Database() MongoDatabase {
 	return c.database
+}
+
+// DatabaseByName - Returns a database instance for the specified name.
+func (c *ConnectionManager) DatabaseByName(name string) MongoDatabase {
+	return c.client.Database(name)
 }
 
 // Ping - Validates application's connectivity to the underlying database by pinging.

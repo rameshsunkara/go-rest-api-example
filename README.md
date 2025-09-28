@@ -2,7 +2,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/rameshsunkara/go-rest-api-example)](https://goreportcard.com/report/github.com/rameshsunkara/go-rest-api-example)
 [![codecov](https://codecov.io/gh/rameshsunkara/go-rest-api-example/branch/main/graph/badge.svg)](https://app.codecov.io/gh/rameshsunkara/go-rest-api-example)
 
-
 # REST API microservice in Go
 
 <div style="text-align: center;">
@@ -13,7 +12,8 @@
 
 ## Offered Features
 
-### API Features:
+### API Features
+
 1. **OWASP Compliant Open API 3 Specification**: Refer to [OpenApi-v1.yaml](./OpenApi-v1.yaml) for details.
 2. **Middleware for**:
    - **Logging**: Facilitates debugging and monitoring processes.
@@ -27,7 +27,8 @@
 5. **Model Management**:
    - Internally used data models differ from those exposed to clients, ensuring separation and security.
 
-### Go Application Features:
+### Go Application Features
+
 1. **Configuration Management**: via Environment Variables
 2. **Integrated Go Formatter and Linter**: Promotes code quality and consistency.
 3. **Secrets Loading Mechanism from Sidecar**
@@ -40,6 +41,7 @@
 10. **Tests**: Tests are executed in parallel across available CPU cores and use atomic mode to detect race conditions.
 
 ### Tooling
+
 1. **Dockerized Environment**: Facilitates service deployment using DOCKER_BUILDKIT.
 2. **Makefile**: Automates common tasks for developers.
 3. **GitHub Actions**: Automates building, testing, code coverage reporting, and enforces the required test coverage threshold.
@@ -67,6 +69,7 @@ go-rest-api-example/
 ├── docker-compose.yaml
 └── OpenApi-v1.postman_collection.json
 ```
+
 ## Control Flow
 
 ```mermaid
@@ -107,12 +110,14 @@ flowchart LR
 - [docker-buildx](https://docs.docker.com/buildx/working-with-buildx/)
 
 ### Frequently used commands
+
       start                          Start all necessary services and API server
       run                            Run the API server
       setup                          Start only dependencies
       test                           Run tests with coverage
 
 ### Development commands
+
       lint                           Run the linter
       lint-fix                       Run the linter and fix issues
       clean                          Clean all Docker resources
@@ -122,12 +127,14 @@ flowchart LR
       tidy                           Tidy Go modules
 
 ### CI commands
+
       build                          Build the API server binary
       ci-coverage                    Check if test coverage meets the threshold
       format                         Format Go code
       version                        Display the current version of the API server
 
 ### Docker commands
+
       docker-build                   Build the Docker image
       docker-build-debug             Build the Docker image without cache
       docker-clean                   Clean all Docker resources
@@ -146,17 +153,16 @@ flowchart LR
 
 ## TODO
 
--  Add more and clear documentation about the features this offers and how to replace tools
--  Add DB Migration Support
--  Add more environmental profiles and obey all [12-Factor App rules](https://12factor.net/ru/)
--  Implement all OWASP security checks specified in the API Spec
--  Add git hooks for pre-commit and pre-push
+- Add more and clear documentation about the features this offers and how to replace tools
+- Add DB Migration Support
+- Implement all OWASP security checks specified in the API Spec
+- Add git hooks for pre-commit and pre-push
 
 ## Good to have
 
--  Improve the data model and add more fields
--  Deploy to cloud
--  Implement Update Operations mentioned in the API Spec
+- Improve the data model and add more fields
+- Deploy to cloud
+- Implement Update Operations mentioned in the API Spec
 
 ## References
 
@@ -171,7 +177,6 @@ flowchart LR
 - Please suggest any improvements
 
 ## Why this?
-
 
 I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
 

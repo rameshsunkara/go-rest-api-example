@@ -31,14 +31,13 @@ var validWriteConcerns = []string{
 type MongoOptions struct {
 	Port           int    `json:"port,omitempty"`           // Port for standard connections (default: 27017)
 	UseSRV         bool   `json:"useSRV,omitempty"`         // Use SRV connection
-	Database       string `json:"database,omitempty"`       // Database name
-	Username       string `json:"username,omitempty"`       // MongoDB username
-	Password       string `json:"password,omitempty"`       // MongoDB password
 	ReplicaSet     string `json:"replicaSet,omitempty"`     // Replica set name
 	ReadPreference string `json:"readPreference,omitempty"` // Read preference
 	ReadConcern    string `json:"readConcern,omitempty"`    // Read concern level
 	WriteConcern   string `json:"writeConcern,omitempty"`   // Write concern level
 	WTimeoutMS     int    `json:"wtimeoutMS,omitempty"`     // Write timeout in milliseconds
+	AuthSource     string `json:"authSource,omitempty"`     // Authentication database (default: admin for root users)
+	QueryLogging   bool   `json:"queryLogging,omitempty"`   // Enable MongoDB query logging
 }
 
 // Option is a functional option for configuring MongoDB connection.
@@ -56,35 +55,6 @@ func WithPort(port int) Option {
 func WithSRV() Option {
 	return func(opts *MongoOptions) {
 		opts.UseSRV = true
-	}
-}
-
-// WithDatabase sets the database name
-func WithDatabase(database string) Option {
-	return func(opts *MongoOptions) {
-		opts.Database = database
-	}
-}
-
-// WithUsername sets the MongoDB username
-func WithUsername(username string) Option {
-	return func(opts *MongoOptions) {
-		opts.Username = username
-	}
-}
-
-// WithPassword sets the MongoDB password
-func WithPassword(password string) Option {
-	return func(opts *MongoOptions) {
-		opts.Password = password
-	}
-}
-
-// WithCredentials sets both username and password
-func WithCredentials(username, password string) Option {
-	return func(opts *MongoOptions) {
-		opts.Username = username
-		opts.Password = password
 	}
 }
 
@@ -120,6 +90,21 @@ func WithWriteConcern(concern string) Option {
 func WithWriteTimeout(timeoutMS int) Option {
 	return func(opts *MongoOptions) {
 		opts.WTimeoutMS = timeoutMS
+	}
+}
+
+// WithAuthSource sets the authentication database
+// For root users created with MONGO_INITDB_ROOT_USERNAME, use "admin"
+func WithAuthSource(authSource string) Option {
+	return func(opts *MongoOptions) {
+		opts.AuthSource = authSource
+	}
+}
+
+// WithQueryLogging sets MongoDB query logging for debugging
+func WithQueryLogging(enabled bool) Option {
+	return func(opts *MongoOptions) {
+		opts.QueryLogging = enabled
 	}
 }
 

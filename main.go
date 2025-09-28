@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
@@ -17,9 +18,12 @@ import (
 )
 
 const (
-	serviceName     = "ecommerce-orders"
-	defaultPort     = "8080"
-	defaultLogLevel = "info"
+	serviceName       = "ecommerce-orders"
+	defaultPort       = "8080"
+	defaultLogLevel   = "info"
+	defDatabase       = "ecommerce"
+	defEnvironment    = "local"
+	defDBQueryLogging = false
 )
 
 // Passed while building from the make file.
@@ -45,7 +49,7 @@ func run() error {
 	}
 
 	// setup : service logger
-	lgr := logger.Setup(svcEnv.LogLevel, svcEnv.Name)
+	lgr := logger.Setup(svcEnv.LogLevel, svcEnv.Environment)
 
 	// setup : database connection
 	dbConnMgr, dbErr := setupDB(lgr, svcEnv)
@@ -60,7 +64,7 @@ func run() error {
 
 	lgr.Info().
 		Str("name", serviceName).
-		Str("environment", svcEnv.Name).
+		Str("environment", svcEnv.Environment).
 		Str("started at", time.Now().UTC().Format(time.RFC3339)).
 		Str("version", version).
 		Msg("starting the service")
@@ -79,11 +83,16 @@ func run() error {
 	}
 }
 
-// getEnvConfig reads all the environmental configurations and panics if something critical is missing.
-func getEnvConfig() (*models.ServiceEnv, error) {
+// getEnvConfig reads all the environmental configurations.
+func getEnvConfig() (*models.ServiceEnvConfig, error) {
+	dbCredentialsSideCar := os.Getenv("DBCredentialsSideCar")
+	if dbCredentialsSideCar == "" {
+		return nil, errors.New("database credentials sidecar file path is missing in env")
+	}
+
 	envName := os.Getenv("environment")
 	if envName == "" {
-		envName = "local"
+		envName = defEnvironment
 	}
 
 	port := os.Getenv("port")
@@ -91,24 +100,19 @@ func getEnvConfig() (*models.ServiceEnv, error) {
 		port = defaultPort
 	}
 
+	dbHosts := os.Getenv("dbHosts")
+	if dbHosts == "" {
+		return nil, errors.New("dbHosts is missing in env")
+	}
 	dbName := os.Getenv("dbName")
 	if dbName == "" {
-		return nil, errors.New("dbName is missing in env")
+		dbName = defDatabase
 	}
-
-	// printDBQueries is optional, default is false, when set to true, it will print all the queries to the console.
 	printDBQueries, err := strconv.ParseBool(os.Getenv("printDBQueries"))
 	if err != nil {
-		printDBQueries = false
+		printDBQueries = defDBQueryLogging
 	}
 
-	mongoSideCar := os.Getenv("MongoVaultSideCar")
-	if mongoSideCar == "" {
-		return nil, errors.New("mongo sidecar file path is missing in env")
-	}
-
-	// disableAuth is optional, default is false, when set to true, it will disable authentication.
-	// Added for development purpose, do not use in production.
 	disableAuth, authEnvErr := strconv.ParseBool(os.Getenv("disableAuth"))
 	if authEnvErr != nil {
 		// do not disable authentication by default, added this flexibility just for local development purpose
@@ -120,29 +124,38 @@ func getEnvConfig() (*models.ServiceEnv, error) {
 		logLevel = defaultLogLevel
 	}
 
-	envConfigurations := &models.ServiceEnv{
-		Name:              envName,
-		Port:              port,
-		PrintQueries:      printDBQueries,
-		MongoVaultSideCar: mongoSideCar,
-		DisableAuth:       disableAuth,
-		DBName:            dbName,
-		LogLevel:          logLevel,
+	envConfigurations := &models.ServiceEnvConfig{
+		Environment:          envName,
+		Port:                 port,
+		DBHosts:              dbHosts,
+		DBName:               dbName,
+		DBCredentialsSideCar: dbCredentialsSideCar,
+		DisableAuth:          disableAuth,
+		LogLevel:             logLevel,
+		DBLogQueries:         printDBQueries,
 	}
 
 	return envConfigurations, nil
 }
 
-func setupDB(lgr *logger.AppLogger, svcEnv *models.ServiceEnv) (*db.ConnectionManager, error) {
-	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.MongoVaultSideCar)
+func setupDB(lgr *logger.AppLogger, svcEnv *models.ServiceEnvConfig) (*db.ConnectionManager, error) {
+	dbCredentials, err := db.MongoDBCredentialFromSideCar(svcEnv.DBCredentialsSideCar)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch DB credentials : %w", err)
 	}
-	connOpts := &db.ConnectionOpts{
-		Database:     svcEnv.DBName,
-		PrintQueries: svcEnv.PrintQueries,
-	}
-	dbConnMgr, dbErr := db.NewMongoManager(dbCredentials, connOpts, lgr)
+
+	// Parse comma-separated hosts into slice
+	dbHosts := strings.Split(strings.ReplaceAll(svcEnv.DBHosts, " ", ""), ",")
+
+	dbConnMgr, dbErr := db.NewMongoManager(
+		dbHosts,
+		svcEnv.DBName,
+		dbCredentials,
+		lgr,
+		db.WithQueryLogging(svcEnv.DBLogQueries),
+		db.WithPort(27022),         // using port 27022 to match docker-compose configuration
+		db.WithAuthSource("admin"), // authenticate against admin database for root credentials
+	)
 	if dbErr != nil {
 		return nil, fmt.Errorf("unable to initialize DB connection: %w", dbErr)
 	}

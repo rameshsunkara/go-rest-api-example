@@ -19,7 +19,7 @@ import (
 
 var startOnce sync.Once
 
-func Start(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManager) error {
+func Start(svcEnv *models.ServiceEnvConfig, lgr *logger.AppLogger, dbMgr db.MongoManager) error {
 	var err error
 	var r *gin.Engine
 	startOnce.Do(func() {
@@ -36,9 +36,9 @@ func Start(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManag
 	return err
 }
 
-func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoManager) (*gin.Engine, error) {
+func WebRouter(svcEnv *models.ServiceEnvConfig, lgr *logger.AppLogger, dbMgr db.MongoManager) (*gin.Engine, error) {
 	ginMode := gin.ReleaseMode
-	if util.IsDevMode(svcEnv.Name) {
+	if util.IsDevMode(svcEnv.Environment) {
 		ginMode = gin.DebugMode
 		gin.ForceConsoleColor()
 	}
@@ -72,7 +72,7 @@ func WebRouter(svcEnv *models.ServiceEnv, lgr *logger.AppLogger, dbMgr db.MongoM
 	}
 
 	// This is a dev mode only endpoint (route) to seed the local db
-	if util.IsDevMode(svcEnv.Name) {
+	if util.IsDevMode(svcEnv.Environment) {
 		if seed, seedHandlerErr := handlers.NewDataSeedHandler(lgr, ordersRepo); seedHandlerErr != nil {
 			lgr.Error().Err(seedHandlerErr).Msg("seed-local-db endpoint will not be available")
 		} else {

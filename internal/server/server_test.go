@@ -13,9 +13,13 @@ import (
 )
 
 func TestListOfRoutes(t *testing.T) {
-	svcInfo := &models.ServiceEnv{
-		Name: "test",
-		Port: "8080",
+	svcInfo := &models.ServiceEnvConfig{
+		Environment:          "test",
+		Port:                 "8080",
+		LogLevel:             "info",
+		DBCredentialsSideCar: "/path/to/mongo/sidecar",
+		DBHosts:              "localhost",
+		DBName:               "testDB",
 	}
 	lgr := logger.Setup("info", "test")
 	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
@@ -60,9 +64,9 @@ func TestListOfRoutes(t *testing.T) {
 }
 
 func TestModeSpecificRoutes(t *testing.T) {
-	svcInfo := &models.ServiceEnv{
-		Name: "dev",
-		Port: "8080",
+	svcInfo := &models.ServiceEnvConfig{
+		Environment: "dev",
+		Port:        "8080",
 	}
 	lgr := logger.Setup("info", "test")
 	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})

@@ -14,8 +14,9 @@ import (
 func resetEnv(t *testing.T) {
 	t.Setenv("environment", "")
 	t.Setenv("port", "")
+	t.Setenv("dbHosts", "")
 	t.Setenv("dbName", "")
-	t.Setenv("MongoVaultSideCar", "")
+	t.Setenv("DBCredentialsSideCar", "")
 	t.Setenv("logLevel", "")
 	t.Setenv("printDBQueries", "")
 }
@@ -33,19 +34,19 @@ func TestMustEnvConfig(t *testing.T) {
 		// Set required environment variables
 		t.Setenv("environment", "test")
 		t.Setenv("port", "8080")
+		t.Setenv("dbHosts", "localhost")
 		t.Setenv("dbName", "testDB")
-		t.Setenv("MongoVaultSideCar", "/path/to/mongo/sidecar")
-		t.Setenv("logLevel", "debug")
-
-		// Call getEnvConfig and verify returned configurations
-		expectedConfig := &models.ServiceEnv{
-			Name:              "test",
-			Port:              "8080",
-			PrintQueries:      false, // default value
-			MongoVaultSideCar: "/path/to/mongo/sidecar",
-			DisableAuth:       false, // default value
-			DBName:            "testDB",
-			LogLevel:          "debug",
+		t.Setenv("DBCredentialsSideCar", "/path/to/mongo/sidecar")
+		t.Setenv("logLevel", "debug") // Call getEnvConfig and verify returned configurations
+		expectedConfig := &models.ServiceEnvConfig{
+			Environment:          "test",
+			Port:                 "8080",
+			LogLevel:             "debug",
+			DBCredentialsSideCar: "/path/to/mongo/sidecar",
+			DBHosts:              "localhost",
+			DBName:               "testDB",
+			DBLogQueries:         false, // default value
+			DisableAuth:          false, // default value
 		}
 
 		actualConfig, err := getEnvConfig()
@@ -64,14 +65,15 @@ func TestMustEnvConfig_Defaults(t *testing.T) {
 		t.Setenv("MongoVaultSideCar", "/path/to/mongo/sidecar")
 
 		// Call getEnvConfig and verify returned configurations
-		expectedConfig := &models.ServiceEnv{
-			Name:              "test",
-			Port:              defaultPort,
-			PrintQueries:      false, // default value
-			MongoVaultSideCar: "/path/to/mongo/sidecar",
-			DisableAuth:       false, // default value
-			DBName:            "testDB",
-			LogLevel:          "info",
+		expectedConfig := &models.ServiceEnvConfig{
+			Environment:          "test",
+			Port:                 defaultPort,
+			LogLevel:             "info",
+			DBCredentialsSideCar: "/path/to/mongo/sidecar",
+			DBHosts:              "localhost",
+			DBName:               "testDB",
+			DBLogQueries:         false, // default value
+			DisableAuth:          false, // default value
 		}
 
 		actualConfig, err := getEnvConfig()
@@ -103,9 +105,10 @@ func Test_exitCode(t *testing.T) {
 func Test_setupDB_fail(t *testing.T) {
 	t.Parallel()
 	lgr := logger.Setup("info", "test")
-	svcEnv := &models.ServiceEnv{
-		DBName:            "db",
-		MongoVaultSideCar: "/notfound",
+	svcEnv := &models.ServiceEnvConfig{
+		DBHosts:              "localhost",
+		DBName:               "db",
+		DBCredentialsSideCar: "/notfound",
 	}
 	_, err := setupDB(lgr, svcEnv)
 	require.Error(t, err)
