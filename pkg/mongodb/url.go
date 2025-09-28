@@ -75,10 +75,7 @@ func ConnectionURL(
 	}
 
 	// Set host
-	hostString, err := getHost(hosts, options)
-	if err != nil {
-		return "", nil, err
-	}
+	hostString := getHost(hosts, options)
 	u.Host = hostString
 
 	// Set database path
@@ -110,8 +107,8 @@ func MaskConnectionURL(connectionURL string) string {
 	return u.String()
 }
 
-// MongoDBCredentialFromSideCar loads MongoDB credentials from a JSON sidecar file.
-func MongoDBCredentialFromSideCar(sideCarFile string) (*MongoCredentials, error) {
+// CredentialFromSideCar loads MongoDB credentials from a JSON sidecar file.
+func CredentialFromSideCar(sideCarFile string) (*MongoCredentials, error) {
 	if sideCarFile == "" {
 		sideCarFile = DefaultMongoDBSidecar
 	}
@@ -212,15 +209,15 @@ func getDatabasePath(database string) string {
 
 // getHost returns the host portion of the MongoDB URI
 // Hosts should be provided as comma-separated "hostname:port" format.
-func getHost(hosts string, opts *MongoOptions) (string, error) {
+func getHost(hosts string, opts *MongoOptions) string {
 	if opts.UseSRV {
 		// SRV uses single host, no port (validation already done)
-		return hosts, nil
+		return hosts
 	}
 
 	// Standard connection - hosts should include port numbers
 	// Remove any spaces and return as-is (already comma-separated)
-	return strings.ReplaceAll(hosts, " ", ""), nil
+	return strings.ReplaceAll(hosts, " ", "")
 }
 
 // getQueryString returns the query string for MongoDB URI.

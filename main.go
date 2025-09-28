@@ -75,7 +75,7 @@ func run() error {
 }
 
 func setupDB(svcEnv *config.ServiceEnvConfig) (*mongodb.ConnectionManager, error) {
-	dbCredentials, err := mongodb.MongoDBCredentialFromSideCar(svcEnv.DBCredentialsSideCar)
+	dbCredentials, err := mongodb.CredentialFromSideCar(svcEnv.DBCredentialsSideCar)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch DB credentials : %w", err)
 	}
