@@ -34,7 +34,7 @@ var (
 
 // ConnectionURL creates a MongoDB connection URI using the given hosts and optional settings.
 // The database parameter is optional - pass empty string if no database should be included in the URI.
-// Hosts should be provided as comma-separated "hostname:port" format (e.g., "localhost:27017" or "db1:27017,db2:27018").
+// Hosts should be comma-separated "hostname:port" format (e.g., "localhost:27017" or "db1:27017,db2:27018").
 // Example usage:
 //
 //	creds := &MongoCredentials{Username: "user", Password: "pass"}
@@ -42,7 +42,12 @@ var (
 //		WithReplicaSet("rs0"),
 //		WithReadPreference("secondary"),
 //		WithAuthSource("admin"))
-func ConnectionURL(hosts string, database string, creds *MongoCredentials, opts ...Option) (string, *MongoOptions, error) {
+func ConnectionURL(
+	hosts string,
+	database string,
+	creds *MongoCredentials,
+	opts ...Option,
+) (string, *MongoOptions, error) {
 	hosts = strings.TrimSpace(hosts)
 	if hosts == "" {
 		return "", nil, ErrNoHosts

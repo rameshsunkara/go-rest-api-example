@@ -17,7 +17,7 @@ type ServiceEnvConfig struct {
 	DBHosts              string // comma separated list of DB hosts
 	DBName               string // name of the database
 	DBPort               int    // port on which the DB is listening, defaults to 27017
-	DBLogQueries         bool   // should we print the DB queries that are triggered through this service, defaults to false
+	DBLogQueries         bool   // print the DB queries that are triggered through this service, defaults to false
 
 	DisableAuth bool // disables API authentication, added to make local development/testing easy
 }
