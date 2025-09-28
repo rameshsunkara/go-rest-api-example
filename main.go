@@ -48,7 +48,7 @@ func run() error {
 	lgr := logger.New(svcEnv.LogLevel, logWriter)
 
 	// setup : database connection
-	dbConnMgr, dbErr := setupDB(lgr, svcEnv)
+	dbConnMgr, dbErr := setupDB(svcEnv)
 	if dbErr != nil {
 		return dbErr
 	}
@@ -74,7 +74,7 @@ func run() error {
 	return err
 }
 
-func setupDB(lgr logger.Logger, svcEnv *config.ServiceEnvConfig) (*mongodb.ConnectionManager, error) {
+func setupDB(svcEnv *config.ServiceEnvConfig) (*mongodb.ConnectionManager, error) {
 	dbCredentials, err := mongodb.MongoDBCredentialFromSideCar(svcEnv.DBCredentialsSideCar)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch DB credentials : %w", err)

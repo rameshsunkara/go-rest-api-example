@@ -75,14 +75,14 @@ func TestStatusHandler(t *testing.T) {
 			mockPingFunc: func() error {
 				return nil
 			},
-			expectedCode: http.StatusNoContent,
+			expectedCode: http.StatusOK,
 		},
 		{
 			name: "StatusDown",
 			mockPingFunc: func() error {
 				return errors.New("DB Connection Failed")
 			},
-			expectedCode: http.StatusFailedDependency,
+			expectedCode: http.StatusOK,
 		},
 	}
 

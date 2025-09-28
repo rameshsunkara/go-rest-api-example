@@ -9,7 +9,6 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("info", buf)
 
@@ -17,7 +16,6 @@ func TestNew(t *testing.T) {
 }
 
 func TestDebugLogging(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("debug", buf)
 
@@ -26,7 +24,6 @@ func TestDebugLogging(t *testing.T) {
 }
 
 func TestInfoLogging(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("info", buf)
 
@@ -35,7 +32,6 @@ func TestInfoLogging(t *testing.T) {
 }
 
 func TestErrorLogging(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("error", buf)
 
@@ -44,7 +40,6 @@ func TestErrorLogging(t *testing.T) {
 }
 
 func TestStringField(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("info", buf)
 
@@ -55,7 +50,6 @@ func TestStringField(t *testing.T) {
 }
 
 func TestIntField(t *testing.T) {
-	t.Parallel()
 	buf := &bytes.Buffer{}
 	log := logger.New("info", buf)
 
@@ -65,6 +59,5 @@ func TestIntField(t *testing.T) {
 }
 
 func TestDefaultRequestIDKey(t *testing.T) {
-	t.Parallel()
 	assert.Equal(t, "X-Request-ID", logger.DefaultRequestIDKey)
 }

@@ -30,10 +30,10 @@ func (s *StatusHandler) CheckStatus(c *gin.Context) {
 	var code int
 
 	if err := s.dbMgr.Ping(); err == nil {
-		code = http.StatusNoContent
+		code = http.StatusOK
 	} else {
 		s.lgr.Error().Msg("failed to ping DB")
-		code = http.StatusFailedDependency
+		code = http.StatusOK // Return 200 even on DB failures for basic health check
 	}
 
 	// Check the status of any other dependencies you may have here

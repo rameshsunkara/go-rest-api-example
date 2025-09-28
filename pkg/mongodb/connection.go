@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/event"
@@ -68,8 +69,7 @@ func (c *ConnectionManager) newClient() (*mongo.Client, error) {
 	if c.options.QueryLogging {
 		cmdMonitor = &event.CommandMonitor{
 			Started: func(_ context.Context, evt *event.CommandStartedEvent) {
-				// MongoDB query logging - using log instead of fmt to satisfy linter
-				_ = evt.Command.String() // Query logged by MongoDB driver
+				fmt.Printf("MongoDB: database query: %s\n", evt.Command.String())
 			},
 		}
 	}
