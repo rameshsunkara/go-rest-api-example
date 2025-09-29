@@ -70,16 +70,16 @@ go-rest-api-example/
 │   ├── middleware/     # HTTP middleware components
 │   ├── models/         # Domain models and data structures
 │   ├── server/         # HTTP server setup and lifecycle
-│   ├── util/           # Internal utilities
+│   ├── utilities/      # Internal utilities
 │   └── mockData/       # Test and development data
 ├── pkg/                # Public packages (can be imported)
 │   ├── logger/         # Structured logging utilities
 │   └── mongodb/        # MongoDB connection management
 ├── localDevelopment/   # Local dev setup (DB init scripts, etc.)
-├── Makefile           # Development automation
-├── Dockerfile         # Container image definition
+├── Makefile            # Development automation
+├── Dockerfile          # Container image definition
 ├── docker-compose.yaml # Local development services
-├── OpenApi-v1.yaml    # API specification
+├── OpenApi-v1.yaml     # API specification
 └── OpenApi-v1.postman_collection.json
 ```
 
