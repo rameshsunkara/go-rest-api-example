@@ -30,9 +30,7 @@ jobs:
         run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
 
       - name: 🛡️ Lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: v9.0.0
+        uses: golangci/golangci-lint-action@v9
 
       - name: 🏗️ Build
         run: make build
