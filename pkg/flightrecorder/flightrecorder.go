@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime/trace"
 	"time"
 
@@ -182,5 +183,10 @@ func extractPathSegment(path string) string {
 	if segment == "." || segment == "/" {
 		return "root"
 	}
-	return segment
+	// Only allow alphanumeric, hyphen, underscore in filename
+	re := regexp.MustCompile("^[A-Za-z0-9-_]+$")
+	if re.MatchString(segment) {
+		return segment
+	}
+	return "root"
 }
