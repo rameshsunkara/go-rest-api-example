@@ -11,6 +11,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/server"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestListOfRoutes(t *testing.T) {
@@ -84,6 +85,27 @@ func TestModeSpecificRoutes(t *testing.T) {
 		Method: http.MethodPost,
 		Path:   "/internal/seed-local-db",
 	})
+}
+
+func TestWebRouterWithTracingEnabled(t *testing.T) {
+	svcInfo := &config.ServiceEnvConfig{
+		Environment:          "test",
+		Port:                 "8080",
+		LogLevel:             "info",
+		DBCredentialsSideCar: "/path/to/mongo/sidecar",
+		DBHosts:              "localhost",
+		DBName:               "testDB",
+		EnableTracing:        true, // Enable tracing
+	}
+	lgr := logger.New("info", os.Stdout)
+	router, err := server.WebRouter(svcInfo, lgr, &mocks.MockMongoMgr{})
+
+	require.NoError(t, err)
+	assert.NotNil(t, router)
+
+	// Verify router is properly configured
+	list := router.Routes()
+	assert.NotEmpty(t, list)
 }
 
 func assertRoutePresent(t *testing.T, gotRoutes gin.RoutesInfo, wantRoute gin.RouteInfo) {

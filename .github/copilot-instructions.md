@@ -14,12 +14,14 @@ When generating code for this project, please ensure compliance with the followi
 
 ### Linting Compliance
 - **golangci-lint**: All generated code must pass our golangci-lint configuration
+- **Verify before committing**: Run `make lint` to check for linting issues locally
 - **Common lint rules to follow**:
   - No unused variables or imports
   - Proper error handling (never ignore errors)
   - Use `require` for error assertions in tests, `assert` for other validations
   - Avoid useless assertions (comparing variables to themselves)
   - Add proper context to error messages
+- **Fix issues promptly**: Address all linting issues before submitting code
 
 ### Testing Standards
 - **Test naming**: Use `Test<FunctionName>` pattern
@@ -140,5 +142,21 @@ lgr.Info().
 - Use the `internal/config` package for environment configuration
 - Validate all required configuration at startup
 - Provide sensible defaults where appropriate
+
+## Development Workflow
+
+### Before Committing Code
+1. **Format**: Run `gofmt -s -w .` to format code
+2. **Lint**: Run `make lint` to verify code passes all linting rules
+3. **Test**: Run `make test` to ensure all tests pass
+4. **Build**: Run `make build` to verify the application builds successfully
+
+### Available Make Targets
+- `make lint` - Run golangci-lint to check for code quality issues
+- `make test` - Run all unit tests
+- `make ci-coverage` - Run tests with coverage reporting
+- `make build` - Build the application binary
+- `make docker-build` - Build the Docker image
+- `make docker-start` - Build and run the application in Docker
 
 When generating code, please ensure it follows these patterns and will pass both our linting rules and maintain consistency with the existing codebase architecture.

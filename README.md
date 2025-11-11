@@ -3,12 +3,43 @@
 [![Build Status](https://github.com/rameshsunkara/go-rest-api-example/actions/workflows/cibuild.yml/badge.svg)](https://github.com/rameshsunkara/go-rest-api-example/actions/workflows/cibuild.yml?query=+branch%3Amain)
 [![Go Report Card](https://goreportcard.com/badge/github.com/rameshsunkara/go-rest-api-example)](https://goreportcard.com/report/github.com/rameshsunkara/go-rest-api-example)
 [![codecov](https://codecov.io/gh/rameshsunkara/go-rest-api-example/branch/main/graph/badge.svg)](https://app.codecov.io/gh/rameshsunkara/go-rest-api-example)
+[![Go Version](https://img.shields.io/badge/Go-1.25-00ADD8?logo=go)](https://go.dev/)
+
+> A production-ready REST API boilerplate built with Go, featuring MongoDB integration, comprehensive middleware, flight recorder tracing, and modern development practices.
 
 ![Go REST Api](go-rest-api.svg)
 
-## [Why this?](#why-this)
+## ✨ Highlights
 
-## Offered Features
+- 🚀 **Production-Ready**: Graceful shutdown, health checks, structured logging
+- 🔒 **Security-First**: OWASP compliant, multi-tier auth, security headers
+- 📊 **Observability**: Flight recorder tracing, Prometheus metrics, pprof profiling
+- 🧪 **Test Coverage**: 70%+ coverage threshold with parallel testing
+- 🐳 **Docker-Ready**: Multi-stage builds with BuildKit optimization
+- 📝 **Well-Documented**: OpenAPI 3 specification with Postman collection
+
+## 🚀 Quick Start
+
+```bash
+# Clone and start
+git clone https://github.com/rameshsunkara/go-rest-api-example.git
+cd go-rest-api-example
+make start
+
+# Your API is now running at http://localhost:8080
+curl http://localhost:8080/healthz
+```
+
+## 📋 Table of Contents
+
+- [Features](#-key-features)
+- [Architecture](#-folder-structure)
+- [Getting Started](#get-started)
+- [Commands](#quickstart)
+- [Tools](#tools)
+- [Contributing](#contribute)
+
+## 🎯 Key Features
 
 ### API Features
 
@@ -25,10 +56,11 @@
    - **Security Headers**: OWASP-compliant security header injection
    - **Query Validation**: Input validation and sanitization
    - **Compression**: Automatic response compression (gzip)
-4. **Standardized Error Handling**: Consistent error response format across all endpoints
-5. **API Versioning**: URL-based versioning with backward compatibility
-6. **Internal vs External APIs**: Separate authentication and access controls
-7. **Model Separation**: Clear distinction between internal and external data representations
+4. **Flight Recorder Integration**: Automatic trace capture for slow requests using Go 1.25's built-in flight recorder.
+5. **Standardized Error Handling**: Consistent error response format across all endpoints
+6. **API Versioning**: URL-based versioning with backward compatibility
+7. **Internal vs External APIs**: Separate authentication and access controls
+8. **Model Separation**: Clear distinction between internal and external data representations
 
 ### Go Application Features
 
@@ -152,6 +184,7 @@ test                           Run tests with coverage
 ```makefile
 lint                           Run the linter
 lint-fix                       Run the linter and fix issues
+trace                          Analyze a trace file (usage: make trace TRACE_FILE=./traces/slow-request-GET-orders-1234567890.trace)
 clean                          Clean all Docker resources (keeps database data)
 clean-all                      Clean all Docker resources including volumes (removes database data)
 clean-volumes                  Remove only the docker-compose volumes (database data)
@@ -174,77 +207,87 @@ version                        Display the current version of the API server
 
 ```makefile
 docker-build                   Build the Docker image
-docker-build-debug             Build the Docker image without cache
-docker-clean                   Clean all Docker resources
-docker-clean-build-images      Remove build images
-docker-compose-up              Start docker-compose services
-docker-compose-down            Stop docker-compose services
-docker-compose-down-volumes    Stop docker-compose services and remove volumes
-docker-remove                  Remove Docker images and containers
-docker-run                     Run the Docker container
 docker-start                   Build and run the Docker container
-docker-stop                    Stop the Docker container
+docker-clean                   Clean all Docker resources
 ```
 
-## Tools
+> 💡 **Tip**: Run `make help` to see all available commands including additional Docker operations.
 
-1. Routing - [Gin](https://github.com/gin-gonic/gin)
-2. Logging - [zerolog](https://github.com/rs/zerolog)
-3. Database - [MongoDB](https://www.mongodb.com/)
-4. Container - [Docker](https://www.docker.com/)
+## 🛠 Tools & Stack
 
-## TODO
+| Category | Technology |
+|----------|-----------|
+| **Framework** | [Gin](https://github.com/gin-gonic/gin) |
+| **Logging** | [zerolog](https://github.com/rs/zerolog) |
+| **Database** | [MongoDB](https://www.mongodb.com/) |
+| **Container** | [Docker](https://www.docker.com/) + BuildKit |
+| **Tracing** | Go 1.25 Flight Recorder |
 
-- Add comprehensive API documentation with examples
-- Implement database migration system
-- Add distributed tracing (OpenTelemetry integration)
-- Implement circuit breaker pattern for external dependencies
-- Add metrics collection and Prometheus integration
-- Implement rate limiting middleware
-- Add comprehensive integration tests
-- Add git hooks for pre-commit and pre-push
-- Implement all remaining OWASP security checks
-- Add Kubernetes deployment manifests
+## 📚 Additional Resources
 
-## Good to have
+### Roadmap
+
+<details>
+<summary>Click to expand planned features</summary>
+
+- [ ] Add comprehensive API documentation with examples
+- [ ] Implement database migration system
+- [ ] Add distributed tracing (OpenTelemetry integration)
+- [ ] Add metrics collection and Prometheus integration
+- [ ] Add git hooks for pre-commit and pre-push
+- [ ] Implement all remaining OWASP security checks
+
+</details>
+
+### Nice to Have
+
+<details>
+<summary>Future enhancements</summary>
 
 - **Enhanced Data Models**: Add validation, relationships, and business logic
 - **Cloud Deployment**: Kubernetes manifests and Helm charts
 - **Advanced Monitoring**: APM integration, alerting, and dashboards
 - **Caching Layer**: Redis integration for performance optimization
-- **Event Sourcing**: Event-driven architecture with message queues
 - **Multi-database Support**: PostgreSQL, CockroachDB adapters
-- **Advanced Security**: JWT tokens, OAuth2, RBAC implementation
 - **Performance Testing**: Load testing scenarios and benchmarks
-- **Documentation**: Auto-generated API docs and architectural decision records
 
-## References
+</details>
+
+### References
 
 - [gin-boilerplate](https://github.com/Massad/gin-boilerplate)
 - [go-rest-api](https://github.com/qiangxue/go-rest-api)
 - [go-base](https://github.com/dhax/go-base)
 
-## Contribute
+## 🤝 Contribute
 
-- Please feel free to Open PRs
-- Please create issues with any problem you noticed
-- Please suggest any improvements
+Contributions are welcome! Here's how you can help:
 
-## Why this?
+- 🐛 **Found a bug?** [Open an issue](https://github.com/rameshsunkara/go-rest-api-example/issues)
+- 💡 **Have a feature idea?** [Start a discussion](https://github.com/rameshsunkara/go-rest-api-example/discussions)
+- 🔧 **Want to contribute code?** Fork the repo and submit a PR
 
-I embarked on the endeavor of crafting my own open-source boilerplate repository for several reasons:
+## 📖 Why This Project?
 
-After years of developing Full Stack applications using ReactJS and JVM-based languages, I observed that existing
-boilerplates tended to be either excessive or insufficient for my needs.
-Consequently, I resolved to construct my own, while adhering rigorously to the principles and guidelines of Go.
-While similarities with popular Go boilerplate templates may be evident,
-I have customized this repository to better align with my preferences and accumulated experiences.
-(My apologies if I inadvertently overlooked crediting any existing templates.)
+After years of developing Full Stack applications using ReactJS and JVM-based languages, I found existing Go boilerplates were either too opinionated or too minimal. This project strikes a balance:
 
-I yearned for the autonomy to meticulously select the tools for fundamental functionalities such as Routing, Logging,
-and Configuration Management, ensuring seamless alignment with my personal preferences and specific requirements.
+✅ **Just Right**: Not too bloated, not too minimal
+✅ **Best Practices**: Follows Go idioms and patterns
+✅ **Production-Tested**: Battle-tested patterns from real-world applications
+✅ **Flexible**: Easy to customize for your specific needs
 
-### What this is not?
+### What This Is NOT
 
-- This isn't a complete solution for all your needs. It's more like a basic template to kickstart your project.
-- This isn't the best place to begin if you want to make an online store. What I've provided is just a simple tool for managing data through an API.
+❌ A complete e-commerce solution
+❌ A framework that does everything for you
+❌ The only way to structure a Go API
+
+**This is a solid foundation to build upon.** Take what you need, leave what you don't.
+
+---
+
+<div align="center">
+
+**⭐ If you find this helpful, please consider giving it a star! ⭐**
+
+</div>
