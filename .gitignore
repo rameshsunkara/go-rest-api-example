@@ -6,6 +6,13 @@ coverage.out
 coverage.html
 coverage.txt
 
+# Environment variables (sensitive data)
+.env
+
+# Flight recorder trace files
+traces/
+*.trace
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/go,intellij+iml,vs
 # Edit at https://www.toptal.com/developers/gitignore?templates=go,intellij+iml,vs

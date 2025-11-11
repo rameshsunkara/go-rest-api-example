@@ -17,6 +17,7 @@ import (
 	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
 	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
 	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
+	"github.com/rameshsunkara/go-rest-api-example/pkg/flightrecorder"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
@@ -100,7 +101,16 @@ func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb
 	router.Use(gzip.Gzip(gzip.DefaultCompression))
 	router.Use(middleware.ReqIDMiddleware())
 	router.Use(middleware.ResponseHeadersMiddleware())
-	router.Use(middleware.RequestLogMiddleware(lgr))
+
+	// Initialize flight recorder for slow request tracing (if enabled)
+	var fr *flightrecorder.Recorder
+	if svcEnv.EnableTracing {
+		fr = flightrecorder.NewDefault(lgr)
+		if fr != nil {
+			lgr.Info().Msg("Flight recorder enabled for slow request tracing")
+		}
+	}
+	router.Use(middleware.RequestLogMiddleware(lgr, fr))
 
 	internalAPIGrp := router.Group("/internal")
 	internalAPIGrp.Use(middleware.InternalAuthMiddleware()) // use special auth middleware to handle internal employees

@@ -19,7 +19,8 @@ type ServiceEnvConfig struct {
 	DBPort               int    // port on which the DB is listening, defaults to 27017
 	DBLogQueries         bool   // print the DB queries that are triggered through this service, defaults to false
 
-	DisableAuth bool // disables API authentication, added to make local development/testing easy
+	DisableAuth   bool // disables API authentication, added to make local development/testing easy
+	EnableTracing bool // enables flight recorder for slow request tracing, defaults to false
 }
 
 const (
@@ -28,6 +29,7 @@ const (
 	DefDatabase       = "ecommerce"
 	DefEnvironment    = "local"
 	DefDBQueryLogging = false
+	DefEnableTracing  = false
 )
 
 // Load reads all environmental configurations and returns a ServiceEnvConfig.
@@ -66,6 +68,12 @@ func Load() (*ServiceEnvConfig, error) {
 		disableAuth = false
 	}
 
+	enableTracing, tracingEnvErr := strconv.ParseBool(os.Getenv("enableTracing"))
+	if tracingEnvErr != nil {
+		// tracing is disabled by default to avoid overhead in production
+		enableTracing = DefEnableTracing
+	}
+
 	logLevel := os.Getenv("logLevel")
 	if logLevel == "" {
 		logLevel = DefaultLogLevel
@@ -78,6 +86,7 @@ func Load() (*ServiceEnvConfig, error) {
 		DBName:               dbName,
 		DBCredentialsSideCar: dbCredentialsSideCar,
 		DisableAuth:          disableAuth,
+		EnableTracing:        enableTracing,
 		LogLevel:             logLevel,
 		DBLogQueries:         printDBQueries,
 	}
