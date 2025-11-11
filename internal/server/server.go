@@ -106,9 +106,6 @@ func WebRouter(svcEnv *config.ServiceEnvConfig, lgr logger.Logger, dbMgr mongodb
 	var fr *flightrecorder.Recorder
 	if svcEnv.EnableTracing {
 		fr = flightrecorder.NewDefault(lgr)
-		if fr != nil {
-			lgr.Info().Msg("Flight recorder enabled for slow request tracing")
-		}
 	}
 	router.Use(middleware.RequestLogMiddleware(lgr, fr))
 

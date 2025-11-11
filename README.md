@@ -25,10 +25,11 @@
    - **Security Headers**: OWASP-compliant security header injection
    - **Query Validation**: Input validation and sanitization
    - **Compression**: Automatic response compression (gzip)
-4. **Standardized Error Handling**: Consistent error response format across all endpoints
-5. **API Versioning**: URL-based versioning with backward compatibility
-6. **Internal vs External APIs**: Separate authentication and access controls
-7. **Model Separation**: Clear distinction between internal and external data representations
+4. **Flight Recorder Integration**: Automatic trace capture for slow requests using Go 1.25's built-in flight recorder.
+5. **Standardized Error Handling**: Consistent error response format across all endpoints
+6. **API Versioning**: URL-based versioning with backward compatibility
+7. **Internal vs External APIs**: Separate authentication and access controls
+8. **Model Separation**: Clear distinction between internal and external data representations
 
 ### Go Application Features
 
@@ -152,6 +153,7 @@ test                           Run tests with coverage
 ```makefile
 lint                           Run the linter
 lint-fix                       Run the linter and fix issues
+trace                          Analyze a trace file (usage: make trace TRACE_FILE=./traces/slow-request-GET-orders-1234567890.trace)
 clean                          Clean all Docker resources (keeps database data)
 clean-all                      Clean all Docker resources including volumes (removes database data)
 clean-volumes                  Remove only the docker-compose volumes (database data)
