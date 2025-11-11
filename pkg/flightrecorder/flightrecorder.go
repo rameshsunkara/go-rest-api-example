@@ -175,18 +175,20 @@ func (r *Recorder) CaptureSlowRequest(lgr logger.Logger, method, path string, el
 //   - "/" -> "root"
 //   - "" -> "root"
 func extractPathSegment(path string) string {
+	const defaultSegment = "root"
+
 	if path == "" {
-		return "root"
+		return defaultSegment
 	}
 	// Extract the last path segment
 	segment := filepath.Base(path)
 	if segment == "." || segment == "/" {
-		return "root"
+		return defaultSegment
 	}
 	// Only allow alphanumeric, hyphen, underscore in filename
 	re := regexp.MustCompile("^[A-Za-z0-9-_]+$")
 	if re.MatchString(segment) {
 		return segment
 	}
-	return "root"
+	return defaultSegment
 }
