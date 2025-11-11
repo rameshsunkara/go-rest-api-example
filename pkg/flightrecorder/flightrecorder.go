@@ -156,7 +156,6 @@ func (r *Recorder) CaptureSlowRequest(lgr logger.Logger, method, path string, el
 
 	// Log successful capture
 	lgr.Info().
-		Str("level", "warning").
 		Str("method", method).
 		Str("path", path).
 		Dur("elapsed", elapsed).
