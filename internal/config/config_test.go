@@ -40,15 +40,19 @@ func TestLoadWithOptionalDefaults(t *testing.T) {
 	t.Setenv("environment", "")
 	t.Setenv("port", "")
 	t.Setenv("logLevel", "")
+	t.Setenv("enableTracing", "")
+	t.Setenv("printDBQueries", "")
 
 	cfg, err := config.Load()
 
 	require.NoError(t, err)
 	assert.NotNil(t, cfg)
-	// Test that defaults are applied (actual values will depend on the implementation)
-	assert.NotEmpty(t, cfg.Environment)
-	assert.NotEmpty(t, cfg.Port)
-	assert.NotEmpty(t, cfg.LogLevel)
+	// Test that defaults are applied
+	assert.Equal(t, config.DefEnvironment, cfg.Environment)
+	assert.Equal(t, config.DefaultPort, cfg.Port)
+	assert.Equal(t, config.DefaultLogLevel, cfg.LogLevel)
+	assert.False(t, cfg.EnableTracing, "EnableTracing should default to false")
+	assert.False(t, cfg.DBLogQueries, "DBLogQueries should default to false")
 }
 
 func TestConstants(t *testing.T) {
@@ -58,6 +62,7 @@ func TestConstants(t *testing.T) {
 	assert.Equal(t, "info", config.DefaultLogLevel)
 	assert.Equal(t, "ecommerce", config.DefDatabase)
 	assert.False(t, config.DefDBQueryLogging)
+	assert.False(t, config.DefEnableTracing)
 }
 
 func TestServiceEnvConfigStruct(t *testing.T) {
@@ -71,6 +76,7 @@ func TestServiceEnvConfigStruct(t *testing.T) {
 		DBCredentialsSideCar: "/test/path",
 		DBLogQueries:         true,
 		DisableAuth:          false,
+		EnableTracing:        true,
 	}
 
 	assert.Equal(t, "test", cfg.Environment)
@@ -81,4 +87,49 @@ func TestServiceEnvConfigStruct(t *testing.T) {
 	assert.Equal(t, "/test/path", cfg.DBCredentialsSideCar)
 	assert.True(t, cfg.DBLogQueries)
 	assert.False(t, cfg.DisableAuth)
+	assert.True(t, cfg.EnableTracing)
+}
+
+func TestEnableTracingConfiguration(t *testing.T) {
+	tests := []struct {
+		name          string
+		envValue      string
+		expectedValue bool
+	}{
+		{
+			name:          "enableTracing set to true",
+			envValue:      "true",
+			expectedValue: true,
+		},
+		{
+			name:          "enableTracing set to false",
+			envValue:      "false",
+			expectedValue: false,
+		},
+		{
+			name:          "enableTracing not set (defaults to false)",
+			envValue:      "",
+			expectedValue: false,
+		},
+		{
+			name:          "enableTracing set to invalid value (defaults to false)",
+			envValue:      "invalid",
+			expectedValue: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set required environment variables
+			t.Setenv("dbHosts", "localhost:27017")
+			t.Setenv("DBCredentialsSideCar", "/path/to/credentials")
+			t.Setenv("enableTracing", tt.envValue)
+
+			cfg, err := config.Load()
+
+			require.NoError(t, err)
+			assert.NotNil(t, cfg)
+			assert.Equal(t, tt.expectedValue, cfg.EnableTracing)
+		})
+	}
 }
