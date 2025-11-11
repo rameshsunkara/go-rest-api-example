@@ -33,10 +33,10 @@ curl http://localhost:8080/healthz
 ## 📋 Table of Contents
 
 - [Features](#-key-features)
-- [Architecture](#-folder-structure)
-- [Getting Started](#get-started)
-- [Commands](#quickstart)
-- [Tools](#tools)
+- [Architecture](#️-architecture)
+- [Getting Started](#-getting-started)
+- [Available Commands](#-available-commands)
+- [Tools & Stack](#-tools--stack)
 - [Contributing](#contribute)
 
 ## 🎯 Key Features
@@ -89,7 +89,9 @@ curl http://localhost:8080/healthz
 3. **GitHub Actions**: Automates building, testing, code coverage reporting, and enforces the required test coverage threshold.
 4. **Multi-Stage Docker Build**: Accelerates build processes.
 
-## Folder Structure
+## 🏗️ Architecture
+
+### 📁 Folder Structure
 
 ```text
 go-rest-api-example/
@@ -115,7 +117,7 @@ go-rest-api-example/
 └── OpenApi-v1.postman_collection.json
 ```
 
-## Control Flow
+### ➡️ Control Flow
 
 ```mermaid
 flowchart LR
@@ -144,7 +146,14 @@ flowchart LR
 5. **Handlers**: The request is passed to the appropriate handler, which validates the request and forwards it to the repository layer.
 6. **Repos(DAO)**: The repository layer communicates with the database to perform CRUD operations.
 
-## Get Started
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Docker and [Docker Compose](https://docs.docker.com/compose/install/)
+- Make
+
+### Start the Application
 
 ```bash
 git clone https://github.com/rameshsunkara/go-rest-api-example.git
@@ -154,32 +163,24 @@ make start
 
 Your API is now running at `http://localhost:8080`
 
-Try it out:
+**Try it out:**
 ```bash
 curl http://localhost:8080/api/v1/healthz
 curl http://localhost:8080/api/v1/orders
 ```
 
-## QuickStart
+## 📟 Available Commands
 
-### Pre-requisites
-
-- Docker
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- Make
-- [golangci-lint](https://golangci-lint.run/welcome/install/#local-installation)
-- [docker-buildx](https://docs.docker.com/buildx/working-with-buildx/)
-
-### Frequently used commands
+### Essential Commands
 
 ```makefile
 start                          Start all necessary services and API server
-run                            Run the API server
-setup                          Start only dependencies
+run                            Run the API server (requires dependencies running)
+setup                          Start only dependencies (MongoDB)
 test                           Run tests with coverage
 ```
 
-### Development commands
+### Development Commands
 
 ```makefile
 lint                           Run the linter
@@ -187,14 +188,10 @@ lint-fix                       Run the linter and fix issues
 trace                          Analyze a trace file (usage: make trace TRACE_FILE=./traces/slow-request-GET-orders-1234567890.trace)
 clean                          Clean all Docker resources (keeps database data)
 clean-all                      Clean all Docker resources including volumes (removes database data)
-clean-volumes                  Remove only the docker-compose volumes (database data)
 coverage                       Generate and display the code coverage report
-go-work                        Generate Go work file
-owasp-report                   Generate OWASP report
-tidy                           Tidy Go modules
 ```
 
-### CI commands
+### CI/CD Commands
 
 ```makefile
 build                          Build the API server binary
@@ -203,7 +200,7 @@ format                         Format Go code
 version                        Display the current version of the API server
 ```
 
-### Docker commands
+### Docker Commands
 
 ```makefile
 docker-build                   Build the Docker image
@@ -211,7 +208,12 @@ docker-start                   Build and run the Docker container
 docker-clean                   Clean all Docker resources
 ```
 
-> 💡 **Tip**: Run `make help` to see all available commands including additional Docker operations.
+> 💡 **Tip**: Run `make help` to see all available commands.
+
+### Additional Prerequisites for Development
+
+- [golangci-lint](https://golangci-lint.run/welcome/install/#local-installation) - For linting
+- [docker-buildx](https://docs.docker.com/buildx/working-with-buildx/) - For multi-platform builds
 
 ## 🛠 Tools & Stack
 
