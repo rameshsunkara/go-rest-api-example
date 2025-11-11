@@ -219,11 +219,12 @@ docker-clean                   Clean all Docker resources
 
 | Category | Technology |
 |----------|-----------|
-| **Framework** | [Gin](https://github.com/gin-gonic/gin) |
+| **Web Framework** | [Gin](https://github.com/gin-gonic/gin) |
 | **Logging** | [zerolog](https://github.com/rs/zerolog) |
 | **Database** | [MongoDB](https://www.mongodb.com/) |
 | **Container** | [Docker](https://www.docker.com/) + BuildKit |
 | **Tracing** | Go 1.25 Flight Recorder |
+| **Profiling** | [pprof](https://golang.org/pkg/net/http/pprof/) |
 
 ## 📚 Additional Resources
 
