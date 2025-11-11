@@ -12,8 +12,6 @@ import (
 )
 
 func TestNewDefault(t *testing.T) {
-	t.Parallel()
-
 	lgr := logger.New("info", os.Stdout)
 	fr := flightrecorder.NewDefault(lgr)
 
@@ -26,8 +24,6 @@ func TestNewDefault(t *testing.T) {
 }
 
 func TestNew(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		name     string
 		traceDir string
@@ -50,8 +46,6 @@ func TestNew(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
 			lgr := logger.New("info", os.Stdout)
 			fr := flightrecorder.New(lgr, tt.traceDir, tt.minAge, tt.maxBytes)
 
@@ -76,8 +70,6 @@ func TestNew(t *testing.T) {
 }
 
 func TestNewWithInvalidTraceDir(t *testing.T) {
-	t.Parallel()
-
 	lgr := logger.New("info", os.Stdout)
 
 	// Try to create a flight recorder with an invalid directory
@@ -95,8 +87,6 @@ func TestNewWithInvalidTraceDir(t *testing.T) {
 }
 
 func TestCaptureSlowRequest(t *testing.T) {
-	t.Parallel()
-
 	// Create a temporary directory for test traces
 	tempDir, err := os.MkdirTemp("", "test-traces-*")
 	require.NoError(t, err)
@@ -125,8 +115,6 @@ func TestCaptureSlowRequest(t *testing.T) {
 }
 
 func TestCaptureSlowRequestWithNilRecorder(t *testing.T) {
-	t.Parallel()
-
 	lgr := logger.New("info", os.Stdout)
 
 	// Create a recorder with invalid directory to get nil
