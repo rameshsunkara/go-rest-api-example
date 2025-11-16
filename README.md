@@ -269,12 +269,31 @@ Contributions are welcome! Here's how you can help:
 
 ## 📖 Why This Project?
 
-After years of developing Full Stack applications using ReactJS and JVM-based languages, I found existing Go boilerplates were either too opinionated or too minimal. This project strikes a balance:
+After years of developing Full Stack applications using ReactJS and JVM-based languages, I found existing Go boilerplates were either too opinionated or too minimal. 
 
-✅ **Just Right**: Not too bloated, not too minimal
-✅ **Best Practices**: Follows Go idioms and patterns
-✅ **Production-Tested**: Battle-tested patterns from real-world applications
-✅ **Flexible**: Easy to customize for your specific needs
+In the age of Copilot and Cursor, you might wonder: "Why another REST API boilerplate?"
+Fair question. But this isn't just another "Hello World" REST API—this is about building for **enterprise**.
+
+### What Makes It Different
+
+This project strikes a balance between simplicity and production-readiness:
+
+✅ **Just Right**: Not too bloated, not too minimal  
+✅ **Best Practices**: Follows Go idioms and patterns  
+✅ **Production-Tested**: Battle-tested patterns from real-world applications  
+✅ **Flexible**: Easy to customize for your specific needs  
+
+### Beyond Performance: Building for Enterprise
+
+In enterprise software, it's not always about raw performance alone. It's about building systems that:
+
+- **Scale with your team**: Code that's readable by engineers at all skill levels, not just the most experienced
+- **Enable safe changes**: Clear boundaries between components so changes don't cascade unexpectedly, with each layer independently testable
+- **Prevent bad practices**: Built-in guardrails that guide developers toward correct patterns
+- **Simplify troubleshooting**: When issues hit production (and they will), you can diagnose them quickly
+- **Measure what matters**: Easy performance profiling and metrics collection without major refactoring
+- **Support evolution**: Adding new features doesn't require rewriting existing code
+- **Delight developers**: New team members become productive in minutes, not days
 
 ### What This Is NOT
 
