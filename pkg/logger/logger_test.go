@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 )
 

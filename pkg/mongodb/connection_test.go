@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

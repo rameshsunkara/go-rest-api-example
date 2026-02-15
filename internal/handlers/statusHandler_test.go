@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/internal/db/mocks"
+	"github.com/bogdanutanu/go-rest-api-example/internal/handlers"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

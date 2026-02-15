@@ -3,7 +3,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

@@ -5,11 +5,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/config"
+	"github.com/bogdanutanu/go-rest-api-example/internal/db/mocks"
+	"github.com/bogdanutanu/go-rest-api-example/internal/server"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
-	"github.com/rameshsunkara/go-rest-api-example/internal/db/mocks"
-	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -2,7 +2,7 @@
 package external
 
 import (
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
 )
 
 // APIError represents the structure of an API error response.

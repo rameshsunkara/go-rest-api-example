@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/db"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/utilities"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
 const (

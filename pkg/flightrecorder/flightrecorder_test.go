@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/pkg/flightrecorder"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/flightrecorder"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

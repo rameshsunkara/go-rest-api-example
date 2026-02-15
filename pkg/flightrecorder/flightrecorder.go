@@ -9,7 +9,7 @@ import (
 	"runtime/trace"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 )
 
 // Default configuration values for the flight recorder.

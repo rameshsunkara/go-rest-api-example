@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

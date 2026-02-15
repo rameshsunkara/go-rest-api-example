@@ -3,7 +3,7 @@ package config_test
 import (
 	"testing"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
+	"github.com/bogdanutanu/go-rest-api-example/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

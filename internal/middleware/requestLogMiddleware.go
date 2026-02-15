@@ -3,9 +3,9 @@ package middleware
 import (
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/pkg/flightrecorder"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/flightrecorder"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
 const (

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

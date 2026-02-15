@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
 )
 
 // FormatTimeToISO returns the time in RFC3339 format.

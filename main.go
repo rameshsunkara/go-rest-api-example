@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
-	"github.com/rameshsunkara/go-rest-api-example/internal/server"
-	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/internal/config"
+	"github.com/bogdanutanu/go-rest-api-example/internal/server"
+	"github.com/bogdanutanu/go-rest-api-example/internal/utilities"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"github.com/rs/zerolog"
 )
 

@@ -6,8 +6,8 @@ import (
 	_ "strings"
 	"testing"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/middleware"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
 	"github.com/stretchr/testify/assert"
 )
 

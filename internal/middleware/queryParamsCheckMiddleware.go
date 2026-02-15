@@ -3,9 +3,9 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/external"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 )
 
 var GetOrdersListReqParams = map[string]bool{

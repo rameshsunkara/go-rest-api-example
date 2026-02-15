@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/middleware"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/flightrecorder"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
-	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/flightrecorder"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"github.com/stretchr/testify/require"
 )
 

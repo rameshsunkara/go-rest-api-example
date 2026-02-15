@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/db"
+	"github.com/bogdanutanu/go-rest-api-example/internal/errors"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/external"
+	"github.com/bogdanutanu/go-rest-api-example/internal/utilities"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/go-faker/faker/v4"
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/errors"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/external"
-	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

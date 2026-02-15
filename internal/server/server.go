@@ -8,18 +8,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bogdanutanu/go-rest-api-example/internal/config"
+	"github.com/bogdanutanu/go-rest-api-example/internal/db"
+	"github.com/bogdanutanu/go-rest-api-example/internal/handlers"
+	"github.com/bogdanutanu/go-rest-api-example/internal/middleware"
+	"github.com/bogdanutanu/go-rest-api-example/internal/utilities"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/flightrecorder"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rameshsunkara/go-rest-api-example/internal/config"
-	"github.com/rameshsunkara/go-rest-api-example/internal/db"
-	"github.com/rameshsunkara/go-rest-api-example/internal/handlers"
-	"github.com/rameshsunkara/go-rest-api-example/internal/middleware"
-	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/flightrecorder"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
 )
 
 const (

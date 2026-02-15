@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/rameshsunkara/go-rest-api-example/pkg/logger"
-	"github.com/rameshsunkara/go-rest-api-example/pkg/mongodb"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/logger"
+	"github.com/bogdanutanu/go-rest-api-example/pkg/mongodb"
 
 	"github.com/gin-gonic/gin"
 )

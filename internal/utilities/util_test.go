@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rameshsunkara/go-rest-api-example/internal/models/data"
-	"github.com/rameshsunkara/go-rest-api-example/internal/utilities"
+	"github.com/bogdanutanu/go-rest-api-example/internal/models/data"
+	"github.com/bogdanutanu/go-rest-api-example/internal/utilities"
 	"github.com/stretchr/testify/assert"
 )
 
