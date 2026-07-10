@@ -165,8 +165,8 @@ Your API is now running at `http://localhost:8080`
 
 **Try it out:**
 ```bash
-curl http://localhost:8080/api/v1/healthz
-curl http://localhost:8080/api/v1/orders
+curl http://localhost:8080/healthz
+curl http://localhost:8080/ecommerce/v1/orders
 ```
 
 ## 📟 Available Commands
