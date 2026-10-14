@@ -1,9 +1,9 @@
 module github.com/rameshsunkara/go-rest-api-example
 
-go 1.25.4
+go 1.26.0
 
 require (
-	github.com/gin-contrib/gzip v1.2.7
+	github.com/gin-contrib/gzip v1.2.8
 	github.com/gin-contrib/pprof v1.5.3
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-faker/faker/v4 v4.9.0
@@ -57,7 +57,7 @@ require (
 	go.mongodb.org/mongo-driver/v2 v2.8.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect
 	golang.org/x/arch v0.29.0 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/crypto v0.56.0 // indirect
 	golang.org/x/net v0.57.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
