@@ -24,8 +24,8 @@ github.com/gin-contrib/sse v1.1.1 h1:uGYpNwTacv5R68bSGMapo62iLTRa9l5zxGCps4hK6ko
 github.com/gin-contrib/sse v1.1.1/go.mod h1:QXzuVkA0YO7o/gun03UI1Q+FTI8ZV/n5t03kIQAI89s=
 github.com/gin-gonic/gin v1.12.0 h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=
 github.com/gin-gonic/gin v1.12.0/go.mod h1:VxccKfsSllpKshkBWgVgRniFFAzFb9csfngsqANjnLc=
-github.com/go-faker/faker/v4 v4.9.0 h1:a4HXLwueuTCtgF93VpUsl8Zd2nG1VH2SgNWDPVEBg5U=
-github.com/go-faker/faker/v4 v4.9.0/go.mod h1:u1dIRP5neLB6kTzgyVjdBOV5R1uP7BdxkcWk7tiKQXk=
+github.com/go-faker/faker/v4 v4.12.0 h1:yZXxuoQjxN+C2PVgYoDSHGiD9wj6dX1/Ful4p7QQV0k=
+github.com/go-faker/faker/v4 v4.12.0/go.mod h1:VFIEwWDd16EdYDLF6NJ5gAAzEp7vz5LgKgJ2iZ17Tdg=
 github.com/go-playground/assert/v2 v2.2.0 h1:JvknZsQTYeFEAhQwI4qEt9cyV5ONwRHC+lYKSsYSR8s=
 github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
